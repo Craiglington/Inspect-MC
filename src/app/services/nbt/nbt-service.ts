@@ -18,18 +18,30 @@ enum NBT_TAG {
 }
 
 /**
+ * An infinitely nestable value.
+ */
+export type SNBTValue =
+  | string
+  | number
+  | number[]
+  | bigint
+  | bigint[]
+  | SNBT
+  | SNBTValue[];
+
+/**
  * A key-value object.
  */
 export type SNBT = {
-  [key: string]: any;
+  [key: string]: SNBTValue;
 };
 
 /**
  * A value with a size in bytes.
  */
-type Payload = {
+type Payload<T> = {
   size: number;
-  value: any;
+  value: T;
 };
 
 @Injectable({
@@ -136,9 +148,9 @@ export class NBTService {
    * In other words, parses the properties of an NBT object.
    * @returns The SNBT object and its size in bytes in the NBT data.
    */
-  private parseNbtTags(nbtData: DataView, offset: number): Payload {
+  private parseNbtTags(nbtData: DataView, offset: number): Payload<SNBT> {
     const originalOffset = offset;
-    let snbt: SNBT = {};
+    const snbt: SNBT = {};
     while (offset < nbtData.byteLength) {
       const tagId = nbtData.getUint8(offset);
       offset += 1;
@@ -160,11 +172,11 @@ export class NBTService {
    * Parses the current NBT tag's name.
    * @returns The NBT tag's name and its size in bytes.
    */
-  private parseNbtTagName(nbtData: DataView, offset: number): Payload {
+  private parseNbtTagName(nbtData: DataView, offset: number): Payload<string> {
     const nameLength = nbtData.getUint16(offset);
     offset += 2;
 
-    let characters: number[] = [];
+    const characters: number[] = [];
     for (let i = 0; i < nameLength; ++i) {
       characters.push(nbtData.getUint8(offset + i));
     }
@@ -183,7 +195,7 @@ export class NBTService {
     nbtData: DataView,
     offset: number,
     id: NBT_TAG
-  ): Payload {
+  ): Payload<SNBTValue> {
     if (id === NBT_TAG.BYTE) {
       return { size: 1, value: nbtData.getInt8(offset) };
     }
@@ -235,7 +247,10 @@ export class NBTService {
     throw new Error(`Invalid NBT tag id: ${id}.`);
   }
 
-  private parseNbtByteArray(nbtData: DataView, offset: number): Payload {
+  private parseNbtByteArray(
+    nbtData: DataView,
+    offset: number
+  ): Payload<number[]> {
     const size = nbtData.getInt32(offset);
     offset += 4;
 
@@ -246,7 +261,7 @@ export class NBTService {
     return { size: 4 + list.length, value: list };
   }
 
-  private parseNbtString(nbtData: DataView, offset: number): Payload {
+  private parseNbtString(nbtData: DataView, offset: number): Payload<string> {
     const size = nbtData.getUint16(offset);
     offset += 2;
 
@@ -257,7 +272,10 @@ export class NBTService {
     return { size: 2 + string.length, value: String.fromCodePoint(...string) };
   }
 
-  private parseNbtTagList(nbtData: DataView, offset: number): Payload {
+  private parseNbtTagList(
+    nbtData: DataView,
+    offset: number
+  ): Payload<SNBTValue[]> {
     const originalOffset = offset;
 
     const tagsId = nbtData.getUint8(offset);
@@ -270,7 +288,7 @@ export class NBTService {
       return { size: offset - originalOffset, value: [] };
     }
 
-    const tagList: SNBT[] = [];
+    const tagList: SNBTValue[] = [];
     for (let i = 0; i < listLength; ++i) {
       const tagPayload = this.parseNbtTagPayload(nbtData, offset, tagsId);
       offset += tagPayload.size;
@@ -280,7 +298,10 @@ export class NBTService {
     return { size: offset - originalOffset, value: tagList };
   }
 
-  private parseNbtIntArray(nbtData: DataView, offset: number): Payload {
+  private parseNbtIntArray(
+    nbtData: DataView,
+    offset: number
+  ): Payload<number[]> {
     const size = nbtData.getInt32(offset);
     offset += 4;
 
@@ -291,7 +312,10 @@ export class NBTService {
     return { size: 4 + list.length * 4, value: list };
   }
 
-  private parseNbtLongArray(nbtData: DataView, offset: number): Payload {
+  private parseNbtLongArray(
+    nbtData: DataView,
+    offset: number
+  ): Payload<bigint[]> {
     const size = nbtData.getInt32(offset);
     offset += 4;
 
