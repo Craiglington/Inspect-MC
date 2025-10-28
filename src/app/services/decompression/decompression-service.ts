@@ -52,7 +52,7 @@ export class DecompressionService {
     try {
       const dataView = new DataView(compressedData);
       return (
-        dataView.byteLength >= 18 &&
+        dataView.byteLength > 18 &&
         dataView.getUint32(dataView.byteLength - 4, true) > 0 &&
         dataView.getUint8(0) === 0x1f &&
         dataView.getUint8(1) === 0x8b
