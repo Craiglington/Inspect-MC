@@ -58,7 +58,7 @@ export class NBTService {
    * @param file An NBT file.
    * @returns A Promise that resolves with an `ArrayBuffer` of the file's data.
    */
-  getNBTFileData(file: File): Promise<ArrayBuffer> {
+  getNBTData(file: File): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
       fileReader.onload = async () => {

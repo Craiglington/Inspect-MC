@@ -29,7 +29,7 @@ export class App {
     let levelDatData: ArrayBuffer | undefined = undefined;
     for (const file of inputElement.files) {
       if (file.name === "level.dat") {
-        levelDatData = await this.NBTService.getNBTFileData(file);
+        levelDatData = await this.NBTService.getNBTData(file);
         break;
       }
     }
