@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { NBTService } from "./services/nbt/nbt-service";
 
@@ -13,7 +13,7 @@ export interface WorldFormGroup {
   styleUrl: "./app.scss"
 })
 export class App {
-  constructor(private readonly NBTService: NBTService) {}
+  private readonly NBTService = inject(NBTService);
 
   async worldDirectoryChanged(event: Event) {
     if (!event.target) {

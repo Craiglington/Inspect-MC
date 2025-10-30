@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { DecompressionService } from "../decompression/decompression-service";
 
 enum NBT_TAG {
@@ -51,7 +51,7 @@ export class NBTService {
   // 1 byte for root tag id and 2 bytes for root tag name length (the length will be 0)
   private static readonly NBT_FILE_OFFSET = 3;
 
-  constructor(private readonly decompressionService: DecompressionService) {}
+  private readonly decompressionService = inject(DecompressionService);
 
   /**
    * Takes an NBT file (https://minecraft.wiki/w/NBT_format) and returns an `ArrayBuffer` of the data within.
