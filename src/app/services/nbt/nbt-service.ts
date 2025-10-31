@@ -1,7 +1,7 @@
 import { inject, Injectable } from "@angular/core";
 import { DecompressionService } from "../decompression/decompression-service";
 
-enum NBT_TAG {
+export enum NBT_TAG {
   END = 0x00,
   BYTE = 0x01,
   SHORT = 0x02,
@@ -39,7 +39,7 @@ export type SNBT = {
 /**
  * A value with a size in bytes.
  */
-type Payload<T> = {
+export type NBTPayload<T> = {
   size: number;
   value: T;
 };
@@ -148,7 +148,7 @@ export class NBTService {
    * In other words, parses the properties of an NBT object.
    * @returns The SNBT object and its size in bytes in the NBT data.
    */
-  private parseNbtTags(nbtData: DataView, offset: number): Payload<SNBT> {
+  private parseNbtTags(nbtData: DataView, offset: number): NBTPayload<SNBT> {
     const originalOffset = offset;
     const snbt: SNBT = {};
     while (offset < nbtData.byteLength) {
@@ -172,7 +172,10 @@ export class NBTService {
    * Parses the current NBT tag's name.
    * @returns The NBT tag's name and its size in bytes.
    */
-  private parseNbtTagName(nbtData: DataView, offset: number): Payload<string> {
+  private parseNbtTagName(
+    nbtData: DataView,
+    offset: number
+  ): NBTPayload<string> {
     const nameLength = nbtData.getUint16(offset);
     offset += 2;
 
@@ -195,7 +198,7 @@ export class NBTService {
     nbtData: DataView,
     offset: number,
     id: NBT_TAG
-  ): Payload<SNBTValue> {
+  ): NBTPayload<SNBTValue> {
     if (id === NBT_TAG.BYTE) {
       return { size: 1, value: nbtData.getInt8(offset) };
     }
@@ -250,7 +253,7 @@ export class NBTService {
   private parseNbtByteArray(
     nbtData: DataView,
     offset: number
-  ): Payload<number[]> {
+  ): NBTPayload<number[]> {
     const size = nbtData.getInt32(offset);
     offset += 4;
 
@@ -261,7 +264,10 @@ export class NBTService {
     return { size: 4 + list.length, value: list };
   }
 
-  private parseNbtString(nbtData: DataView, offset: number): Payload<string> {
+  private parseNbtString(
+    nbtData: DataView,
+    offset: number
+  ): NBTPayload<string> {
     const size = nbtData.getUint16(offset);
     offset += 2;
 
@@ -275,7 +281,7 @@ export class NBTService {
   private parseNbtTagList(
     nbtData: DataView,
     offset: number
-  ): Payload<SNBTValue[]> {
+  ): NBTPayload<SNBTValue[]> {
     const originalOffset = offset;
 
     const tagsId = nbtData.getUint8(offset);
@@ -301,7 +307,7 @@ export class NBTService {
   private parseNbtIntArray(
     nbtData: DataView,
     offset: number
-  ): Payload<number[]> {
+  ): NBTPayload<number[]> {
     const size = nbtData.getInt32(offset);
     offset += 4;
 
@@ -315,7 +321,7 @@ export class NBTService {
   private parseNbtLongArray(
     nbtData: DataView,
     offset: number
-  ): Payload<bigint[]> {
+  ): NBTPayload<bigint[]> {
     const size = nbtData.getInt32(offset);
     offset += 4;
 
