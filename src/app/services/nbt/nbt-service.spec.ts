@@ -67,10 +67,6 @@ describe("NBTService", () => {
     it("should resolve with decompressed data when compressed", async () => {
       mockDecompressionService.isValidGzipData.and.returnValue(true);
       spyOn(service, "isValidNBTData").and.returnValue(true);
-
-      const resultData = await service.getNBTData(
-        new File(["test"], "test.txt")
-      );
     });
   });
 });

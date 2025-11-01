@@ -32,17 +32,17 @@ export type SNBTValue =
 /**
  * A key-value object.
  */
-export type SNBT = {
+export interface SNBT {
   [key: string]: SNBTValue;
-};
+}
 
 /**
  * A value with a size in bytes.
  */
-export type NBTPayload<T> = {
+export interface NBTPayload<T> {
   size: number;
   value: T;
-};
+}
 
 @Injectable({
   providedIn: "root"
