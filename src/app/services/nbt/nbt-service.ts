@@ -1,48 +1,6 @@
-import { inject, Injectable } from "@angular/core";
-import { DecompressionService } from "../decompression/decompression-service";
-
-export enum NBT_TAG {
-  END = 0x00,
-  BYTE = 0x01,
-  SHORT = 0x02,
-  INT = 0x03,
-  LONG = 0x04,
-  FLOAT = 0x05,
-  DOUBLE = 0x06,
-  BYTE_ARRAY = 0x07,
-  STRING = 0x08,
-  LIST = 0x09,
-  COMPOUND = 0x0a,
-  INT_ARRAY = 0x0b,
-  LONG_ARRAY = 0x0c
-}
-
-/**
- * An infinitely nestable value.
- */
-export type SNBTValue =
-  | string
-  | number
-  | number[]
-  | bigint
-  | bigint[]
-  | SNBT
-  | SNBTValue[];
-
-/**
- * A key-value object.
- */
-export interface SNBT {
-  [key: string]: SNBTValue;
-}
-
-/**
- * A value with a size in bytes.
- */
-export interface NBTPayload<T> {
-  size: number;
-  value: T;
-}
+import { Injectable } from "@angular/core";
+import { SNBT, SNBTValue } from "../../models/snbt";
+import { NBT_TAG, NBTPayload } from "../../models/nbt";
 
 @Injectable({
   providedIn: "root"
@@ -50,53 +8,6 @@ export interface NBTPayload<T> {
 export class NBTService {
   // 1 byte for root tag id and 2 bytes for root tag name length (the length will be 0)
   private static readonly NBT_FILE_OFFSET = 3;
-
-  private readonly decompressionService = inject(DecompressionService);
-
-  /**
-   * Takes an NBT file (https://minecraft.wiki/w/NBT_format) and returns an `ArrayBuffer` of the data within.
-   * @param file An NBT file.
-   * @returns A Promise that resolves with an `ArrayBuffer` of the file's data.
-   */
-  getNBTData(file: File): Promise<ArrayBuffer> {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.onload = async () => {
-        try {
-          if (!fileReader.result || typeof fileReader.result === "string") {
-            throw new Error(
-              "File reader error: Result is not an array buffer."
-            );
-          }
-
-          const decompressedData = this.decompressionService.isValidGzipData(
-            fileReader.result
-          )
-            ? await this.decompressionService.decompressData(
-                fileReader.result,
-                "gzip"
-              )
-            : fileReader.result;
-
-          if (!this.isValidNBTData(decompressedData)) {
-            throw new Error(
-              "Invalid NBT file format: Data does not begin and end with a root tag."
-            );
-          }
-
-          resolve(decompressedData);
-        } catch (error) {
-          console.error(error);
-          reject(error);
-        }
-      };
-      fileReader.onerror = (event) => {
-        console.error(event);
-        reject(event.target?.error);
-      };
-      fileReader.readAsArrayBuffer(file);
-    });
-  }
 
   /**
    * Based on the NBT format found at https://minecraft.wiki/w/NBT_format#Binary_format.
