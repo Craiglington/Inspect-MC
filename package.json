@@ -20,6 +20,7 @@
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "lz4js": "^0.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -30,6 +31,7 @@
     "@angular/compiler-cli": "^20.3.0",
     "@eslint/js": "^9.38.0",
     "@types/jasmine": "~5.1.0",
+    "@types/lz4js": "^0.2.2",
     "angular-eslint": "20.5.0",
     "eslint": "^9.38.0",
     "jasmine-core": "~5.9.0",
