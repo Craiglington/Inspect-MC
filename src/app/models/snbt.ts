@@ -8,7 +8,8 @@ export type SNBTValue =
   | bigint
   | bigint[]
   | SNBT
-  | SNBTValue[];
+  | SNBTValue[]
+  | undefined;
 
 /**
  * A key-value object.

@@ -1,0 +1,10 @@
+{
+  "/mojang": {
+    "target": "https://sessionserver.mojang.com",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/mojang": ""
+    }
+  }
+}

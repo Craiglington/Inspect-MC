@@ -184,7 +184,7 @@ export class NBTService {
 
     const string: number[] = [];
     for (let i = 0; i < size; ++i) {
-      string.push(nbtData.getInt8(offset + i));
+      string.push(nbtData.getUint8(offset + i));
     }
     return { size: 2 + string.length, value: String.fromCodePoint(...string) };
   }
