@@ -1,3 +1,13 @@
 <header>
-  <mat-toolbar></mat-toolbar>
+  <mat-toolbar>
+    <button mat-icon-button matTooltip="Menu" [matMenuTriggerFor]="menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="contactUs()">Contact Me</button>
+    </mat-menu>
+    <span>{{title}}</span>
+    <span class="spacer"></span>
+    <app-toggle-theme></app-toggle-theme>
+  </mat-toolbar>
 </header>

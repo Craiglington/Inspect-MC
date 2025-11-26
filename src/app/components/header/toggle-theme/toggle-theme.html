@@ -1,0 +1,9 @@
+@if ((theme$ | async) === "light") {
+<button mat-icon-button (click)="toggleTheme()" matTooltip="Dark Mode">
+  <mat-icon>dark_mode</mat-icon>
+</button>
+} @else {
+<button mat-icon-button (click)="toggleTheme()" matTooltip="Light Mode">
+  <mat-icon>light_mode</mat-icon>
+</button>
+}

@@ -2,5 +2,21 @@ html,
 body {
   height: 100%;
   margin: 0;
-  background-color: #191d20;
+}
+
+.flex-row {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.scrollable {
+  overflow: auto;
 }
