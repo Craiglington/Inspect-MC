@@ -1,7 +1,8 @@
 import { TestBed } from "@angular/core/testing";
 
-import { NBT_TAG, NBTService } from "./nbt-service";
+import { NBTService } from "./nbt-service";
 import { DecompressionService } from "../decompression/decompression-service";
+import { NBT_TAG } from "../../models/nbt";
 
 describe("NBTService", () => {
   let service: NBTService;
