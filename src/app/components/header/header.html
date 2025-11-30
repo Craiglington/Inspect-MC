@@ -6,7 +6,9 @@
     <mat-menu #menu="matMenu">
       <button mat-menu-item (click)="contactUs()">Contact Me</button>
     </mat-menu>
-    <span>{{title}}</span>
+    <button mat-icon-button matTooltip="Map">
+      <mat-icon>map</mat-icon>
+    </button>
     <span class="spacer"></span>
     <app-toggle-theme></app-toggle-theme>
   </mat-toolbar>

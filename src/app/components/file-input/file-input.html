@@ -1,0 +1,11 @@
+<input
+  #fileInput
+  type="file"
+  hidden
+  webkitdirectory
+  multiple
+  (change)="change.emit($event)" />
+<button matFab extended type="button" (click)="fileInput.click()">
+  <mat-icon>attach_file</mat-icon>
+  {{label}}
+</button>

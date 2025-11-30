@@ -109,6 +109,20 @@ export class AnvilService {
   }
 
   /**
+   * Returns the coordinates of a chunk in the world given
+   * the corrdiantes of a block in the world.
+   */
+  worldBlockCoordsToChunkCoords(
+    blockX: number,
+    blockZ: number
+  ): { chunkX: number; chunkZ: number } {
+    return {
+      chunkX: Math.floor(blockX / 16),
+      chunkZ: Math.floor(blockZ / 16)
+    };
+  }
+
+  /**
    * Returns the coordinates of a chunk in its region given the
    * coordinates of the chunk in the world.
    */
@@ -117,8 +131,8 @@ export class AnvilService {
     chunkZ: number
   ): { chunkX: number; chunkZ: number } {
     return {
-      chunkX: chunkX - (chunkX - (chunkX % 32)),
-      chunkZ: chunkZ - (chunkZ - (chunkZ % 32))
+      chunkX: chunkX >= 0 ? chunkX % 32 : 32 - (Math.abs(chunkX) % 32),
+      chunkZ: chunkZ >= 0 ? chunkZ % 32 : 32 - (Math.abs(chunkZ) % 32)
     };
   }
 
@@ -175,22 +189,19 @@ export class AnvilService {
           -64
         );
 
-        while (true) {
+        let mapColorId: number = 0;
+        for (; mapColorId === 0 && blockYLevel >= -64; --blockYLevel) {
           const paletteEntry = this.getChunkPaletteEntry(
             chunkSections,
             chunkBlockIndex,
             blockYLevel
           );
-          const mapColorId = this.getMapColorId(paletteEntry);
-          if (mapColorId > 0 || blockYLevel <= -64) {
-            blocks.push({
-              mapColorId: mapColorId,
-              yLevel: blockYLevel
-            });
-            break;
-          }
-          blockYLevel -= 1;
+          mapColorId = this.getMapColorId(paletteEntry);
         }
+        blocks.push({
+          mapColorId: mapColorId,
+          yLevel: blockYLevel
+        });
       }
     }
     return blocks;
@@ -201,23 +212,19 @@ export class AnvilService {
    */
   private getMapColorId(paletteEntry: BlockPaletteEntry): number {
     const blockColor = BlockColors[paletteEntry.Name.slice(10)];
-    if (blockColor) {
-      if (typeof blockColor === "number") {
-        return blockColor;
-      } else {
-        for (const color of blockColor) {
-          let match = true;
-          for (const property in color.properties) {
-            if (
-              color.properties[property] !== paletteEntry.Properties?.[property]
-            ) {
-              match = false;
-              break;
-            }
-          }
-          if (match) return color.id;
+    if (!blockColor) return 0;
+    if (typeof blockColor === "number") return blockColor;
+    for (const color of blockColor) {
+      let match = true;
+      for (const property in color.properties) {
+        if (
+          color.properties[property] !== paletteEntry.Properties?.[property]
+        ) {
+          match = false;
+          break;
         }
       }
+      if (match) return color.id;
     }
     return 0;
   }
