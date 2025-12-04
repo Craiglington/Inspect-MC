@@ -4,8 +4,11 @@
   hidden
   webkitdirectory
   multiple
-  (change)="change.emit($event)" />
-<button matFab extended type="button" (click)="fileInput.click()">
-  <mat-icon>attach_file</mat-icon>
+  (change)="filesUploadedEvent($event)" />
+<button matButton="filled" type="button" (click)="fileInput.click()">
   {{label}}
+  <mat-icon>upload</mat-icon>
 </button>
+@if (numFilesUploaded > 0) {
+<span id="filesUploadedMessage">{{numFilesUploaded}} Files Uploaded</span>
+}

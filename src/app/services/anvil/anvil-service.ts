@@ -130,9 +130,17 @@ export class AnvilService {
     chunkX: number,
     chunkZ: number
   ): { chunkX: number; chunkZ: number } {
+    let regionChunkX = chunkX % 32;
+    if (regionChunkX < 0) {
+      regionChunkX += 32;
+    }
+    let regionChunkZ = chunkZ % 32;
+    if (regionChunkZ < 0) {
+      regionChunkZ += 32;
+    }
     return {
-      chunkX: chunkX >= 0 ? chunkX % 32 : 32 - (Math.abs(chunkX) % 32),
-      chunkZ: chunkZ >= 0 ? chunkZ % 32 : 32 - (Math.abs(chunkZ) % 32)
+      chunkX: regionChunkX,
+      chunkZ: regionChunkZ
     };
   }
 

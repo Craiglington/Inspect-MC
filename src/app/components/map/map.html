@@ -1,25 +1,24 @@
-<form id="mapForm" class="flex-row" [formGroup]="formGroup">
-  <app-file-input
-    label="Region Folder"
-    (change)="fileUploadChange($event)"></app-file-input>
-  <mat-form-field appearance="outline">
-    <mat-label>X Coordinate</mat-label>
-    <input
-      matInput
-      type="number"
-      placeholder="0"
-      step="1"
-      formControlName="xCoordinate" />
-  </mat-form-field>
-  <mat-form-field appearance="outline">
-    <mat-label>Z Coordinate</mat-label>
-    <input
-      matInput
-      type="number"
-      placeholder="0"
-      step="1"
-      formControlName="zCoordinate" />
-  </mat-form-field>
+<form id="mapForm" class="flex-row">
+  @if (regionFilesProcessed) {
+  <input
+    name="xCoord"
+    type="number"
+    placeholder="0"
+    step="1"
+    [(ngModel)]="xCoord"
+    (change)="drawMap()" />
+  <input
+    name="zCoord"
+    type="number"
+    placeholder="0"
+    step="1"
+    [(ngModel)]="zCoord"
+    (change)="drawMap()" />
+  }
+  <span class="spacer"></span>
+  <button id="editButton" matIconButton type="button" (click)="openMapDialog()">
+    <mat-icon>edit</mat-icon>
+  </button>
 </form>
 
-<canvas #mapCanvas id="map-canvas" width="16" height="16"> </canvas>
+<canvas #mapCanvas id="map-canvas"> </canvas>

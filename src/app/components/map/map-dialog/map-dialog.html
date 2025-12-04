@@ -1,0 +1,60 @@
+<h2 id="dialogTitle" mat-dialog-title>Map Options</h2>
+<mat-dialog-content id="dialogContent" [formGroup]="formGroup">
+  <app-file-input
+    label="Upload Region Folder"
+    (filesUploaded)="filesUploaded($event)"></app-file-input>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Starting X Coordinate</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="xStartingCoord" />
+    @if (formGroup.controls.xStartingCoord.invalid) {
+    <mat-error>{{errorMessage}}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Starting Z Coordinate</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="zStartingCoord" />
+    @if (formGroup.controls.zStartingCoord.invalid) {
+    <mat-error>{{errorMessage}}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Origin Location</mat-label>
+    <mat-select formControlName="origin">
+      @for (origin of originOptions; track $index) {
+      <mat-option [value]="origin.value">{{origin.text}}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Color Palette</mat-label>
+    <mat-select formControlName="colorPalette">
+      @for (colorPalette of colorPaletteOptions; track $index) {
+      <mat-option [value]="colorPalette.value"
+        >{{colorPalette.text}}</mat-option
+      >
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="outlined" mat-dialog-close>Cancel</button>
+  <button
+    matButton="filled"
+    [mat-dialog-close]="getOutputData()"
+    [disabled]="formGroup.invalid || !files">
+    Ok
+  </button>
+</mat-dialog-actions>

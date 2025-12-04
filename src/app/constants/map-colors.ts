@@ -8,558 +8,558 @@ export const MapColors: MapColor[] = [
     id: 0,
     name: "NONE",
     color: {
-      below: "rgba(0, 0, 0, 0)",
-      same: "rgba(0, 0, 0, 0)",
-      above: "rgba(0, 0, 0, 0)"
+      below: { r: 0, g: 0, b: 0, a: 0 },
+      same: { r: 0, g: 0, b: 0, a: 0 },
+      above: { r: 0, g: 0, b: 0, a: 0 }
     }
   },
   {
     id: 1,
     name: "GRASS",
     color: {
-      below: "rgb(90, 126, 39)",
-      same: "rgb(109, 153, 48)",
-      above: "rgb(127, 178, 56)"
+      below: { r: 90, g: 126, b: 39, a: 255 },
+      same: { r: 109, g: 153, b: 48, a: 255 },
+      above: { r: 127, g: 178, b: 56, a: 255 }
     }
   },
   {
     id: 2,
     name: "SAND",
     color: {
-      below: "rgb(175, 165, 115)",
-      same: "rgb(212, 200, 140)",
-      above: "rgb(247, 233, 163)"
+      below: { r: 175, g: 165, b: 115, a: 255 },
+      same: { r: 212, g: 200, b: 140, a: 255 },
+      above: { r: 247, g: 233, b: 163, a: 255 }
     }
   },
   {
     id: 3,
     name: "WOOL",
     color: {
-      below: "rgb(141, 141, 141)",
-      same: "rgb(171, 171, 171)",
-      above: "rgb(199, 199, 199)"
+      below: { r: 141, g: 141, b: 141, a: 255 },
+      same: { r: 171, g: 171, b: 171, a: 255 },
+      above: { r: 199, g: 199, b: 199, a: 255 }
     }
   },
   {
     id: 4,
     name: "FIRE",
     color: {
-      below: "rgb(181, 0, 0)",
-      same: "rgb(219, 0, 0)",
-      above: "rgb(255, 0, 0)"
+      below: { r: 181, g: 0, b: 0, a: 255 },
+      same: { r: 219, g: 0, b: 0, a: 255 },
+      above: { r: 255, g: 0, b: 0, a: 255 }
     }
   },
   {
     id: 5,
     name: "ICE",
     color: {
-      below: "rgb(113, 113, 181)",
-      same: "rgb(137, 137, 219)",
-      above: "rgb(160, 160, 255)"
+      below: { r: 113, g: 113, b: 181, a: 255 },
+      same: { r: 137, g: 137, b: 219, a: 255 },
+      above: { r: 160, g: 160, b: 255, a: 255 }
     }
   },
   {
     id: 6,
     name: "METAL",
     color: {
-      below: "rgb(118, 118, 118)",
-      same: "rgb(143, 143, 143)",
-      above: "rgb(167, 167, 167)"
+      below: { r: 118, g: 118, b: 118, a: 255 },
+      same: { r: 143, g: 143, b: 143, a: 255 },
+      above: { r: 167, g: 167, b: 167, a: 255 }
     }
   },
   {
     id: 7,
     name: "PLANT",
     color: {
-      below: "rgb(0, 88, 0)",
-      same: "rgb(0, 106, 0)",
-      above: "rgb(0, 124, 0)"
+      below: { r: 0, g: 88, b: 0, a: 255 },
+      same: { r: 0, g: 106, b: 0, a: 255 },
+      above: { r: 0, g: 124, b: 0, a: 255 }
     }
   },
   {
     id: 8,
     name: "SNOW",
     color: {
-      below: "rgb(181, 181, 181)",
-      same: "rgb(219, 219, 219)",
-      above: "rgb(255, 255, 255)"
+      below: { r: 181, g: 181, b: 181, a: 255 },
+      same: { r: 219, g: 219, b: 219, a: 255 },
+      above: { r: 255, g: 255, b: 255, a: 255 }
     }
   },
   {
     id: 9,
     name: "CLAY",
     color: {
-      below: "rgb(116, 119, 130)",
-      same: "rgb(141, 144, 158)",
-      above: "rgb(164, 168, 184)"
+      below: { r: 116, g: 119, b: 130, a: 255 },
+      same: { r: 141, g: 144, b: 158, a: 255 },
+      above: { r: 164, g: 168, b: 184, a: 255 }
     }
   },
   {
     id: 10,
     name: "DIRT",
     color: {
-      below: "rgb(107, 77, 54)",
-      same: "rgb(129, 93, 66)",
-      above: "rgb(151, 109, 77)"
+      below: { r: 107, g: 77, b: 54, a: 255 },
+      same: { r: 129, g: 93, b: 66, a: 255 },
+      above: { r: 151, g: 109, b: 77, a: 255 }
     }
   },
   {
     id: 11,
     name: "STONE",
     color: {
-      below: "rgb(79, 79, 79)",
-      same: "rgb(96, 96, 96)",
-      above: "rgb(112, 112, 112)"
+      below: { r: 79, g: 79, b: 79, a: 255 },
+      same: { r: 96, g: 96, b: 96, a: 255 },
+      above: { r: 112, g: 112, b: 112, a: 255 }
     }
   },
   {
     id: 12,
     name: "WATER",
     color: {
-      below: "rgb(45, 45, 181)",
-      same: "rgb(55, 55, 219)",
-      above: "rgb(64, 64, 255)"
+      below: { r: 45, g: 45, b: 181, a: 255 },
+      same: { r: 55, g: 55, b: 219, a: 255 },
+      above: { r: 64, g: 64, b: 255, a: 255 }
     }
   },
   {
     id: 13,
     name: "WOOD",
     color: {
-      below: "rgb(101, 84, 51)",
-      same: "rgb(122, 102, 61)",
-      above: "rgb(143, 119, 72)"
+      below: { r: 101, g: 84, b: 51, a: 255 },
+      same: { r: 122, g: 102, b: 61, a: 255 },
+      above: { r: 143, g: 119, b: 72, a: 255 }
     }
   },
   {
     id: 14,
     name: "QUARTZ",
     color: {
-      below: "rgb(181, 178, 173)",
-      same: "rgb(219, 216, 210)",
-      above: "rgb(255, 252, 245)"
+      below: { r: 181, g: 178, b: 173, a: 255 },
+      same: { r: 219, g: 216, b: 210, a: 255 },
+      above: { r: 255, g: 252, b: 245, a: 255 }
     }
   },
   {
     id: 15,
     name: "COLOR_ORANGE",
     color: {
-      below: "rgb(153, 90, 36)",
-      same: "rgb(185, 109, 43)",
-      above: "rgb(216, 127, 51)"
+      below: { r: 153, g: 90, b: 36, a: 255 },
+      same: { r: 185, g: 109, b: 43, a: 255 },
+      above: { r: 216, g: 127, b: 51, a: 255 }
     }
   },
   {
     id: 16,
     name: "COLOR_MAGENTA",
     color: {
-      below: "rgb(126, 53, 153)",
-      same: "rgb(153, 65, 185)",
-      above: "rgb(178, 76, 216)"
+      below: { r: 126, g: 53, b: 153, a: 255 },
+      same: { r: 153, g: 65, b: 185, a: 255 },
+      above: { r: 178, g: 76, b: 216, a: 255 }
     }
   },
   {
     id: 17,
     name: "COLOR_LIGHT_BLUE",
     color: {
-      below: "rgb(72, 108, 153)",
-      same: "rgb(87, 131, 185)",
-      above: "rgb(102, 153, 216)"
+      below: { r: 72, g: 108, b: 153, a: 255 },
+      same: { r: 87, g: 131, b: 185, a: 255 },
+      above: { r: 102, g: 153, b: 216, a: 255 }
     }
   },
   {
     id: 18,
     name: "COLOR_YELLOW",
     color: {
-      below: "rgb(162, 162, 36)",
-      same: "rgb(196, 196, 43)",
-      above: "rgb(229, 229, 51)"
+      below: { r: 162, g: 162, b: 36, a: 255 },
+      same: { r: 196, g: 196, b: 43, a: 255 },
+      above: { r: 229, g: 229, b: 51, a: 255 }
     }
   },
   {
     id: 19,
     name: "COLOR_LIGHT_GREEN",
     color: {
-      below: "rgb(90, 144, 17)",
-      same: "rgb(109, 175, 21)",
-      above: "rgb(127, 204, 25)"
+      below: { r: 90, g: 144, b: 17, a: 255 },
+      same: { r: 109, g: 175, b: 21, a: 255 },
+      above: { r: 127, g: 204, b: 25, a: 255 }
     }
   },
   {
     id: 20,
     name: "COLOR_PINK",
     color: {
-      below: "rgb(171, 90, 117)",
-      same: "rgb(208, 109, 141)",
-      above: "rgb(242, 127, 165)"
+      below: { r: 171, g: 90, b: 117, a: 255 },
+      same: { r: 208, g: 109, b: 141, a: 255 },
+      above: { r: 242, g: 127, b: 165, a: 255 }
     }
   },
   {
     id: 21,
     name: "COLOR_GRAY",
     color: {
-      below: "rgb(53, 53, 53)",
-      same: "rgb(65, 65, 65)",
-      above: "rgb(76, 76, 76)"
+      below: { r: 53, g: 53, b: 53, a: 255 },
+      same: { r: 65, g: 65, b: 65, a: 255 },
+      above: { r: 76, g: 76, b: 76, a: 255 }
     }
   },
   {
     id: 22,
     name: "COLOR_LIGHT_GRAY",
     color: {
-      below: "rgb(108, 108, 108)",
-      same: "rgb(131, 131, 131)",
-      above: "rgb(153, 153, 153)"
+      below: { r: 108, g: 108, b: 108, a: 255 },
+      same: { r: 131, g: 131, b: 131, a: 255 },
+      above: { r: 153, g: 153, b: 153, a: 255 }
     }
   },
   {
     id: 23,
     name: "COLOR_CYAN",
     color: {
-      below: "rgb(53, 90, 108)",
-      same: "rgb(65, 109, 131)",
-      above: "rgb(76, 127, 153)"
+      below: { r: 53, g: 90, b: 108, a: 255 },
+      same: { r: 65, g: 109, b: 131, a: 255 },
+      above: { r: 76, g: 127, b: 153, a: 255 }
     }
   },
   {
     id: 24,
     name: "COLOR_PURPLE",
     color: {
-      below: "rgb(90, 44, 126)",
-      same: "rgb(109, 54, 153)",
-      above: "rgb(127, 63, 178)"
+      below: { r: 90, g: 44, b: 126, a: 255 },
+      same: { r: 109, g: 54, b: 153, a: 255 },
+      above: { r: 127, g: 63, b: 178, a: 255 }
     }
   },
   {
     id: 25,
     name: "COLOR_BLUE",
     color: {
-      below: "rgb(36, 53, 126)",
-      same: "rgb(43, 65, 153)",
-      above: "rgb(51, 76, 178)"
+      below: { r: 36, g: 53, b: 126, a: 255 },
+      same: { r: 43, g: 65, b: 153, a: 255 },
+      above: { r: 51, g: 76, b: 178, a: 255 }
     }
   },
   {
     id: 26,
     name: "COLOR_BROWN",
     color: {
-      below: "rgb(72, 53, 36)",
-      same: "rgb(87, 65, 43)",
-      above: "rgb(102, 76, 51)"
+      below: { r: 72, g: 53, b: 36, a: 255 },
+      same: { r: 87, g: 65, b: 43, a: 255 },
+      above: { r: 102, g: 76, b: 51, a: 255 }
     }
   },
   {
     id: 27,
     name: "COLOR_GREEN",
     color: {
-      below: "rgb(72, 90, 36)",
-      same: "rgb(87, 109, 43)",
-      above: "rgb(102, 127, 51)"
+      below: { r: 72, g: 90, b: 36, a: 255 },
+      same: { r: 87, g: 109, b: 43, a: 255 },
+      above: { r: 102, g: 127, b: 51, a: 255 }
     }
   },
   {
     id: 28,
     name: "COLOR_RED",
     color: {
-      below: "rgb(108, 36, 36)",
-      same: "rgb(131, 43, 43)",
-      above: "rgb(153, 51, 51)"
+      below: { r: 108, g: 36, b: 36, a: 255 },
+      same: { r: 131, g: 43, b: 43, a: 255 },
+      above: { r: 153, g: 51, b: 51, a: 255 }
     }
   },
   {
     id: 29,
     name: "COLOR_BLACK",
     color: {
-      below: "rgb(17, 17, 17)",
-      same: "rgb(21, 21, 21)",
-      above: "rgb(25, 25, 25)"
+      below: { r: 17, g: 17, b: 17, a: 255 },
+      same: { r: 21, g: 21, b: 21, a: 255 },
+      above: { r: 25, g: 25, b: 25, a: 255 }
     }
   },
   {
     id: 30,
     name: "GOLD",
     color: {
-      below: "rgb(177, 168, 54)",
-      same: "rgb(215, 204, 66)",
-      above: "rgb(250, 238, 77)"
+      below: { r: 177, g: 168, b: 54, a: 255 },
+      same: { r: 215, g: 204, b: 66, a: 255 },
+      above: { r: 250, g: 238, b: 77, a: 255 }
     }
   },
   {
     id: 31,
     name: "DIAMOND",
     color: {
-      below: "rgb(65, 155, 151)",
-      same: "rgb(79, 188, 183)",
-      above: "rgb(92, 219, 213)"
+      below: { r: 65, g: 155, b: 151, a: 255 },
+      same: { r: 79, g: 188, b: 183, a: 255 },
+      above: { r: 92, g: 219, b: 213, a: 255 }
     }
   },
   {
     id: 32,
     name: "LAPIS",
     color: {
-      below: "rgb(52, 90, 181)",
-      same: "rgb(63, 110, 219)",
-      above: "rgb(74, 128, 255)"
+      below: { r: 52, g: 90, b: 181, a: 255 },
+      same: { r: 63, g: 110, b: 219, a: 255 },
+      above: { r: 74, g: 128, b: 255, a: 255 }
     }
   },
   {
     id: 33,
     name: "EMERALD",
     color: {
-      below: "rgb(0, 154, 41)",
-      same: "rgb(0, 186, 49)",
-      above: "rgb(0, 217, 58)"
+      below: { r: 0, g: 154, b: 41, a: 255 },
+      same: { r: 0, g: 186, b: 49, a: 255 },
+      above: { r: 0, g: 217, b: 58, a: 255 }
     }
   },
   {
     id: 34,
     name: "PODZOL",
     color: {
-      below: "rgb(91, 61, 34)",
-      same: "rgb(110, 73, 42)",
-      above: "rgb(129, 86, 49)"
+      below: { r: 91, g: 61, b: 34, a: 255 },
+      same: { r: 110, g: 73, b: 42, a: 255 },
+      above: { r: 129, g: 86, b: 49, a: 255 }
     }
   },
   {
     id: 35,
     name: "NETHER",
     color: {
-      below: "rgb(79, 1, 0)",
-      same: "rgb(96, 1, 0)",
-      above: "rgb(112, 2, 0)"
+      below: { r: 79, g: 1, b: 0, a: 255 },
+      same: { r: 96, g: 1, b: 0, a: 255 },
+      above: { r: 112, g: 2, b: 0, a: 255 }
     }
   },
   {
     id: 36,
     name: "TERRACOTTA_WHITE",
     color: {
-      below: "rgb(148, 125, 114)",
-      same: "rgb(179, 152, 138)",
-      above: "rgb(209, 177, 161)"
+      below: { r: 148, g: 125, b: 114, a: 255 },
+      same: { r: 179, g: 152, b: 138, a: 255 },
+      above: { r: 209, g: 177, b: 161, a: 255 }
     }
   },
   {
     id: 37,
     name: "TERRACOTTA_ORANGE",
     color: {
-      below: "rgb(112, 58, 25)",
-      same: "rgb(136, 70, 30)",
-      above: "rgb(159, 82, 36)"
+      below: { r: 112, g: 58, b: 25, a: 255 },
+      same: { r: 136, g: 70, b: 30, a: 255 },
+      above: { r: 159, g: 82, b: 36, a: 255 }
     }
   },
   {
     id: 38,
     name: "TERRACOTTA_MAGENTA",
     color: {
-      below: "rgb(105, 61, 76)",
-      same: "rgb(128, 74, 92)",
-      above: "rgb(149, 87, 108)"
+      below: { r: 105, g: 61, b: 76, a: 255 },
+      same: { r: 128, g: 74, b: 92, a: 255 },
+      above: { r: 149, g: 87, b: 108, a: 255 }
     }
   },
   {
     id: 39,
     name: "TERRACOTTA_LIGHT_BLUE",
     color: {
-      below: "rgb(79, 76, 97)",
-      same: "rgb(96, 92, 118)",
-      above: "rgb(112, 108, 138)"
+      below: { r: 79, g: 76, b: 97, a: 255 },
+      same: { r: 96, g: 92, b: 118, a: 255 },
+      above: { r: 112, g: 108, b: 138, a: 255 }
     }
   },
   {
     id: 40,
     name: "TERRACOTTA_YELLOW",
     color: {
-      below: "rgb(132, 94, 25)",
-      same: "rgb(159, 114, 30)",
-      above: "rgb(186, 133, 36)"
+      below: { r: 132, g: 94, b: 25, a: 255 },
+      same: { r: 159, g: 114, b: 30, a: 255 },
+      above: { r: 186, g: 133, b: 36, a: 255 }
     }
   },
   {
     id: 41,
     name: "TERRACOTTA_LIGHT_GREEN",
     color: {
-      below: "rgb(73, 83, 37)",
-      same: "rgb(88, 100, 45)",
-      above: "rgb(103, 117, 53)"
+      below: { r: 73, g: 83, b: 37, a: 255 },
+      same: { r: 88, g: 100, b: 45, a: 255 },
+      above: { r: 103, g: 117, b: 53, a: 255 }
     }
   },
   {
     id: 42,
     name: "TERRACOTTA_PINK",
     color: {
-      below: "rgb(113, 54, 55)",
-      same: "rgb(137, 66, 67)",
-      above: "rgb(160, 77, 78)"
+      below: { r: 113, g: 54, b: 55, a: 255 },
+      same: { r: 137, g: 66, b: 67, a: 255 },
+      above: { r: 160, g: 77, b: 78, a: 255 }
     }
   },
   {
     id: 43,
     name: "TERRACOTTA_GRAY",
     color: {
-      below: "rgb(40, 29, 24)",
-      same: "rgb(49, 35, 30)",
-      above: "rgb(57, 41, 35)"
+      below: { r: 40, g: 29, b: 24, a: 255 },
+      same: { r: 49, g: 35, b: 30, a: 255 },
+      above: { r: 57, g: 41, b: 35, a: 255 }
     }
   },
   {
     id: 44,
     name: "TERRACOTTA_LIGHT_GRAY",
     color: {
-      below: "rgb(95, 75, 69)",
-      same: "rgb(116, 92, 84)",
-      above: "rgb(135, 107, 98)"
+      below: { r: 95, g: 75, b: 69, a: 255 },
+      same: { r: 116, g: 92, b: 84, a: 255 },
+      above: { r: 135, g: 107, b: 98, a: 255 }
     }
   },
   {
     id: 45,
     name: "TERRACOTTA_CYAN",
     color: {
-      below: "rgb(61, 65, 65)",
-      same: "rgb(74, 79, 79)",
-      above: "rgb(87, 92, 92)"
+      below: { r: 61, g: 65, b: 65, a: 255 },
+      same: { r: 74, g: 79, b: 79, a: 255 },
+      above: { r: 87, g: 92, b: 92, a: 255 }
     }
   },
   {
     id: 46,
     name: "TERRACOTTA_PURPLE",
     color: {
-      below: "rgb(86, 51, 62)",
-      same: "rgb(104, 62, 75)",
-      above: "rgb(122, 73, 88)"
+      below: { r: 86, g: 51, b: 62, a: 255 },
+      same: { r: 104, g: 62, b: 75, a: 255 },
+      above: { r: 122, g: 73, b: 88, a: 255 }
     }
   },
   {
     id: 47,
     name: "TERRACOTTA_BLUE",
     color: {
-      below: "rgb(53, 44, 65)",
-      same: "rgb(65, 53, 79)",
-      above: "rgb(76, 62, 92)"
+      below: { r: 53, g: 44, b: 65, a: 255 },
+      same: { r: 65, g: 53, b: 79, a: 255 },
+      above: { r: 76, g: 62, b: 92, a: 255 }
     }
   },
   {
     id: 48,
     name: "TERRACOTTA_BROWN",
     color: {
-      below: "rgb(53, 35, 24)",
-      same: "rgb(65, 43, 30)",
-      above: "rgb(76, 50, 35)"
+      below: { r: 53, g: 35, b: 24, a: 255 },
+      same: { r: 65, g: 43, b: 30, a: 255 },
+      above: { r: 76, g: 50, b: 35, a: 255 }
     }
   },
   {
     id: 49,
     name: "TERRACOTTA_GREEN",
     color: {
-      below: "rgb(53, 58, 29)",
-      same: "rgb(65, 70, 36)",
-      above: "rgb(76, 82, 42)"
+      below: { r: 53, g: 58, b: 29, a: 255 },
+      same: { r: 65, g: 70, b: 36, a: 255 },
+      above: { r: 76, g: 82, b: 42, a: 255 }
     }
   },
   {
     id: 50,
     name: "TERRACOTTA_RED",
     color: {
-      below: "rgb(100, 42, 32)",
-      same: "rgb(122, 51, 39)",
-      above: "rgb(142, 60, 46)"
+      below: { r: 100, g: 42, b: 32, a: 255 },
+      same: { r: 122, g: 51, b: 39, a: 255 },
+      above: { r: 142, g: 60, b: 46, a: 255 }
     }
   },
   {
     id: 51,
     name: "TERRACOTTA_BLACK",
     color: {
-      below: "rgb(26, 15, 11)",
-      same: "rgb(31, 18, 13)",
-      above: "rgb(37, 22, 16)"
+      below: { r: 26, g: 15, b: 11, a: 255 },
+      same: { r: 31, g: 18, b: 13, a: 255 },
+      above: { r: 37, g: 22, b: 16, a: 255 }
     }
   },
   {
     id: 52,
     name: "CRIMSON_NYLIUM",
     color: {
-      below: "rgb(134, 34, 34)",
-      same: "rgb(162, 41, 42)",
-      above: "rgb(189, 48, 49)"
+      below: { r: 134, g: 34, b: 34, a: 255 },
+      same: { r: 162, g: 41, b: 42, a: 255 },
+      above: { r: 189, g: 48, b: 49, a: 255 }
     }
   },
   {
     id: 53,
     name: "CRIMSON_STEM",
     color: {
-      below: "rgb(105, 44, 68)",
-      same: "rgb(127, 54, 83)",
-      above: "rgb(148, 63, 97)"
+      below: { r: 105, g: 44, b: 68, a: 255 },
+      same: { r: 127, g: 54, b: 83, a: 255 },
+      above: { r: 148, g: 63, b: 97, a: 255 }
     }
   },
   {
     id: 54,
     name: "CRIMSON_HYPHAE",
     color: {
-      below: "rgb(65, 17, 20)",
-      same: "rgb(79, 21, 24)",
-      above: "rgb(92, 25, 29)"
+      below: { r: 65, g: 17, b: 20, a: 255 },
+      same: { r: 79, g: 21, b: 24, a: 255 },
+      above: { r: 92, g: 25, b: 29, a: 255 }
     }
   },
   {
     id: 55,
     name: "WARPED_NYLIUM",
     color: {
-      below: "rgb(15, 89, 95)",
-      same: "rgb(18, 108, 115)",
-      above: "rgb(22, 126, 134)"
+      below: { r: 15, g: 89, b: 95, a: 255 },
+      same: { r: 18, g: 108, b: 115, a: 255 },
+      above: { r: 22, g: 126, b: 134, a: 255 }
     }
   },
   {
     id: 56,
     name: "WARPED_STEM",
     color: {
-      below: "rgb(41, 100, 99)",
-      same: "rgb(49, 122, 120)",
-      above: "rgb(58, 142, 140)"
+      below: { r: 41, g: 100, b: 99, a: 255 },
+      same: { r: 49, g: 122, b: 120, a: 255 },
+      above: { r: 58, g: 142, b: 140, a: 255 }
     }
   },
   {
     id: 57,
     name: "WARPED_HYPHAE",
     color: {
-      below: "rgb(61, 31, 44)",
-      same: "rgb(73, 37, 53)",
-      above: "rgb(86, 44, 62)"
+      below: { r: 61, g: 31, b: 44, a: 255 },
+      same: { r: 73, g: 37, b: 53, a: 255 },
+      above: { r: 86, g: 44, b: 62, a: 255 }
     }
   },
   {
     id: 58,
     name: "WARPED_WART_BLOCK",
     color: {
-      below: "rgb(14, 127, 94)",
-      same: "rgb(17, 154, 114)",
-      above: "rgb(20, 180, 133)"
+      below: { r: 14, g: 127, b: 94, a: 255 },
+      same: { r: 17, g: 154, b: 114, a: 255 },
+      above: { r: 20, g: 180, b: 133, a: 255 }
     }
   },
   {
     id: 59,
     name: "DEEPSLATE",
     color: {
-      below: "rgb(71, 71, 71)",
-      same: "rgb(86, 86, 86)",
-      above: "rgb(100, 100, 100)"
+      below: { r: 71, g: 71, b: 71, a: 255 },
+      same: { r: 86, g: 86, b: 86, a: 255 },
+      above: { r: 100, g: 100, b: 100, a: 255 }
     }
   },
   {
     id: 60,
     name: "RAW_IRON",
     color: {
-      below: "rgb(153, 124, 104)",
-      same: "rgb(185, 150, 126)",
-      above: "rgb(216, 175, 147)"
+      below: { r: 153, g: 124, b: 104, a: 255 },
+      same: { r: 185, g: 150, b: 126, a: 255 },
+      above: { r: 216, g: 175, b: 147, a: 255 }
     }
   },
   {
     id: 61,
     name: "GLOW_LICHEN",
     color: {
-      below: "rgb(90, 118, 106)",
-      same: "rgb(109, 143, 129)",
-      above: "rgb(127, 167, 150)"
+      below: { r: 90, g: 118, b: 106, a: 255 },
+      same: { r: 109, g: 143, b: 129, a: 255 },
+      above: { r: 127, g: 167, b: 150, a: 255 }
     }
   }
 ];

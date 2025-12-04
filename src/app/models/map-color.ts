@@ -1,9 +1,16 @@
+export interface RGBAColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
 export interface MapColor {
   id: number;
   name: string;
   color: {
-    below: string;
-    same: string;
-    above: string;
+    below: RGBAColor;
+    same: RGBAColor;
+    above: RGBAColor;
   };
 }

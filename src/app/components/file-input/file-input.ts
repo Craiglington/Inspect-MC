@@ -10,5 +10,17 @@ import { MatIconModule } from "@angular/material/icon";
 })
 export class FileInput {
   @Input("label") label: string = "";
-  @Output("change") change: EventEmitter<Event> = new EventEmitter();
+  @Output("filesUploaded") filesUploaded: EventEmitter<FileList> =
+    new EventEmitter();
+  numFilesUploaded: number = 0;
+
+  filesUploadedEvent(event: Event) {
+    if (!event.target) return;
+    const inputElement: HTMLInputElement = event.target as HTMLInputElement;
+    if (!inputElement.files?.length) {
+      return;
+    }
+    this.numFilesUploaded = inputElement.files?.length;
+    this.filesUploaded.emit(inputElement.files);
+  }
 }
