@@ -26,6 +26,10 @@ import { FileReaderService } from "../../services/file-reader/file-reader-servic
 import { MapDialogComponent } from "./map-dialog/map-dialog";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { CoordInput } from "./coord-input/coord-input";
+import {
+  LocalStorageKey,
+  LocalStorageService
+} from "../../services/local-storage/local-storage";
 
 @Component({
   selector: "app-map",
@@ -46,18 +50,31 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly fileReaderService = inject(FileReaderService);
   private readonly anvilService = inject(AnvilService);
+  private readonly localStorageService = inject(LocalStorageService);
   private readonly dialog = inject(MatDialog);
 
   private regionFiles: Map<string, Promise<ArrayBuffer>> = new Map();
   private chunkImageData: Map<string, ImageBitmap | null> = new Map();
 
   regionFilesProcessed = false;
-  xStartingCoord: number = -391;
-  xCoord: number = this.xStartingCoord;
-  zStartingCoord: number = -94;
-  zCoord: number = this.zStartingCoord;
-  origin: MapOrigin = "top-left";
-  colorPalette: MapColorPalette = "original";
+  xStartingCoord: number;
+  xCoord: number;
+  zStartingCoord: number;
+  zCoord: number;
+  origin: MapOrigin;
+  colorPalette: MapColorPalette;
+
+  constructor() {
+    const mapSettings = this.localStorageService.get<MapDialogInputData>(
+      LocalStorageKey.MAP_SETTINGS
+    );
+    this.xStartingCoord = mapSettings?.xStartingCoord ?? 0;
+    this.xCoord = this.xStartingCoord;
+    this.zStartingCoord = mapSettings?.zStartingCoord ?? 0;
+    this.zCoord = this.zStartingCoord;
+    this.origin = mapSettings?.origin ?? "center";
+    this.colorPalette = mapSettings?.colorPalette ?? "original";
+  }
 
   ngOnInit(): void {
     this.openMapDialog();
@@ -95,17 +112,22 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
-      this.xStartingCoord = data.xStartingCoord ?? 0;
-      this.xCoord = this.xStartingCoord;
-      this.zStartingCoord = data.zStartingCoord ?? 0;
-      this.zCoord = this.zStartingCoord;
-      this.origin = data.origin ?? "top-left";
-      this.colorPalette = data.colorPalette ?? "original";
-      if (data.files) {
-        this.processRegionFiles(data.files);
+      const { files, ...storedSettings } = data;
+      this.xStartingCoord = storedSettings.xStartingCoord;
+      this.zStartingCoord = storedSettings.zStartingCoord;
+      this.origin = storedSettings.origin;
+      this.colorPalette = storedSettings.colorPalette;
+      if (files) {
+        this.xCoord = this.xStartingCoord;
+        this.zCoord = this.zStartingCoord;
+        this.processRegionFiles(files);
       } else {
         this.drawMap();
       }
+      this.localStorageService.set(
+        LocalStorageKey.MAP_SETTINGS,
+        storedSettings
+      );
     });
   }
 

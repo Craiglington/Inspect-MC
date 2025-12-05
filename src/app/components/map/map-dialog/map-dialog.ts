@@ -61,17 +61,27 @@ export class MapDialogComponent implements OnInit {
     this.formGroup = this.formBuilder.group({
       xStartingCoord: new FormControl(this.data.xStartingCoord, {
         nonNullable: true,
-        validators: [Validators.max(30_000_000), Validators.min(-30_000_000)]
+        validators: [
+          Validators.max(30_000_000),
+          Validators.min(-30_000_000),
+          Validators.required
+        ]
       }),
       zStartingCoord: new FormControl(this.data.zStartingCoord, {
         nonNullable: true,
-        validators: [Validators.max(30_000_000), Validators.min(-30_000_000)]
+        validators: [
+          Validators.max(30_000_000),
+          Validators.min(-30_000_000),
+          Validators.required
+        ]
       }),
       origin: new FormControl(this.data.origin, {
-        nonNullable: true
+        nonNullable: true,
+        validators: [Validators.required]
       }),
       colorPalette: new FormControl(this.data.colorPalette, {
-        nonNullable: true
+        nonNullable: true,
+        validators: [Validators.required]
       })
     });
   }
@@ -82,7 +92,7 @@ export class MapDialogComponent implements OnInit {
 
   getOutputData(): MapDialogOutputData {
     return {
-      ...this.formGroup.value,
+      ...this.formGroup.getRawValue(),
       files: this.files
     };
   }

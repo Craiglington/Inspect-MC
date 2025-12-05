@@ -3,12 +3,12 @@ import { FormControl } from "@angular/forms";
 export type MapOrigin = "center" | "top-left";
 export const MapOriginOptions = [
   {
-    text: "Top Left",
-    value: "top-left"
-  },
-  {
     text: "Center",
     value: "center"
+  },
+  {
+    text: "Top Left",
+    value: "top-left"
   }
 ];
 
@@ -31,7 +31,7 @@ export interface MapDialogInputData {
   colorPalette: MapColorPalette;
 }
 
-export interface MapDialogOutputData extends Partial<MapDialogInputData> {
+export interface MapDialogOutputData extends MapDialogInputData {
   files?: FileList;
 }
 
