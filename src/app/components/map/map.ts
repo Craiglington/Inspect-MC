@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   inject,
   OnDestroy,
   OnInit,
@@ -30,6 +31,7 @@ import {
   LocalStorageKey,
   LocalStorageService
 } from "../../services/local-storage/local-storage";
+import { debounceTime } from "rxjs";
 
 @Component({
   selector: "app-map",
@@ -52,6 +54,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly anvilService = inject(AnvilService);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly dialog = inject(MatDialog);
+  private readonly $resizeCanvas: EventEmitter<void> = new EventEmitter();
 
   private regionFiles: Map<string, Promise<ArrayBuffer>> = new Map();
   private chunkImageData: Map<string, ImageBitmap | null> = new Map();
@@ -78,25 +81,34 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.openMapDialog();
+    this.$resizeCanvas.pipe(debounceTime(250)).subscribe(() => {
+      this.resizeCanvas();
+    });
   }
 
   ngAfterViewInit(): void {
-    window.addEventListener("resize", this.resizeCanvas);
+    window.addEventListener("resize", this.windowResizeHandler);
     this.resizeCanvas();
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener("resize", this.resizeCanvas);
+    window.removeEventListener("resize", this.windowResizeHandler);
+    this.$resizeCanvas.unsubscribe();
   }
 
-  resizeCanvas = () => {
+  private windowResizeHandler = () => {
+    this.$resizeCanvas.emit();
+  };
+
+  private resizeCanvas() {
     if (!this.mapCanvas || !this.mapCanvas.nativeElement) return;
     const canvas = this.mapCanvas.nativeElement;
     canvas.width = canvas.offsetWidth / 4;
     canvas.height = canvas.offsetHeight / 4;
-  };
+    this.drawMap();
+  }
 
-  openMapDialog() {
+  protected openMapDialog() {
     const dialogRef = this.dialog.open<
       MapDialogComponent,
       MapDialogInputData,
@@ -131,7 +143,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  async processRegionFiles(files: FileList) {
+  private async processRegionFiles(files: FileList) {
     this.regionFiles.clear();
     this.chunkImageData.clear();
     const anvilRegex = new RegExp(/^r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/);
@@ -148,7 +160,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.drawMap();
   }
 
-  drawMap() {
+  protected drawMap() {
     if (!this.mapCanvas || !this.mapCanvas.nativeElement) return;
     const canvas = this.mapCanvas.nativeElement;
 
