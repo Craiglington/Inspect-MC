@@ -1,0 +1,13 @@
+<div id="input-container" [ngClass]="{'disabled': disabled}">
+  <span id="label">{{label}}</span>
+  <input
+    [name]="name"
+    [ngModel]="value"
+    (ngModelChange)="valueChanged($event)"
+    [disabled]="disabled"
+    type="number"
+    [placeholder]="placeholder"
+    [step]="step"
+    min="-30000000"
+    max="30000000" />
+</div>

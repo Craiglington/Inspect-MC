@@ -1,23 +1,25 @@
 <form id="mapForm" class="flex-row">
   @if (regionFilesProcessed) {
-  <input
+  <app-coord-input
+    label="X:"
     name="xCoord"
-    type="number"
-    placeholder="0"
-    step="1"
     [(ngModel)]="xCoord"
-    (change)="drawMap()" />
-  <input
+    (change)="drawMap()"></app-coord-input>
+  <app-coord-input
+    label="Z:"
     name="zCoord"
-    type="number"
-    placeholder="0"
-    step="1"
     [(ngModel)]="zCoord"
-    (change)="drawMap()" />
+    (change)="drawMap()"></app-coord-input>
+
   }
   <span class="spacer"></span>
-  <button id="editButton" matIconButton type="button" (click)="openMapDialog()">
-    <mat-icon>edit</mat-icon>
+  <button
+    id="editButton"
+    matIconButton
+    type="button"
+    (click)="openMapDialog()"
+    matTooltip="Map Settings">
+    <mat-icon>settings</mat-icon>
   </button>
 </form>
 

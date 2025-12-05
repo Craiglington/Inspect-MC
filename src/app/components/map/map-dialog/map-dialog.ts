@@ -48,15 +48,14 @@ import { FileInput } from "../../file-input/file-input";
 })
 export class MapDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly data = inject<MapDialogInputData>(MAT_DIALOG_DATA);
+  protected files?: FileList;
 
-  readonly dialogRef = inject(MatDialogRef<MapDialogComponent>);
-  readonly data = inject<MapDialogInputData>(MAT_DIALOG_DATA);
   readonly originOptions = MapOriginOptions;
   readonly colorPaletteOptions = MapColorPaletteOptions;
+  readonly errorMessage = "Range: [-30 million, 30 million]";
 
   formGroup!: FormGroup<MapDialogForm>;
-  files?: FileList;
-  errorMessage = "Range: [-30 million, 30 million]";
 
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({

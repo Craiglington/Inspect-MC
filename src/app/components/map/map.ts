@@ -24,6 +24,8 @@ import {
 import { AnvilService } from "../../services/anvil/anvil-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
 import { MapDialogComponent } from "./map-dialog/map-dialog";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { CoordInput } from "./coord-input/coord-input";
 
 @Component({
   selector: "app-map",
@@ -32,7 +34,9 @@ import { MapDialogComponent } from "./map-dialog/map-dialog";
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    FormsModule
+    FormsModule,
+    MatTooltipModule,
+    CoordInput
   ],
   templateUrl: "./map.html",
   styleUrl: "./map.scss"
@@ -48,9 +52,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private chunkImageData: Map<string, ImageBitmap | null> = new Map();
 
   regionFilesProcessed = false;
-  xStartingCoord: number = 48;
+  xStartingCoord: number = -391;
   xCoord: number = this.xStartingCoord;
-  zStartingCoord: number = -385;
+  zStartingCoord: number = -94;
   zCoord: number = this.zStartingCoord;
   origin: MapOrigin = "top-left";
   colorPalette: MapColorPalette = "original";
@@ -99,6 +103,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.colorPalette = data.colorPalette ?? "original";
       if (data.files) {
         this.processRegionFiles(data.files);
+      } else {
+        this.drawMap();
       }
     });
   }

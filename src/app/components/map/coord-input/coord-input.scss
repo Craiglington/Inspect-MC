@@ -1,0 +1,45 @@
+#input-container {
+  background-color: var(--mat-sys-primary-container);
+  display: flex;
+  align-items: center;
+  padding-left: 0.25em;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--mat-sys-secondary);
+  border-radius: 2px;
+  box-sizing: border-box;
+  --disabled-text-color: color-mix(
+    in srgb,
+    var(--mat-sys-on-surface) 38%,
+    transparent
+  );
+
+  #label {
+    color: var(--disabled-text-color) !important;
+    user-select: none;
+  }
+
+  input {
+    padding: 0.25em;
+    font-size: medium;
+    width: 100px;
+    border: none !important;
+    background-color: transparent !important;
+  }
+
+  input:focus-visible {
+    outline: none !important;
+  }
+}
+
+.disabled {
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+  color: --disabled-text-color !important;
+  border-color: color-mix(
+    in srgb,
+    var(--mat-sys-secondary) 38%,
+    transparent
+  ) !important;
+}
