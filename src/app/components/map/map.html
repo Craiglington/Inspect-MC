@@ -1,26 +1,31 @@
+@if (regionFilesProcessed) {
 <form id="mapForm" class="flex-row">
-  @if (regionFilesProcessed) {
   <app-coord-input
     label="X:"
     name="xCoord"
     [(ngModel)]="xCoord"
-    (change)="drawMap()"></app-coord-input>
+    (change)="coordInputChange()"></app-coord-input>
   <app-coord-input
     label="Z:"
     name="zCoord"
     [(ngModel)]="zCoord"
-    (change)="drawMap()"></app-coord-input>
-
-  }
-  <span class="spacer"></span>
-  <button
-    id="editButton"
-    matIconButton
-    type="button"
-    (click)="openMapDialog()"
-    matTooltip="Map Settings">
-    <mat-icon>settings</mat-icon>
-  </button>
+    (change)="coordInputChange()"></app-coord-input>
 </form>
+}
 
-<canvas #mapCanvas id="map-canvas"> </canvas>
+<button
+  id="editButton"
+  matIconButton
+  type="button"
+  (click)="openMapDialog()"
+  matTooltip="Map Settings">
+  <mat-icon>settings</mat-icon>
+</button>
+
+<canvas
+  #mapCanvas
+  id="map-canvas"
+  [ngClass]="{'draggingMap': draggingMap}"
+  (mousedown)="mouseDown($event)"
+  (mousemove)="mouseMove($event)">
+</canvas>

@@ -8,26 +8,27 @@
 }
 
 #mapForm {
-  width: 100%;
   box-sizing: border-box;
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0.25em;
+  left: 0.25em;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 1em;
-  padding: 0.5em;
 
   input {
     padding: 0.25em;
     font-size: medium;
     width: 100px;
   }
+}
 
-  #editButton {
-    background-color: var(--mat-sys-surface);
-  }
+#editButton {
+  position: absolute;
+  top: 0.25em;
+  right: 0.25em;
+  background-color: var(--mat-sys-surface);
 }
 
 #map-canvas {
@@ -35,4 +36,8 @@
   height: 100%;
   image-rendering: pixelated;
   cursor: grab;
+}
+
+#map-canvas.draggingMap {
+  cursor: grabbing;
 }

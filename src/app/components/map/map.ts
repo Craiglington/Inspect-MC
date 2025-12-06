@@ -1,3 +1,4 @@
+import { NgClass } from "@angular/common";
 import {
   AfterViewInit,
   Component,
@@ -14,6 +15,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
 import { RGBAColor } from "../../models/map-color";
 import {
@@ -24,14 +27,12 @@ import {
 } from "../../models/map-dialog-data";
 import { AnvilService } from "../../services/anvil/anvil-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
-import { MapDialogComponent } from "./map-dialog/map-dialog";
-import { MatTooltipModule } from "@angular/material/tooltip";
-import { CoordInput } from "./coord-input/coord-input";
 import {
   LocalStorageKey,
   LocalStorageService
 } from "../../services/local-storage/local-storage";
-import { debounceTime } from "rxjs";
+import { CoordInput } from "./coord-input/coord-input";
+import { MapDialogComponent } from "./map-dialog/map-dialog";
 
 @Component({
   selector: "app-map",
@@ -42,30 +43,49 @@ import { debounceTime } from "rxjs";
     MatIconModule,
     FormsModule,
     MatTooltipModule,
-    CoordInput
+    CoordInput,
+    NgClass
   ],
   templateUrl: "./map.html",
   styleUrl: "./map.scss"
 })
 export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild("mapCanvas") mapCanvas?: ElementRef<HTMLCanvasElement>;
-
   private readonly fileReaderService = inject(FileReaderService);
   private readonly anvilService = inject(AnvilService);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly dialog = inject(MatDialog);
+
+  @ViewChild("mapCanvas") private mapCanvasRef?: ElementRef<HTMLCanvasElement>;
+  private mapCanvas?: HTMLCanvasElement;
+  private ctx?: CanvasRenderingContext2D;
   private readonly $resizeCanvas: EventEmitter<void> = new EventEmitter();
+  private readonly regionFiles: Map<string, Promise<ArrayBuffer>> = new Map();
+  private readonly chunkImageData: Map<string, ImageBitmap | null> = new Map();
+  private readonly drawnChunks: string[] = [];
 
-  private regionFiles: Map<string, Promise<ArrayBuffer>> = new Map();
-  private chunkImageData: Map<string, ImageBitmap | null> = new Map();
+  protected regionFilesProcessed = false;
+  private xStartingCoord: number;
+  protected xCoord: number;
+  private zStartingCoord: number;
+  protected zCoord: number;
+  private origin: MapOrigin;
+  private colorPalette: MapColorPalette;
 
-  regionFilesProcessed = false;
-  xStartingCoord: number;
-  xCoord: number;
-  zStartingCoord: number;
-  zCoord: number;
-  origin: MapOrigin;
-  colorPalette: MapColorPalette;
+  protected draggingMap: boolean = false;
+  private xOffset: number = 0;
+  private zOffset: number = 0;
+  private readonly dragStartOriginCoords = {
+    xCoord: 0,
+    zCoord: 0
+  };
+  private readonly dragStartCoords = {
+    xCoord: 0,
+    zCoord: 0
+  };
+  private readonly dragCoords = {
+    xCoord: 0,
+    zCoord: 0
+  };
 
   constructor() {
     const mapSettings = this.localStorageService.get<MapDialogInputData>(
@@ -87,6 +107,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.mapCanvas = this.mapCanvasRef?.nativeElement;
+    this.ctx = this.mapCanvas?.getContext("2d") ?? undefined;
     window.addEventListener("resize", this.windowResizeHandler);
     this.resizeCanvas();
   }
@@ -96,16 +118,23 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.$resizeCanvas.unsubscribe();
   }
 
+  protected coordInputChange() {
+    if (!this.draggingMap) {
+      this.drawMap();
+    }
+  }
+
   private windowResizeHandler = () => {
     this.$resizeCanvas.emit();
   };
 
   private resizeCanvas() {
-    if (!this.mapCanvas || !this.mapCanvas.nativeElement) return;
-    const canvas = this.mapCanvas.nativeElement;
-    canvas.width = canvas.offsetWidth / 4;
-    canvas.height = canvas.offsetHeight / 4;
-    this.drawMap();
+    if (!this.mapCanvas) return;
+    this.mapCanvas.width = this.mapCanvas.offsetWidth / 4;
+    this.mapCanvas.height = this.mapCanvas.offsetHeight / 4;
+    if (!this.draggingMap) {
+      this.drawMap();
+    }
   }
 
   protected openMapDialog() {
@@ -161,12 +190,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected drawMap() {
-    if (!this.mapCanvas || !this.mapCanvas.nativeElement) return;
-    const canvas = this.mapCanvas.nativeElement;
+    if (!this.mapCanvas || !this.ctx) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.ctx.clearRect(0, 0, this.mapCanvas.width, this.mapCanvas.height);
 
     // Get current map coords
     const zCurrentCoord = this.zCoord;
@@ -177,31 +203,36 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     // Get offset of starting chunk
-    let zOffset = zCurrentCoord % 16;
-    zOffset = 0 - (zOffset >= 0 ? zOffset : 16 + zOffset);
-    let xOffset = xCurrentCoord % 16;
-    xOffset = 0 - (xOffset >= 0 ? xOffset : 16 + xOffset);
+    this.zOffset = zCurrentCoord % 16;
+    this.zOffset = 0 - (this.zOffset >= 0 ? this.zOffset : 16 + this.zOffset);
+    this.xOffset = xCurrentCoord % 16;
+    this.xOffset = 0 - (this.xOffset >= 0 ? this.xOffset : 16 + this.xOffset);
+
+    this.drawnChunks.length = 0;
     for (
-      let z = zOffset, chunkZ = chunkCoords.chunkZ;
-      z < canvas.height;
+      let z = this.zOffset, chunkZ = chunkCoords.chunkZ;
+      z < this.mapCanvas.height;
       z += 16, ++chunkZ
     ) {
       for (
-        let x = xOffset, chunkX = chunkCoords.chunkX;
-        x < canvas.width;
+        let x = this.xOffset, chunkX = chunkCoords.chunkX;
+        x < this.mapCanvas.width;
         x += 16, ++chunkX
       ) {
-        let storedImageBitmap = this.chunkImageData.get(`${chunkX},${chunkZ}`);
+        const chunkKey = `${chunkX},${chunkZ}`;
+        this.drawnChunks.push(chunkKey);
+
+        let storedImageBitmap = this.chunkImageData.get(chunkKey);
         if (storedImageBitmap === null) continue;
 
         if (storedImageBitmap) {
-          ctx.drawImage(storedImageBitmap, x, z);
+          this.ctx.drawImage(storedImageBitmap, x, z);
           continue;
         }
 
         this.saveChunkImage(chunkX, chunkZ).then((imageBitmap) => {
           if (imageBitmap) {
-            ctx.drawImage(imageBitmap, x, z);
+            this.ctx!.drawImage(imageBitmap, x, z);
           }
         });
       }
@@ -279,4 +310,70 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       return null;
     }
   }
+
+  mouseDown = (event: MouseEvent) => {
+    if (this.draggingMap) return;
+    this.draggingMap = true;
+    this.dragStartOriginCoords.xCoord = this.xCoord;
+    this.dragStartOriginCoords.zCoord = this.zCoord;
+    this.dragStartCoords.xCoord = event.x;
+    this.dragStartCoords.zCoord = event.y;
+    this.dragCoords.xCoord = event.x;
+    this.dragCoords.zCoord = event.y;
+    window.addEventListener("mouseup", this.mouseUp);
+    requestAnimationFrame(this.animationFrame);
+  };
+
+  mouseMove = (event: MouseEvent) => {
+    if (!this.draggingMap) return;
+    this.dragCoords.xCoord = event.x;
+    this.dragCoords.zCoord = event.y;
+  };
+
+  mouseUp = () => {
+    if (!this.draggingMap) return;
+    this.draggingMap = false;
+    window.removeEventListener("mouseup", this.mouseUp);
+  };
+
+  animationFrame = () => {
+    if (!this.mapCanvas || !this.ctx) return;
+
+    const xShift = Math.round(
+      (this.dragCoords.xCoord - this.dragStartCoords.xCoord) / 4
+    );
+    this.xCoord = this.dragStartOriginCoords.xCoord - xShift;
+
+    const zShift = Math.round(
+      (this.dragCoords.zCoord - this.dragStartCoords.zCoord) / 4
+    );
+    this.zCoord = this.dragStartOriginCoords.zCoord - zShift;
+
+    this.ctx.clearRect(0, 0, this.mapCanvas.width, this.mapCanvas.height);
+    for (
+      let z = this.zOffset + zShift, chunkIndex = 0;
+      z < this.mapCanvas.height + zShift;
+      z += 16
+    ) {
+      for (
+        let x = this.xOffset + xShift;
+        x < this.mapCanvas.width + xShift;
+        x += 16, ++chunkIndex
+      ) {
+        let storedImageBitmap = this.chunkImageData.get(
+          this.drawnChunks[chunkIndex]
+        );
+
+        if (storedImageBitmap) {
+          this.ctx.drawImage(storedImageBitmap, x, z);
+        }
+      }
+    }
+
+    if (this.draggingMap) {
+      requestAnimationFrame(this.animationFrame);
+    } else {
+      this.drawMap();
+    }
+  };
 }
