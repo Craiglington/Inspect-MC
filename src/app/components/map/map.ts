@@ -66,6 +66,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected regionFilesProcessed = false;
   private xStartingCoord: number;
   protected xCoord: number;
+  private yStartingLevel: number;
+  protected yLevel: number;
   private zStartingCoord: number;
   protected zCoord: number;
   private origin: MapOrigin;
@@ -95,6 +97,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.xCoord = this.xStartingCoord;
     this.zStartingCoord = mapSettings?.zStartingCoord ?? 0;
     this.zCoord = this.zStartingCoord;
+    this.yStartingLevel = mapSettings?.yStartingLevel ?? 319;
+    this.yLevel = this.yStartingLevel;
     this.origin = mapSettings?.origin ?? "center";
     this.colorPalette = mapSettings?.colorPalette ?? "original";
   }
@@ -116,6 +120,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     window.removeEventListener("resize", this.windowResizeHandler);
     this.$resizeCanvas.unsubscribe();
+  }
+
+  protected yLevelChange() {
+    this.chunkImageData.clear();
+    this.coordInputChange();
   }
 
   protected coordInputChange() {
@@ -146,6 +155,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       data: {
         xStartingCoord: this.xStartingCoord,
         zStartingCoord: this.zStartingCoord,
+        yStartingLevel: this.yStartingLevel,
         origin: this.origin,
         colorPalette: this.colorPalette
       }
@@ -156,11 +166,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const { files, ...storedSettings } = data;
       this.xStartingCoord = storedSettings.xStartingCoord;
       this.zStartingCoord = storedSettings.zStartingCoord;
+      this.yStartingLevel = storedSettings.yStartingLevel;
       this.origin = storedSettings.origin;
       this.colorPalette = storedSettings.colorPalette;
       if (files) {
         this.xCoord = this.xStartingCoord;
         this.zCoord = this.zStartingCoord;
+        this.yLevel = this.yStartingLevel;
         this.processRegionFiles(files);
       } else {
         this.drawMap();
@@ -273,7 +285,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // Get map colors
-      const mapIds = this.anvilService.getChunkMapIds(chunkData);
+      const mapIds = this.anvilService.getChunkMapIds(chunkData, this.yLevel);
 
       // Create image data
       const imageData = new ImageData(16, 16);

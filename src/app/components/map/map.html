@@ -10,6 +10,13 @@
     name="zCoord"
     [(ngModel)]="zCoord"
     (change)="coordInputChange()"></app-coord-input>
+  <app-coord-input
+    label="Y:"
+    name="yLevel"
+    [(ngModel)]="yLevel"
+    [min]="-64"
+    [max]="319"
+    (change)="yLevelChange()"></app-coord-input>
 </form>
 }
 

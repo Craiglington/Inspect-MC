@@ -53,7 +53,6 @@ export class MapDialogComponent implements OnInit {
 
   readonly originOptions = MapOriginOptions;
   readonly colorPaletteOptions = MapColorPaletteOptions;
-  readonly errorMessage = "Range: [-30 million, 30 million]";
 
   formGroup!: FormGroup<MapDialogForm>;
 
@@ -72,6 +71,14 @@ export class MapDialogComponent implements OnInit {
         validators: [
           Validators.max(30_000_000),
           Validators.min(-30_000_000),
+          Validators.required
+        ]
+      }),
+      yStartingLevel: new FormControl(this.data.yStartingLevel, {
+        nonNullable: true,
+        validators: [
+          Validators.max(319),
+          Validators.min(-64),
           Validators.required
         ]
       }),

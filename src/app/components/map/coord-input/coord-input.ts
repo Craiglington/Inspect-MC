@@ -25,6 +25,8 @@ export class CoordInput implements ControlValueAccessor {
   @Input("placeholder") placeholder: number = 0;
   @Input("step") step: number = 1;
   @Input("disabled") disabled: boolean = false;
+  @Input("min") min: number = -30000000;
+  @Input("max") max: number = 30000000;
   protected value?: number;
   private onChange?: (value: number) => void;
   private onTouched?: () => void;

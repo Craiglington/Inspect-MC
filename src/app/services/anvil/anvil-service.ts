@@ -162,7 +162,10 @@ export class AnvilService {
    * Given a chunk's data, returns a list of map color ids and y levels for each block in the chunk.
    * The list contains 256 entries (16x16).
    */
-  getChunkMapIds(chunk: Chunk): { mapColorId: number; yLevel: number }[] {
+  getChunkMapIds(
+    chunk: Chunk,
+    maxYLevel?: number
+  ): { mapColorId: number; yLevel: number }[] {
     /**
      * In certain scenarios, a 25th section can be included.
      * Only use the 24 sections starting with Y: -4.
@@ -196,6 +199,9 @@ export class AnvilService {
           Number((heightMap >> BigInt(i * 9)) & 0x1ffn) - 65,
           -64
         );
+        if (maxYLevel !== undefined) {
+          blockYLevel = Math.min(blockYLevel, maxYLevel);
+        }
 
         let mapColorId: number = 0;
         for (; mapColorId === 0 && blockYLevel >= -64; --blockYLevel) {

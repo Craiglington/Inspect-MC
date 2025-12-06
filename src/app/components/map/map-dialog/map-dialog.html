@@ -12,7 +12,7 @@
       step="1"
       formControlName="xStartingCoord" />
     @if (formGroup.controls.xStartingCoord.invalid) {
-    <mat-error>{{errorMessage}}</mat-error>
+    <mat-error>Range: [-30 million, 30 million]</mat-error>
     }
   </mat-form-field>
 
@@ -25,7 +25,20 @@
       step="1"
       formControlName="zStartingCoord" />
     @if (formGroup.controls.zStartingCoord.invalid) {
-    <mat-error>{{errorMessage}}</mat-error>
+    <mat-error>Range: [-30 million, 30 million]</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Starting Y Level</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="yStartingLevel" />
+    @if (formGroup.controls.yStartingLevel.invalid) {
+    <mat-error>Range: [-64, 319]</mat-error>
     }
   </mat-form-field>
 
