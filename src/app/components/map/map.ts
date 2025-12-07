@@ -18,6 +18,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
+import { ChunkImage } from "../../models/chunk-image";
 import { RGBAColor } from "../../models/map-color";
 import {
   MapColorPalette,
@@ -59,8 +60,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private mapCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private readonly $resizeCanvas: EventEmitter<void> = new EventEmitter();
-  private readonly regionFiles: Map<string, Promise<ArrayBuffer>> = new Map();
-  private readonly chunkImageData: Map<string, ImageBitmap | null> = new Map();
+  private readonly regionFilePromises: Map<string, Promise<ArrayBuffer>> =
+    new Map();
+  private readonly chunkImagePromises: Map<string, Promise<ChunkImage | null>> =
+    new Map();
   private readonly drawnChunks: string[] = [];
 
   protected regionFilesProcessed = false;
@@ -123,7 +126,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected yLevelChange() {
-    this.chunkImageData.clear();
+    this.chunkImagePromises.clear();
     this.coordInputChange();
   }
 
@@ -185,13 +188,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async processRegionFiles(files: FileList) {
-    this.regionFiles.clear();
-    this.chunkImageData.clear();
+    this.regionFilePromises.clear();
+    this.chunkImagePromises.clear();
     const anvilRegex = new RegExp(/^r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/);
     for (const file of files) {
       const regexResult = anvilRegex.exec(file.name);
       if (!regexResult || !regexResult.groups) continue;
-      this.regionFiles.set(
+      this.regionFilePromises.set(
         `${regexResult.groups["x"]},${regexResult.groups["z"]}`,
         this.fileReaderService.readAsArrayBuffer(file)
       );
@@ -234,38 +237,45 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         const chunkKey = `${chunkX},${chunkZ}`;
         this.drawnChunks.push(chunkKey);
 
-        let storedImageBitmap = this.chunkImageData.get(chunkKey);
-        if (storedImageBitmap === null) continue;
+        let chunkImagePromise = this.chunkImagePromises.get(chunkKey);
 
-        if (storedImageBitmap) {
-          this.ctx.drawImage(storedImageBitmap, x, z);
+        if (chunkImagePromise) {
+          this.drawChunkImage(chunkImagePromise, x, z);
           continue;
         }
 
-        this.saveChunkImage(chunkX, chunkZ).then((imageBitmap) => {
-          if (imageBitmap) {
-            this.ctx!.drawImage(imageBitmap, x, z);
-          }
-        });
+        const newChunkImagePromise = this.getChunkImage(chunkX, chunkZ);
+        this.drawChunkImage(newChunkImagePromise, x, z);
+        this.chunkImagePromises.set(chunkKey, newChunkImagePromise);
       }
     }
   }
 
-  private async saveChunkImage(
+  private async drawChunkImage(
+    chunkImagePromise: Promise<ChunkImage | null>,
+    x: number,
+    z: number
+  ) {
+    const chunkImage = await chunkImagePromise;
+    if (chunkImage) {
+      this.ctx?.drawImage(chunkImage.image, x, z);
+    }
+  }
+
+  private async getChunkImage(
     chunkX: number,
     chunkZ: number
-  ): Promise<ImageBitmap | null> {
+  ): Promise<ChunkImage | null> {
     try {
       // Get region file
       const regionCoords = this.anvilService.worldChunkCoordsToRegionCoords(
         chunkX,
         chunkZ
       );
-      const regionData = this.regionFiles.get(
+      const regionData = this.regionFilePromises.get(
         `${regionCoords.regionX},${regionCoords.regionZ}`
       );
       if (!regionData) {
-        this.chunkImageData.set(`${chunkX},${chunkZ}`, null);
         return null;
       }
 
@@ -280,31 +290,50 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         regionChunkCoords.chunkZ
       );
       if (chunkData?.Status !== "minecraft:full") {
-        this.chunkImageData.set(`${chunkX},${chunkZ}`, null);
         return null;
       }
 
       // Get map colors
       const mapIds = this.anvilService.getChunkMapIds(chunkData, this.yLevel);
 
-      // Create image data
+      // Get the previous chunk's final y levels
+      let previousFinalYLevels: number[] | undefined = undefined;
+      const previousChunkImagePromise = this.chunkImagePromises.get(
+        `${chunkX},${chunkZ - 1}`
+      );
+      if (previousChunkImagePromise) {
+        previousFinalYLevels = (await previousChunkImagePromise)?.finalYLevels;
+      }
+
+      // Create chunk image data
       const imageData = new ImageData(16, 16);
+      const finalYLevels: number[] = [];
       for (let x = 0; x < 16; ++x) {
         for (let z = 0; z < 16; ++z) {
           const mapIdIndex = z * 16 + x;
           const mapId = mapIds[mapIdIndex];
+          if (z === 15) {
+            finalYLevels.push(mapId.yLevel);
+          }
+
           let color: RGBAColor;
           if (z === 0) {
-            color = MapColors[mapId.mapColorId].color.same;
+            if (previousFinalYLevels) {
+              color = this.getMapColorIdColor(
+                mapId.mapColorId,
+                mapId.yLevel,
+                previousFinalYLevels[x]
+              );
+            } else {
+              color = MapColors[mapId.mapColorId].color.same;
+            }
           } else {
             const previousYLevel = mapIds[mapIdIndex - 16].yLevel;
-            if (previousYLevel < mapId.yLevel) {
-              color = MapColors[mapId.mapColorId].color.above;
-            } else if (previousYLevel === mapId.yLevel) {
-              color = MapColors[mapId.mapColorId].color.same;
-            } else {
-              color = MapColors[mapId.mapColorId].color.below;
-            }
+            color = this.getMapColorIdColor(
+              mapId.mapColorId,
+              mapId.yLevel,
+              previousYLevel
+            );
           }
           const imageDataIndex = mapIdIndex * 4;
           imageData.data[imageDataIndex] = color.r;
@@ -315,15 +344,31 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const imageBitmap = await createImageBitmap(imageData);
-      this.chunkImageData.set(`${chunkX},${chunkZ}`, imageBitmap);
-      return imageBitmap;
+      return {
+        image: imageBitmap,
+        finalYLevels: finalYLevels
+      };
     } catch (error) {
       console.error(error);
       return null;
     }
   }
 
-  mouseDown = (event: MouseEvent) => {
+  private getMapColorIdColor(
+    mapColorId: number,
+    yLevel: number,
+    previousYLevel: number
+  ): RGBAColor {
+    if (previousYLevel < yLevel) {
+      return MapColors[mapColorId].color.above;
+    } else if (previousYLevel > yLevel) {
+      return MapColors[mapColorId].color.below;
+    } else {
+      return MapColors[mapColorId].color.same;
+    }
+  }
+
+  protected mouseDown = (event: MouseEvent) => {
     if (this.draggingMap) return;
     this.draggingMap = true;
     this.dragStartOriginCoords.xCoord = this.xCoord;
@@ -336,19 +381,19 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     requestAnimationFrame(this.animationFrame);
   };
 
-  mouseMove = (event: MouseEvent) => {
+  protected mouseMove = (event: MouseEvent) => {
     if (!this.draggingMap) return;
     this.dragCoords.xCoord = event.x;
     this.dragCoords.zCoord = event.y;
   };
 
-  mouseUp = () => {
+  private mouseUp = () => {
     if (!this.draggingMap) return;
     this.draggingMap = false;
     window.removeEventListener("mouseup", this.mouseUp);
   };
 
-  animationFrame = () => {
+  private animationFrame = () => {
     if (!this.mapCanvas || !this.ctx) return;
 
     const xShift = Math.round(
@@ -372,12 +417,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         x < this.mapCanvas.width + xShift;
         x += 16, ++chunkIndex
       ) {
-        let storedImageBitmap = this.chunkImageData.get(
+        let chunkImagePromise = this.chunkImagePromises.get(
           this.drawnChunks[chunkIndex]
         );
 
-        if (storedImageBitmap) {
-          this.ctx.drawImage(storedImageBitmap, x, z);
+        if (chunkImagePromise) {
+          this.drawChunkImage(chunkImagePromise, x, z);
         }
       }
     }
