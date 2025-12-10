@@ -57,32 +57,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
 
   @ViewChild("mapCanvas") private mapCanvasRef?: ElementRef<HTMLCanvasElement>;
-  private mapCanvas?: HTMLCanvasElement;
-  private ctx?: CanvasRenderingContext2D;
+
+  private readonly CHUNK_LENGTH = 16;
+  private readonly MIN_CHUNK_SCREEN_RATIO = 4;
+  private readonly MAX_MAP_LENGTH_CHUNKS = 25;
   private readonly $resizeCanvas: EventEmitter<void> = new EventEmitter();
   private readonly regionFilePromises: Map<string, Promise<ArrayBuffer>> =
     new Map();
   private readonly chunkImagePromises: Map<string, Promise<ChunkImage | null>> =
     new Map();
-  private readonly drawnChunks: string[] = [];
-
-  protected regionFilesProcessed = false;
-  private xStartingCoord: number;
-  protected xCoord: number;
-  private yStartingLevel: number;
-  protected yLevel: number;
-  private zStartingCoord: number;
-  protected zCoord: number;
-  private origin: MapOrigin;
-  private colorPalette: MapColorPalette;
-
-  protected draggingMap: boolean = false;
-  private xOffset: number = 0;
-  private zOffset: number = 0;
-  private readonly dragStartOriginCoords = {
-    xCoord: 0,
-    zCoord: 0
-  };
+  private readonly currentMapChunkKeys: string[] = [];
   private readonly dragStartCoords = {
     xCoord: 0,
     zCoord: 0
@@ -91,6 +75,25 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     xCoord: 0,
     zCoord: 0
   };
+
+  private mapCanvas?: HTMLCanvasElement;
+  private ctx?: CanvasRenderingContext2D;
+  private mapPixelRatio = this.MIN_CHUNK_SCREEN_RATIO;
+  private mapWidth: number = 0;
+  private mapHeight: number = 0;
+  private xStartingCoord: number;
+  private yStartingLevel: number;
+  private zStartingCoord: number;
+  private origin: MapOrigin;
+  private colorPalette: MapColorPalette;
+  private xMapStartCoord: number = 0;
+  private zMapStartCoord: number = 0;
+
+  protected regionFilesProcessed = false;
+  protected xCoord: number;
+  protected yLevel: number;
+  protected zCoord: number;
+  protected isMapDragging: boolean = false;
 
   constructor() {
     const mapSettings = this.localStorageService.get<MapDialogInputData>(
@@ -131,7 +134,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected coordInputChange() {
-    if (!this.draggingMap) {
+    if (!this.isMapDragging) {
       this.drawMap();
     }
   }
@@ -141,10 +144,27 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   private resizeCanvas() {
-    if (!this.mapCanvas) return;
-    this.mapCanvas.width = this.mapCanvas.offsetWidth / 4;
-    this.mapCanvas.height = this.mapCanvas.offsetHeight / 4;
-    if (!this.draggingMap) {
+    if (!this.mapCanvas || !this.ctx) return;
+    const rect = this.mapCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.mapCanvas.width = rect.width * dpr;
+    this.mapCanvas.height = rect.height * dpr;
+
+    this.mapPixelRatio = Math.max(
+      Math.trunc(
+        this.mapCanvas.width / this.MAX_MAP_LENGTH_CHUNKS / this.CHUNK_LENGTH
+      ),
+      this.MIN_CHUNK_SCREEN_RATIO
+    );
+
+    this.mapWidth = Math.ceil(this.mapCanvas.width / this.mapPixelRatio);
+    this.mapHeight = Math.ceil(this.mapCanvas.height / this.mapPixelRatio);
+
+    this.ctx.scale(this.mapPixelRatio, this.mapPixelRatio);
+    this.ctx.setTransform(this.mapPixelRatio, 0, 0, this.mapPixelRatio, 0, 0);
+    this.ctx.imageSmoothingEnabled = false;
+
+    if (!this.isMapDragging) {
       this.drawMap();
     }
   }
@@ -209,33 +229,43 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.ctx.clearRect(0, 0, this.mapCanvas.width, this.mapCanvas.height);
 
-    // Get current map coords
-    const zCurrentCoord = this.zCoord;
-    const xCurrentCoord = this.xCoord;
+    // Get current map (block) coords
+    let zCurrentCoord = this.zCoord;
+    let xCurrentCoord = this.xCoord;
+
+    // Translate coords if origin is in the center
+    if (this.origin === "center") {
+      zCurrentCoord -= Math.ceil(this.mapHeight / 2);
+      xCurrentCoord -= Math.ceil(this.mapWidth / 2);
+    }
+
+    // Get chunk coords of current map (block) coords
     const chunkCoords = this.anvilService.worldBlockCoordsToChunkCoords(
       xCurrentCoord,
       zCurrentCoord
     );
 
-    // Get offset of starting chunk
-    this.zOffset = zCurrentCoord % 16;
-    this.zOffset = 0 - (this.zOffset >= 0 ? this.zOffset : 16 + this.zOffset);
-    this.xOffset = xCurrentCoord % 16;
-    this.xOffset = 0 - (this.xOffset >= 0 ? this.xOffset : 16 + this.xOffset);
+    // Get starting map coords to begin drawing the chunks. Range (-this.CHUNK_LENGTH, 0]
+    const xRemainder = xCurrentCoord % this.CHUNK_LENGTH;
+    this.xMapStartCoord =
+      -1 * (xRemainder >= 0 ? xRemainder : this.CHUNK_LENGTH + xRemainder);
+    const zRemainder = zCurrentCoord % this.CHUNK_LENGTH;
+    this.zMapStartCoord =
+      -1 * (zRemainder >= 0 ? zRemainder : this.CHUNK_LENGTH + zRemainder);
 
-    this.drawnChunks.length = 0;
+    this.currentMapChunkKeys.length = 0;
     for (
-      let z = this.zOffset, chunkZ = chunkCoords.chunkZ;
-      z < this.mapCanvas.height;
-      z += 16, ++chunkZ
+      let z = this.zMapStartCoord, chunkZ = chunkCoords.chunkZ;
+      z < this.mapHeight;
+      z += this.CHUNK_LENGTH, ++chunkZ
     ) {
       for (
-        let x = this.xOffset, chunkX = chunkCoords.chunkX;
-        x < this.mapCanvas.width;
-        x += 16, ++chunkX
+        let x = this.xMapStartCoord, chunkX = chunkCoords.chunkX;
+        x < this.mapWidth;
+        x += this.CHUNK_LENGTH, ++chunkX
       ) {
         const chunkKey = `${chunkX},${chunkZ}`;
-        this.drawnChunks.push(chunkKey);
+        this.currentMapChunkKeys.push(chunkKey);
 
         let chunkImagePromise = this.chunkImagePromises.get(chunkKey);
 
@@ -306,13 +336,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // Create chunk image data
-      const imageData = new ImageData(16, 16);
+      const imageData = new ImageData(this.CHUNK_LENGTH, this.CHUNK_LENGTH);
       const finalYLevels: number[] = [];
-      for (let x = 0; x < 16; ++x) {
-        for (let z = 0; z < 16; ++z) {
-          const mapIdIndex = z * 16 + x;
+      for (let x = 0; x < this.CHUNK_LENGTH; ++x) {
+        for (let z = 0; z < this.CHUNK_LENGTH; ++z) {
+          const mapIdIndex = z * this.CHUNK_LENGTH + x;
           const mapId = mapIds[mapIdIndex];
-          if (z === 15) {
+          if (z === this.CHUNK_LENGTH - 1) {
             finalYLevels.push(mapId.yLevel);
           }
 
@@ -328,7 +358,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
               color = MapColors[mapId.mapColorId].color.same;
             }
           } else {
-            const previousYLevel = mapIds[mapIdIndex - 16].yLevel;
+            const previousYLevel =
+              mapIds[mapIdIndex - this.CHUNK_LENGTH].yLevel;
             color = this.getMapColorIdColor(
               mapId.mapColorId,
               mapId.yLevel,
@@ -369,10 +400,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected mouseDown = (event: MouseEvent) => {
-    if (this.draggingMap) return;
-    this.draggingMap = true;
-    this.dragStartOriginCoords.xCoord = this.xCoord;
-    this.dragStartOriginCoords.zCoord = this.zCoord;
+    if (this.isMapDragging) return;
+    this.isMapDragging = true;
     this.dragStartCoords.xCoord = event.x;
     this.dragStartCoords.zCoord = event.y;
     this.dragCoords.xCoord = event.x;
@@ -382,54 +411,68 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   protected mouseMove = (event: MouseEvent) => {
-    if (!this.draggingMap) return;
+    if (!this.isMapDragging) return;
     this.dragCoords.xCoord = event.x;
     this.dragCoords.zCoord = event.y;
   };
 
   private mouseUp = () => {
-    if (!this.draggingMap) return;
-    this.draggingMap = false;
+    if (!this.isMapDragging) return;
+    this.isMapDragging = false;
     window.removeEventListener("mouseup", this.mouseUp);
   };
 
   private animationFrame = () => {
     if (!this.mapCanvas || !this.ctx) return;
 
-    const xShift = Math.round(
-      (this.dragCoords.xCoord - this.dragStartCoords.xCoord) / 4
+    let xShift = Math.trunc(
+      (this.dragCoords.xCoord - this.dragStartCoords.xCoord) /
+        this.mapPixelRatio
     );
-    this.xCoord = this.dragStartOriginCoords.xCoord - xShift;
-
-    const zShift = Math.round(
-      (this.dragCoords.zCoord - this.dragStartCoords.zCoord) / 4
+    let zShift = Math.trunc(
+      (this.dragCoords.zCoord - this.dragStartCoords.zCoord) /
+        this.mapPixelRatio
     );
-    this.zCoord = this.dragStartOriginCoords.zCoord - zShift;
 
-    this.ctx.clearRect(0, 0, this.mapCanvas.width, this.mapCanvas.height);
-    for (
-      let z = this.zOffset + zShift, chunkIndex = 0;
-      z < this.mapCanvas.height + zShift;
-      z += 16
-    ) {
+    if (xShift !== 0 || zShift !== 0) {
+      this.xCoord -= xShift;
+      this.zCoord -= zShift;
+
+      this.dragStartCoords.xCoord += xShift * this.mapPixelRatio;
+      this.dragStartCoords.zCoord += zShift * this.mapPixelRatio;
+
+      this.ctx.clearRect(
+        this.xMapStartCoord,
+        this.zMapStartCoord,
+        this.mapWidth - this.xMapStartCoord + this.CHUNK_LENGTH,
+        this.mapHeight - this.zMapStartCoord + this.CHUNK_LENGTH
+      );
+      this.ctx.translate(xShift, zShift);
       for (
-        let x = this.xOffset + xShift;
-        x < this.mapCanvas.width + xShift;
-        x += 16, ++chunkIndex
+        let z = this.zMapStartCoord, chunkIndex = 0;
+        z < this.mapHeight;
+        z += this.CHUNK_LENGTH
       ) {
-        let chunkImagePromise = this.chunkImagePromises.get(
-          this.drawnChunks[chunkIndex]
-        );
+        for (
+          let x = this.xMapStartCoord;
+          x < this.mapWidth;
+          x += this.CHUNK_LENGTH, ++chunkIndex
+        ) {
+          let chunkImagePromise = this.chunkImagePromises.get(
+            this.currentMapChunkKeys[chunkIndex]
+          );
 
-        if (chunkImagePromise) {
-          this.drawChunkImage(chunkImagePromise, x, z);
+          if (chunkImagePromise) {
+            this.drawChunkImage(chunkImagePromise, x, z);
+          }
         }
       }
     }
 
-    if (this.draggingMap) {
+    if (this.isMapDragging) {
       requestAnimationFrame(this.animationFrame);
     } else {
+      this.ctx.setTransform(this.mapPixelRatio, 0, 0, this.mapPixelRatio, 0, 0);
       this.drawMap();
     }
   };

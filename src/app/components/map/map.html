@@ -32,7 +32,7 @@
 <canvas
   #mapCanvas
   id="map-canvas"
-  [ngClass]="{'draggingMap': draggingMap}"
+  [ngClass]="{'isMapDragging': isMapDragging}"
   (mousedown)="mouseDown($event)"
   (mousemove)="mouseMove($event)">
 </canvas>
