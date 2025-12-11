@@ -162,10 +162,10 @@ export class AnvilService {
    * Given a chunk's data, returns a list of map color ids and y levels for each block in the chunk.
    * The list contains 256 entries (16x16).
    */
-  getChunkMapIds(
+  getChunkMapInfo(
     chunk: Chunk,
     maxYLevel?: number
-  ): { mapColorId: number; yLevel: number }[] {
+  ): { colorIds: number[]; yLevels: number[] } {
     /**
      * In certain scenarios, a 25th section can be included.
      * Only use the 24 sections starting with Y: -4.
@@ -178,47 +178,37 @@ export class AnvilService {
       }
     }
 
-    let chunkBlockIndex = -1;
-    const blocks: { mapColorId: number; yLevel: number }[] = [];
+    if (!chunk.Heightmaps.WORLD_SURFACE) {
+      throw new Error("Chunk height map is not defined.");
+    }
 
-    const worldHeightMap = chunk.Heightmaps.WORLD_SURFACE ?? [];
-    for (const heightMap of worldHeightMap) {
-      /**
-       * Each heightMap consists of 7 9-bit numbers/entries.
-       * Each heightMap is a BigInt (8 bytes). 7*9=63 bits. 1 bit extra.
-       */
-      for (let i = 0; i < 7; ++i) {
-        // 16 * 16. We have processed all highest blocks in the chunk.
-        if (++chunkBlockIndex === 256) return blocks;
-
-        /**
-         * Each heightMap entry (9-bit number) shows the number of blocks in that column in the chunk.
-         * Minus 65 (1 + 64 (lowest y level is -64)) to get the block's starting y level.
-         */
-        let blockYLevel = Math.max(
-          Number((heightMap >> BigInt(i * 9)) & 0x1ffn) - 65,
-          -64
+    const max = maxYLevel !== undefined ? maxYLevel : Number.POSITIVE_INFINITY;
+    const colorIds: number[] = [];
+    const yLevels: number[] = [];
+    let blockIndex = 0;
+    for (const heightMapEntry of chunk.Heightmaps.WORLD_SURFACE) {
+      for (let i = 0; i < 7 && blockIndex < 256; ++i, ++blockIndex) {
+        let yLevel = Math.min(
+          Number((heightMapEntry >> BigInt(i * 9)) & 0x1ffn) - 65,
+          max
         );
-        if (maxYLevel !== undefined) {
-          blockYLevel = Math.min(blockYLevel, maxYLevel);
-        }
-
-        let mapColorId: number = 0;
-        for (; mapColorId === 0 && blockYLevel >= -64; --blockYLevel) {
+        let colorId: number = 0;
+        for (; colorId === 0 && yLevel >= -64; --yLevel) {
           const paletteEntry = this.getChunkPaletteEntry(
             chunkSections,
-            chunkBlockIndex,
-            blockYLevel
+            blockIndex,
+            yLevel
           );
-          mapColorId = this.getMapColorId(paletteEntry);
+          colorId = this.getMapColorId(paletteEntry);
         }
-        blocks.push({
-          mapColorId: mapColorId,
-          yLevel: blockYLevel
-        });
+        yLevels.push(yLevel);
+        colorIds.push(colorId);
       }
     }
-    return blocks;
+    return {
+      colorIds: colorIds,
+      yLevels: yLevels
+    };
   }
 
   /**

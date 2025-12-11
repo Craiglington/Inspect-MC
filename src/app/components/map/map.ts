@@ -18,7 +18,6 @@ import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
-import { ChunkImage } from "../../models/chunk-image";
 import { RGBAColor } from "../../models/map-color";
 import {
   MapColorPalette,
@@ -34,6 +33,7 @@ import {
 } from "../../services/local-storage/local-storage";
 import { CoordInput } from "./coord-input/coord-input";
 import { MapDialogComponent } from "./map-dialog/map-dialog";
+import { Chunk } from "../../models/chunk";
 
 @Component({
   selector: "app-map",
@@ -59,13 +59,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("mapCanvas") private mapCanvasRef?: ElementRef<HTMLCanvasElement>;
 
   private readonly CHUNK_LENGTH = 16;
+  private readonly BLOCKS_IN_CHUNK = this.CHUNK_LENGTH * this.CHUNK_LENGTH;
   private readonly MIN_CHUNK_SCREEN_RATIO = 4;
   private readonly MAX_MAP_LENGTH_CHUNKS = 25;
   private readonly $resizeCanvas: EventEmitter<void> = new EventEmitter();
   private readonly regionFilePromises: Map<string, Promise<ArrayBuffer>> =
     new Map();
-  private readonly chunkImagePromises: Map<string, Promise<ChunkImage | null>> =
-    new Map();
+  private readonly chunkImagePromises: Map<
+    string,
+    Promise<ImageBitmap | null>
+  > = new Map();
+  private readonly chunkColorIds: Map<string, number[] | null> = new Map();
+  private readonly chunkYLevels: Map<string, number[] | null> = new Map();
   private readonly currentMapChunkKeys: string[] = [];
   private readonly dragStartCoords = {
     xCoord: 0,
@@ -282,103 +287,130 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async drawChunkImage(
-    chunkImagePromise: Promise<ChunkImage | null>,
+    chunkImagePromise: Promise<ImageBitmap | null>,
     x: number,
     z: number
   ) {
     const chunkImage = await chunkImagePromise;
     if (chunkImage) {
-      this.ctx?.drawImage(chunkImage.image, x, z);
+      this.ctx?.drawImage(chunkImage, x, z);
     }
+  }
+
+  private async getChunk(
+    chunkX: number,
+    chunkZ: number
+  ): Promise<Chunk | null> {
+    // Get region file
+    const regionCoords = this.anvilService.worldChunkCoordsToRegionCoords(
+      chunkX,
+      chunkZ
+    );
+    const regionData = this.regionFilePromises.get(
+      `${regionCoords.regionX},${regionCoords.regionZ}`
+    );
+    if (!regionData) {
+      return null;
+    }
+
+    // Get region chunk coords
+    const regionChunkCoords =
+      this.anvilService.worldChunkCoordsToRegionChunkCoords(chunkX, chunkZ);
+
+    // Get chunk
+    const chunk = await this.anvilService.getChunkData(
+      await regionData,
+      regionChunkCoords.chunkX,
+      regionChunkCoords.chunkZ
+    );
+    return chunk?.Status === "minecraft:full" ? chunk : null;
   }
 
   private async getChunkImage(
     chunkX: number,
     chunkZ: number
-  ): Promise<ChunkImage | null> {
+  ): Promise<ImageBitmap | null> {
     try {
-      // Get region file
-      const regionCoords = this.anvilService.worldChunkCoordsToRegionCoords(
-        chunkX,
-        chunkZ
-      );
-      const regionData = this.regionFilePromises.get(
-        `${regionCoords.regionX},${regionCoords.regionZ}`
-      );
-      if (!regionData) {
+      // Get the chunk map info
+      const chunkKey = `${chunkX},${chunkZ}`;
+
+      let colorIds = this.chunkColorIds.get(chunkKey);
+      this.chunkColorIds.delete(chunkKey);
+      let yLevels = this.chunkYLevels.get(chunkKey);
+      this.chunkYLevels.delete(chunkKey);
+      if (colorIds === undefined || yLevels === undefined) {
+        // Get the chunk
+        const chunk = await this.getChunk(chunkX, chunkZ);
+        if (!chunk) {
+          return null;
+        }
+
+        // Get the chunk map info
+        let mapInfo = this.anvilService.getChunkMapInfo(chunk, this.yLevel);
+        colorIds = mapInfo.colorIds;
+        yLevels = mapInfo.yLevels;
+      } else if (colorIds === null || yLevels === null) {
         return null;
       }
 
-      // Get region chunk coords
-      const regionChunkCoords =
-        this.anvilService.worldChunkCoordsToRegionChunkCoords(chunkX, chunkZ);
-
-      // Get chunk data
-      const chunkData = await this.anvilService.getChunkData(
-        await regionData,
-        regionChunkCoords.chunkX,
-        regionChunkCoords.chunkZ
-      );
-      if (chunkData?.Status !== "minecraft:full") {
-        return null;
-      }
-
-      // Get map colors
-      const mapIds = this.anvilService.getChunkMapIds(chunkData, this.yLevel);
-
-      // Get the previous chunk's final y levels
-      let previousFinalYLevels: number[] | undefined = undefined;
-      const previousChunkImagePromise = this.chunkImagePromises.get(
-        `${chunkX},${chunkZ - 1}`
-      );
+      // Await previous chunk image if present. This ensures previous chunk's y levels are already stored.
+      const previousChunkKey = `${chunkX},${chunkZ - 1}`;
+      const previousChunkImagePromise =
+        this.chunkImagePromises.get(previousChunkKey);
       if (previousChunkImagePromise) {
-        previousFinalYLevels = (await previousChunkImagePromise)?.finalYLevels;
+        await previousChunkImagePromise;
+      }
+
+      // Get and store the previous chunk's y levels
+      let previousYLevels = this.chunkYLevels.get(previousChunkKey);
+      if (previousYLevels === undefined) {
+        // Get the previous chunk
+        const previousChunk = await this.getChunk(chunkX, chunkZ - 1);
+        if (!previousChunk) {
+          previousYLevels = null;
+          this.chunkColorIds.set(previousChunkKey, null);
+          this.chunkYLevels.set(previousChunkKey, null);
+        } else {
+          let previousMapInfo = this.anvilService.getChunkMapInfo(
+            previousChunk,
+            this.yLevel
+          );
+          previousYLevels = previousMapInfo.yLevels.slice(
+            this.BLOCKS_IN_CHUNK - this.CHUNK_LENGTH
+          );
+          this.chunkColorIds.set(previousChunkKey, previousMapInfo.colorIds);
+          this.chunkYLevels.set(previousChunkKey, previousMapInfo.yLevels);
+        }
       }
 
       // Create chunk image data
       const imageData = new ImageData(this.CHUNK_LENGTH, this.CHUNK_LENGTH);
-      const finalYLevels: number[] = [];
-      for (let x = 0; x < this.CHUNK_LENGTH; ++x) {
-        for (let z = 0; z < this.CHUNK_LENGTH; ++z) {
-          const mapIdIndex = z * this.CHUNK_LENGTH + x;
-          const mapId = mapIds[mapIdIndex];
-          if (z === this.CHUNK_LENGTH - 1) {
-            finalYLevels.push(mapId.yLevel);
-          }
-
-          let color: RGBAColor;
-          if (z === 0) {
-            if (previousFinalYLevels) {
-              color = this.getMapColorIdColor(
-                mapId.mapColorId,
-                mapId.yLevel,
-                previousFinalYLevels[x]
-              );
-            } else {
-              color = MapColors[mapId.mapColorId].color.same;
-            }
-          } else {
-            const previousYLevel =
-              mapIds[mapIdIndex - this.CHUNK_LENGTH].yLevel;
+      for (let i = 0; i < this.BLOCKS_IN_CHUNK; ++i) {
+        let color: RGBAColor;
+        if (i < this.CHUNK_LENGTH) {
+          if (previousYLevels) {
             color = this.getMapColorIdColor(
-              mapId.mapColorId,
-              mapId.yLevel,
-              previousYLevel
+              colorIds[i],
+              yLevels[i],
+              previousYLevels[i]
             );
+          } else {
+            color = MapColors[colorIds[i]].color.same;
           }
-          const imageDataIndex = mapIdIndex * 4;
-          imageData.data[imageDataIndex] = color.r;
-          imageData.data[imageDataIndex + 1] = color.g;
-          imageData.data[imageDataIndex + 2] = color.b;
-          imageData.data[imageDataIndex + 3] = color.a;
+        } else {
+          color = this.getMapColorIdColor(
+            colorIds[i],
+            yLevels[i],
+            yLevels[i - this.CHUNK_LENGTH]
+          );
         }
+        const imageDataIndex = i * 4;
+        imageData.data[imageDataIndex] = color.r;
+        imageData.data[imageDataIndex + 1] = color.g;
+        imageData.data[imageDataIndex + 2] = color.b;
+        imageData.data[imageDataIndex + 3] = color.a;
       }
-
-      const imageBitmap = await createImageBitmap(imageData);
-      return {
-        image: imageBitmap,
-        finalYLevels: finalYLevels
-      };
+      return await createImageBitmap(imageData);
     } catch (error) {
       console.error(error);
       return null;
