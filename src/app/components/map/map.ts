@@ -93,6 +93,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private colorPalette: MapColorPalette;
   private xMapStartCoord: number = 0;
   private zMapStartCoord: number = 0;
+  private drawLicense: number = 0;
 
   protected regionFilesProcessed = false;
   protected xCoord: number;
@@ -133,8 +134,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.$resizeCanvas.unsubscribe();
   }
 
+  private setNewDrawLicense() {
+    let newDrawLicense: number;
+    do {
+      newDrawLicense = Math.trunc(Math.random() * 1000);
+    } while (newDrawLicense === this.drawLicense);
+    this.drawLicense = newDrawLicense;
+  }
+
   protected yLevelChange() {
     this.chunkImagePromises.clear();
+    this.chunkColorIds.clear();
+    this.chunkYLevels.clear();
     this.coordInputChange();
   }
 
@@ -215,6 +226,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private async processRegionFiles(files: FileList) {
     this.regionFilePromises.clear();
     this.chunkImagePromises.clear();
+    this.chunkColorIds.clear();
+    this.chunkYLevels.clear();
     const anvilRegex = new RegExp(/^r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/);
     for (const file of files) {
       const regexResult = anvilRegex.exec(file.name);
@@ -231,6 +244,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected drawMap() {
     if (!this.mapCanvas || !this.ctx) return;
+
+    this.setNewDrawLicense();
+    const currentDrawLicense = this.drawLicense;
 
     this.ctx.clearRect(0, 0, this.mapCanvas.width, this.mapCanvas.height);
 
@@ -275,12 +291,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         let chunkImagePromise = this.chunkImagePromises.get(chunkKey);
 
         if (chunkImagePromise) {
-          this.drawChunkImage(chunkImagePromise, x, z);
+          this.drawChunkImage(chunkImagePromise, x, z, currentDrawLicense);
           continue;
         }
 
         const newChunkImagePromise = this.getChunkImage(chunkX, chunkZ);
-        this.drawChunkImage(newChunkImagePromise, x, z);
+        this.drawChunkImage(newChunkImagePromise, x, z, currentDrawLicense);
         this.chunkImagePromises.set(chunkKey, newChunkImagePromise);
       }
     }
@@ -289,10 +305,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private async drawChunkImage(
     chunkImagePromise: Promise<ImageBitmap | null>,
     x: number,
-    z: number
+    z: number,
+    drawLicenseUsed: number
   ) {
     const chunkImage = await chunkImagePromise;
-    if (chunkImage) {
+    if (chunkImage && drawLicenseUsed === this.drawLicense) {
       this.ctx?.drawImage(chunkImage, x, z);
     }
   }
@@ -434,6 +451,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected mouseDown = (event: MouseEvent) => {
     if (this.isMapDragging) return;
     this.isMapDragging = true;
+    this.setNewDrawLicense();
     this.dragStartCoords.xCoord = event.x;
     this.dragStartCoords.zCoord = event.y;
     this.dragCoords.xCoord = event.x;
@@ -495,7 +513,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           );
 
           if (chunkImagePromise) {
-            this.drawChunkImage(chunkImagePromise, x, z);
+            this.drawChunkImage(chunkImagePromise, x, z, this.drawLicense);
           }
         }
       }
