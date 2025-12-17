@@ -10,8 +10,8 @@
       type="number"
       placeholder="0"
       step="1"
-      formControlName="xStartingCoord" />
-    @if (formGroup.controls.xStartingCoord.invalid) {
+      formControlName="startingXCoord" />
+    @if (formGroup.controls.startingXCoord.invalid) {
     <mat-error>Range: [-30 million, 30 million]</mat-error>
     }
   </mat-form-field>
@@ -23,8 +23,8 @@
       type="number"
       placeholder="0"
       step="1"
-      formControlName="zStartingCoord" />
-    @if (formGroup.controls.zStartingCoord.invalid) {
+      formControlName="startingZCoord" />
+    @if (formGroup.controls.startingZCoord.invalid) {
     <mat-error>Range: [-30 million, 30 million]</mat-error>
     }
   </mat-form-field>
@@ -36,8 +36,8 @@
       type="number"
       placeholder="0"
       step="1"
-      formControlName="yStartingLevel" />
-    @if (formGroup.controls.yStartingLevel.invalid) {
+      formControlName="startingYLevel" />
+    @if (formGroup.controls.startingYLevel.invalid) {
     <mat-error>Range: [-64, 319]</mat-error>
     }
   </mat-form-field>

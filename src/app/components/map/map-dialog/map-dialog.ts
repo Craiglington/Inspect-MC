@@ -58,7 +58,7 @@ export class MapDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
-      xStartingCoord: new FormControl(this.data.xStartingCoord, {
+      startingXCoord: new FormControl(this.data.startingXCoord, {
         nonNullable: true,
         validators: [
           Validators.max(30_000_000),
@@ -66,7 +66,7 @@ export class MapDialogComponent implements OnInit {
           Validators.required
         ]
       }),
-      zStartingCoord: new FormControl(this.data.zStartingCoord, {
+      startingZCoord: new FormControl(this.data.startingZCoord, {
         nonNullable: true,
         validators: [
           Validators.max(30_000_000),
@@ -74,7 +74,7 @@ export class MapDialogComponent implements OnInit {
           Validators.required
         ]
       }),
-      yStartingLevel: new FormControl(this.data.yStartingLevel, {
+      startingYLevel: new FormControl(this.data.startingYLevel, {
         nonNullable: true,
         validators: [
           Validators.max(319),

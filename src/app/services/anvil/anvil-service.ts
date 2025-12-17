@@ -6,6 +6,7 @@ import {
 } from "../decompression/decompression-service";
 import { NBTService } from "../nbt/nbt-service";
 import { BlockColors } from "../../constants/block-colors";
+import { Coords2D } from "../../models/coords-2d";
 
 @Injectable({
   providedIn: "root"
@@ -112,14 +113,8 @@ export class AnvilService {
    * Returns the coordinates of a chunk in the world given
    * the corrdiantes of a block in the world.
    */
-  worldBlockCoordsToChunkCoords(
-    blockX: number,
-    blockZ: number
-  ): { chunkX: number; chunkZ: number } {
-    return {
-      chunkX: Math.floor(blockX / 16),
-      chunkZ: Math.floor(blockZ / 16)
-    };
+  worldBlockCoordsToChunkCoords(blockX: number, blockZ: number): Coords2D {
+    return new Coords2D(Math.floor(blockX / 16), Math.floor(blockZ / 16));
   }
 
   /**

@@ -2,21 +2,21 @@
 <form id="mapForm" class="flex-row">
   <app-coord-input
     label="X:"
-    name="xCoord"
-    [(ngModel)]="xCoord"
-    (change)="coordInputChange()"></app-coord-input>
+    name="mapXCoord"
+    [(ngModel)]="mapCoords.x"
+    (change)="mapCoordInputChange()"></app-coord-input>
   <app-coord-input
     label="Z:"
-    name="zCoord"
-    [(ngModel)]="zCoord"
-    (change)="coordInputChange()"></app-coord-input>
+    name="mapZCoord"
+    [(ngModel)]="mapCoords.z"
+    (change)="mapCoordInputChange()"></app-coord-input>
   <app-coord-input
     label="Y:"
-    name="yLevel"
-    [(ngModel)]="yLevel"
+    name="mapYLevel"
+    [(ngModel)]="mapYLevel"
     [min]="-64"
     [max]="319"
-    (change)="yLevelChange()"></app-coord-input>
+    (change)="mapYLevelChange()"></app-coord-input>
 </form>
 }
 
@@ -30,8 +30,8 @@
 </button>
 
 <canvas
-  #mapCanvas
-  id="map-canvas"
+  #map
+  id="map"
   [ngClass]="{'isMapDragging': isMapDragging}"
   (mousedown)="mouseDown($event)"
   (mousemove)="mouseMove($event)">

@@ -25,9 +25,9 @@ export const MapColorPaletteOptions = [
 ];
 
 export interface MapDialogInputData {
-  xStartingCoord: number;
-  zStartingCoord: number;
-  yStartingLevel: number;
+  startingXCoord: number;
+  startingZCoord: number;
+  startingYLevel: number;
   origin: MapOrigin;
   colorPalette: MapColorPalette;
 }
@@ -37,9 +37,9 @@ export interface MapDialogOutputData extends MapDialogInputData {
 }
 
 export interface MapDialogForm {
-  xStartingCoord: FormControl<number>;
-  zStartingCoord: FormControl<number>;
-  yStartingLevel: FormControl<number>;
+  startingXCoord: FormControl<number>;
+  startingZCoord: FormControl<number>;
+  startingYLevel: FormControl<number>;
   origin: FormControl<MapOrigin>;
   colorPalette: FormControl<MapColorPalette>;
 }
