@@ -494,8 +494,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.xCoord = Math.round(this.dragMapCoords.xCoord);
     this.zCoord = Math.round(this.dragMapCoords.zCoord);
 
-    this.dragStartCoords.xCoord += xShift * this.mapPixelRatio;
-    this.dragStartCoords.zCoord += zShift * this.mapPixelRatio;
+    this.dragStartCoords.xCoord += (xShift * this.mapPixelRatio) / this.dpr;
+    this.dragStartCoords.zCoord += (zShift * this.mapPixelRatio) / this.dpr;
 
     this.ctx.clearRect(
       this.xMapStartCoord,
