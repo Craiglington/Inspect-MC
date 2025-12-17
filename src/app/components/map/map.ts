@@ -72,6 +72,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly chunkColorIds: Map<string, number[] | null> = new Map();
   private readonly chunkYLevels: Map<string, number[] | null> = new Map();
   private readonly currentMapChunkKeys: string[] = [];
+  private readonly dragMapCoords = {
+    xCoord: 0,
+    zCoord: 0
+  };
   private readonly dragStartCoords = {
     xCoord: 0,
     zCoord: 0
@@ -83,6 +87,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private mapCanvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
+  private dpr: number = 1;
   private mapPixelRatio = this.MIN_CHUNK_SCREEN_RATIO;
   private mapWidth: number = 0;
   private mapHeight: number = 0;
@@ -162,9 +167,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private resizeCanvas() {
     if (!this.mapCanvas || !this.ctx) return;
     const rect = this.mapCanvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    this.mapCanvas.width = rect.width * dpr;
-    this.mapCanvas.height = rect.height * dpr;
+    this.dpr = window.devicePixelRatio || 1;
+    this.mapCanvas.width = rect.width * this.dpr;
+    this.mapCanvas.height = rect.height * this.dpr;
 
     this.mapPixelRatio = Math.max(
       Math.trunc(
@@ -452,6 +457,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isMapDragging) return;
     this.isMapDragging = true;
     this.setNewDrawLicense();
+    this.dragMapCoords.xCoord = this.xCoord;
+    this.dragMapCoords.zCoord = this.zCoord;
     this.dragStartCoords.xCoord = event.x;
     this.dragStartCoords.zCoord = event.y;
     this.dragCoords.xCoord = event.x;
@@ -475,46 +482,44 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private animationFrame = () => {
     if (!this.mapCanvas || !this.ctx) return;
 
-    let xShift = Math.trunc(
-      (this.dragCoords.xCoord - this.dragStartCoords.xCoord) /
-        this.mapPixelRatio
+    let xShift =
+      ((this.dragCoords.xCoord - this.dragStartCoords.xCoord) * this.dpr) /
+      this.mapPixelRatio;
+    let zShift =
+      ((this.dragCoords.zCoord - this.dragStartCoords.zCoord) * this.dpr) /
+      this.mapPixelRatio;
+
+    this.dragMapCoords.xCoord -= xShift;
+    this.dragMapCoords.zCoord -= zShift;
+    this.xCoord = Math.round(this.dragMapCoords.xCoord);
+    this.zCoord = Math.round(this.dragMapCoords.zCoord);
+
+    this.dragStartCoords.xCoord += xShift * this.mapPixelRatio;
+    this.dragStartCoords.zCoord += zShift * this.mapPixelRatio;
+
+    this.ctx.clearRect(
+      this.xMapStartCoord,
+      this.zMapStartCoord,
+      this.mapWidth - this.xMapStartCoord + this.CHUNK_LENGTH,
+      this.mapHeight - this.zMapStartCoord + this.CHUNK_LENGTH
     );
-    let zShift = Math.trunc(
-      (this.dragCoords.zCoord - this.dragStartCoords.zCoord) /
-        this.mapPixelRatio
-    );
-
-    if (xShift !== 0 || zShift !== 0) {
-      this.xCoord -= xShift;
-      this.zCoord -= zShift;
-
-      this.dragStartCoords.xCoord += xShift * this.mapPixelRatio;
-      this.dragStartCoords.zCoord += zShift * this.mapPixelRatio;
-
-      this.ctx.clearRect(
-        this.xMapStartCoord,
-        this.zMapStartCoord,
-        this.mapWidth - this.xMapStartCoord + this.CHUNK_LENGTH,
-        this.mapHeight - this.zMapStartCoord + this.CHUNK_LENGTH
-      );
-      this.ctx.translate(xShift, zShift);
+    this.ctx.translate(xShift, zShift);
+    for (
+      let z = this.zMapStartCoord, chunkIndex = 0;
+      z < this.mapHeight;
+      z += this.CHUNK_LENGTH
+    ) {
       for (
-        let z = this.zMapStartCoord, chunkIndex = 0;
-        z < this.mapHeight;
-        z += this.CHUNK_LENGTH
+        let x = this.xMapStartCoord;
+        x < this.mapWidth;
+        x += this.CHUNK_LENGTH, ++chunkIndex
       ) {
-        for (
-          let x = this.xMapStartCoord;
-          x < this.mapWidth;
-          x += this.CHUNK_LENGTH, ++chunkIndex
-        ) {
-          let chunkImagePromise = this.chunkImagePromises.get(
-            this.currentMapChunkKeys[chunkIndex]
-          );
+        let chunkImagePromise = this.chunkImagePromises.get(
+          this.currentMapChunkKeys[chunkIndex]
+        );
 
-          if (chunkImagePromise) {
-            this.drawChunkImage(chunkImagePromise, x, z, this.drawLicense);
-          }
+        if (chunkImagePromise) {
+          this.drawChunkImage(chunkImagePromise, x, z, this.drawLicense);
         }
       }
     }
