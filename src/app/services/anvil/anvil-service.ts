@@ -8,6 +8,7 @@ import { NBTService } from "../nbt/nbt-service";
 import { BlockColors } from "../../constants/block-colors";
 import { Coords } from "../../models/coords";
 import { ChunkMapData } from "../../models/chunk-map-data";
+import { MapIds } from "../../constants/map-colors";
 
 @Injectable({
   providedIn: "root"
@@ -173,17 +174,22 @@ export class AnvilService {
           Number((heightMapEntry >> BigInt(i * 9)) & 0x1ffn) - 65,
           max
         );
-        let colorId: number = 0;
-        for (; colorId === 0 && yLevel >= -64; --yLevel) {
+        let colorId: number = MapIds.NONE;
+        let isWater = false;
+        for (; colorId === MapIds.NONE && yLevel >= -64; --yLevel) {
           const paletteEntry = this.getChunkPaletteEntry(
             chunkSections,
             blockIndex,
             yLevel
           );
           colorId = this.getMapColorId(paletteEntry);
+          if (colorId === MapIds.WATER) {
+            colorId = MapIds.NONE;
+            isWater = true;
+          }
         }
         yLevels.push(yLevel);
-        colorIds.push(colorId);
+        colorIds.push(isWater ? MapIds.WATER : colorId);
       }
     }
     return {

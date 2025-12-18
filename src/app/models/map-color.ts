@@ -7,7 +7,6 @@ export interface RGBAColor {
 
 export interface MapColor {
   id: number;
-  name: string;
   color: {
     below: RGBAColor;
     same: RGBAColor;
