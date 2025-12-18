@@ -6,7 +6,8 @@ import {
 } from "../decompression/decompression-service";
 import { NBTService } from "../nbt/nbt-service";
 import { BlockColors } from "../../constants/block-colors";
-import { Coords2D } from "../../models/coords-2d";
+import { Coords } from "../../models/coords";
+import { ChunkMapData } from "../../models/chunk-map-data";
 
 @Injectable({
   providedIn: "root"
@@ -113,18 +114,15 @@ export class AnvilService {
    * Returns the coordinates of a chunk in the world given
    * the corrdiantes of a block in the world.
    */
-  worldBlockCoordsToChunkCoords(blockX: number, blockZ: number): Coords2D {
-    return new Coords2D(Math.floor(blockX / 16), Math.floor(blockZ / 16));
+  worldBlockCoordsToChunkCoords(blockX: number, blockZ: number): Coords {
+    return new Coords(Math.floor(blockX / 16), Math.floor(blockZ / 16));
   }
 
   /**
    * Returns the coordinates of a chunk in its region given the
    * coordinates of the chunk in the world.
    */
-  worldChunkCoordsToRegionChunkCoords(
-    chunkX: number,
-    chunkZ: number
-  ): { chunkX: number; chunkZ: number } {
+  worldChunkCoordsToRegionChunkCoords(chunkX: number, chunkZ: number): Coords {
     let regionChunkX = chunkX % 32;
     if (regionChunkX < 0) {
       regionChunkX += 32;
@@ -133,34 +131,22 @@ export class AnvilService {
     if (regionChunkZ < 0) {
       regionChunkZ += 32;
     }
-    return {
-      chunkX: regionChunkX,
-      chunkZ: regionChunkZ
-    };
+    return new Coords(regionChunkX, regionChunkZ);
   }
 
   /**
    * Returns the coordinates of a region given the
    * coordinates of a chunk in the world.
    */
-  worldChunkCoordsToRegionCoords(
-    chunkX: number,
-    chunkZ: number
-  ): { regionX: number; regionZ: number } {
-    return {
-      regionX: Math.floor(chunkX / 32),
-      regionZ: Math.floor(chunkZ / 32)
-    };
+  worldChunkCoordsToRegionCoords(chunkX: number, chunkZ: number): Coords {
+    return new Coords(Math.floor(chunkX / 32), Math.floor(chunkZ / 32));
   }
 
   /**
    * Given a chunk's data, returns a list of map color ids and y levels for each block in the chunk.
    * The list contains 256 entries (16x16).
    */
-  getChunkMapInfo(
-    chunk: Chunk,
-    maxYLevel?: number
-  ): { colorIds: number[]; yLevels: number[] } {
+  getChunkMapData(chunk: Chunk, maxYLevel?: number): ChunkMapData {
     /**
      * In certain scenarios, a 25th section can be included.
      * Only use the 24 sections starting with Y: -4.

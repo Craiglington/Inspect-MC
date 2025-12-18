@@ -34,8 +34,9 @@ import {
 import { CoordInput } from "./coord-input/coord-input";
 import { MapDialogComponent } from "./map-dialog/map-dialog";
 import { Chunk } from "../../models/chunk";
-import { Coords2D } from "../../models/coords-2d";
-import { Dimensions2D } from "../../models/dimensions-2d";
+import { Coords } from "../../models/coords";
+import { Dimensions } from "../../models/dimensions";
+import { ChunkMapData } from "../../models/chunk-map-data";
 
 @Component({
   selector: "app-map",
@@ -65,6 +66,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly BLOCKS_IN_CHUNK = this.CHUNK_LENGTH * this.CHUNK_LENGTH;
   private readonly MIN_CANVAS_TO_MAP_RATIO = 4;
   private readonly MAX_MAP_LENGTH_CHUNKS = 25;
+  private readonly MAX_STORED_CHUNK_IMAGES =
+    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10;
 
   // An event emitter used to signal and time when the window is resized and thus the canvas should be resized.
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
@@ -84,18 +87,17 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   > = new Map();
 
   /**
-   * If a chunk's data is required to create another chunk's image, not its own,
-   * we store the chunk's data in these two maps. Keys are strings in the format "x,z".
+   * If a chunk's map data is required to create another chunk's image but not its own,
+   * we store the chunk's map data in this map. Keys are strings in the format "x,z".
    * That way, if the chunk needs to be drawn in the future, we do not need to
-   * fetch the chunk's data again.
+   * fetch the chunk's map data again to generate its image.
    */
-  private readonly chunkColorIds: Map<string, number[] | null> = new Map();
-  private readonly chunkYLevels: Map<string, number[] | null> = new Map();
+  private readonly chunkMapData: Map<string, ChunkMapData | null> = new Map();
 
   // Keys are strings in the format "x,z".
   private readonly currentlyDrawnChunkKeys: string[] = [];
 
-  protected mapCoords = new Coords2D();
+  protected mapCoords = new Coords();
   protected mapYLevel: number;
   /**
    * Chunk images are 16 x 16 map pixels. Given the current position of the map,
@@ -103,23 +105,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
    * negative offset where the map's chunk images are drawn from. That way, only
    * the portion of the chunk that should be visible are visible on the map.
    */
-  private readonly mapStartCoords = new Coords2D();
-
-  /**
-   * When the map is dragging, these coords keep track of the current map position.
-   * These coords are not limited to whole numbers like regular map coordinates.
-   * This allows for smoother dragging.
-   */
-  private readonly draggingMapCoords = new Coords2D();
+  private readonly mapStartCoords = new Coords();
 
   /**
    * These two coords are used to track the previous and current mouse positions
    * during a dragging event. These coords will be set in html/css pixels.
    */
-  private readonly dragStartHtmlCoords = new Coords2D();
-  private readonly dragHtmlCoords = new Coords2D();
-  private readonly mapDimensions = new Dimensions2D();
-  private readonly mapClearDimensions = new Dimensions2D();
+  private readonly dragStartHtmlCoords = new Coords();
+  private readonly dragHtmlCoords = new Coords();
+  private readonly mapDimensions = new Dimensions();
+  private readonly mapClearDimensions = new Dimensions();
 
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
@@ -140,9 +135,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       LocalStorageKey.MAP_SETTINGS
     );
     this.startingXCoord = mapSettings?.startingXCoord ?? 0;
-    this.mapCoords.x = this.startingXCoord;
     this.startingZCoord = mapSettings?.startingZCoord ?? 0;
-    this.mapCoords.z = this.startingZCoord;
+    this.mapCoords.set(this.startingXCoord, this.startingZCoord);
     this.startingYLevel = mapSettings?.startingYLevel ?? 319;
     this.mapYLevel = this.startingYLevel;
     this.origin = mapSettings?.origin ?? "center";
@@ -184,8 +178,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected mapYLevelChange() {
     this.chunkImagePromises.clear();
-    this.chunkColorIds.clear();
-    this.chunkYLevels.clear();
+    this.chunkMapData.clear();
     this.mapCoordInputChange();
   }
 
@@ -295,8 +288,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.origin = storedSettings.origin;
       this.colorPalette = storedSettings.colorPalette;
       if (files) {
-        this.mapCoords.x = this.startingXCoord;
-        this.mapCoords.z = this.startingZCoord;
+        this.mapCoords.set(this.startingXCoord, this.startingZCoord);
         this.mapYLevel = this.startingYLevel;
         this.processRegionFiles(files);
       } else {
@@ -313,8 +305,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private async processRegionFiles(files: FileList) {
     this.regionFilePromises.clear();
     this.chunkImagePromises.clear();
-    this.chunkColorIds.clear();
-    this.chunkYLevels.clear();
+    this.chunkMapData.clear();
     const anvilRegex = new RegExp(/^r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/);
     for (const file of files) {
       const regexResult = anvilRegex.exec(file.name);
@@ -329,24 +320,53 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.drawMap();
   }
 
-  protected drawMap() {
-    if (!this.canvas || !this.ctx) return;
+  /**
+   * Guaranteed to clear the map whether it is dragging or not.
+   */
+  private clearMap() {
+    this.ctx?.clearRect(
+      this.mapStartCoords.x,
+      this.mapStartCoords.z,
+      this.mapClearDimensions.width,
+      this.mapClearDimensions.height
+    );
+  }
 
+  /**
+   * Draws the chunk's image once the promise is resolved and if the license
+   * provided is still active.
+   */
+  private async drawChunkImage(
+    chunkImagePromise: Promise<ImageBitmap | null>,
+    x: number,
+    z: number,
+    drawLicenseUsed: number
+  ) {
+    const chunkImage = await chunkImagePromise;
+    if (chunkImage && drawLicenseUsed === this.drawLicense) {
+      this.ctx?.drawImage(chunkImage, x, z);
+    }
+  }
+
+  /**
+   * Given the current map coords and the region files, draws the Minecraft chunks onto the map
+   */
+  protected drawMap() {
     this.setNewDrawLicense();
     const currentDrawLicense = this.drawLicense;
 
-    this.clearMap();
-
     // Get current map coords
-    const currentMapCoords = new Coords2D(this.mapCoords.x, this.mapCoords.z);
+    const currentMapCoords = new Coords(this.mapCoords.x, this.mapCoords.z);
 
     // Translate coords if origin is in the center
     if (this.origin === "center") {
-      currentMapCoords.z -= Math.ceil(this.mapDimensions.height / 2);
-      currentMapCoords.x -= Math.ceil(this.mapDimensions.width / 2);
+      currentMapCoords.subtract(
+        Math.ceil(this.mapDimensions.width / 2),
+        Math.ceil(this.mapDimensions.height / 2)
+      );
     }
 
-    // Get chunk coords of current map (block) coords
+    // Get chunk coords of current map coords
     const chunkCoords = this.anvilService.worldBlockCoordsToChunkCoords(
       currentMapCoords.x,
       currentMapCoords.z
@@ -354,18 +374,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Get starting map coords to begin drawing the chunks. Range (-this.CHUNK_LENGTH, 0]
     const xRemainder = currentMapCoords.x % this.CHUNK_LENGTH;
-    this.mapStartCoords.x =
-      -1 * (xRemainder >= 0 ? xRemainder : this.CHUNK_LENGTH + xRemainder);
     const zRemainder = currentMapCoords.z % this.CHUNK_LENGTH;
-    this.mapStartCoords.z =
-      -1 * (zRemainder >= 0 ? zRemainder : this.CHUNK_LENGTH + zRemainder);
+    this.mapStartCoords.set(
+      -1 * (xRemainder >= 0 ? xRemainder : this.CHUNK_LENGTH + xRemainder),
+      -1 * (zRemainder >= 0 ? zRemainder : this.CHUNK_LENGTH + zRemainder)
+    );
 
     // Set the map clear dimensions based on the map start coords
-    this.mapClearDimensions.width =
-      this.mapDimensions.width - this.mapStartCoords.x + this.CHUNK_LENGTH;
-    this.mapClearDimensions.height =
-      this.mapDimensions.height - this.mapStartCoords.z + this.CHUNK_LENGTH;
+    this.mapClearDimensions.setWithDimensions(this.mapDimensions);
+    this.mapClearDimensions.add(
+      this.CHUNK_LENGTH - this.mapStartCoords.x,
+      this.CHUNK_LENGTH - this.mapStartCoords.z
+    );
 
+    this.clearMap();
     this.currentlyDrawnChunkKeys.length = 0;
     for (
       let z = this.mapStartCoords.z, chunkZ = chunkCoords.z;
@@ -392,30 +414,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chunkImagePromises.set(chunkKey, newChunkImagePromise);
       }
     }
+    if (this.chunkImagePromises.size > this.MAX_STORED_CHUNK_IMAGES) {
+      this.reduceMapByHalf(this.chunkImagePromises);
+    }
   }
 
-  private clearMap() {
-    this.ctx?.clearRect(
-      this.mapStartCoords.x,
-      this.mapStartCoords.z,
-      this.mapClearDimensions.width,
-      this.mapClearDimensions.height
-    );
-  }
-
-  /**
-   * Draws the chunk's image once the promise is resolved and the license
-   * provided is still active.
-   */
-  private async drawChunkImage(
-    chunkImagePromise: Promise<ImageBitmap | null>,
-    x: number,
-    z: number,
-    drawLicenseUsed: number
-  ) {
-    const chunkImage = await chunkImagePromise;
-    if (chunkImage && drawLicenseUsed === this.drawLicense) {
-      this.ctx?.drawImage(chunkImage, x, z);
+  private reduceMapByHalf(map: Map<string, unknown>) {
+    const keys = map.keys();
+    for (let i = map.size / 2; i < map.size; ++i) {
+      const key = keys.next().value;
+      if (key) map.delete(key);
     }
   }
 
@@ -428,107 +436,93 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     chunkX: number,
     chunkZ: number
   ): Promise<Chunk | null> {
-    // Get region file
+    // Get region data. If it doesn't exist, return null.
     const regionCoords = this.anvilService.worldChunkCoordsToRegionCoords(
       chunkX,
       chunkZ
     );
     const regionData = this.regionFilePromises.get(
-      `${regionCoords.regionX},${regionCoords.regionZ}`
+      `${regionCoords.x},${regionCoords.z}`
     );
     if (!regionData) {
       return null;
     }
 
-    // Get region chunk coords
+    // Get chunk data. If it doesn't exist or is not fully generated, return null.
     const regionChunkCoords =
       this.anvilService.worldChunkCoordsToRegionChunkCoords(chunkX, chunkZ);
-
-    // Get chunk
     const chunk = await this.anvilService.getChunkData(
       await regionData,
-      regionChunkCoords.chunkX,
-      regionChunkCoords.chunkZ
+      regionChunkCoords.x,
+      regionChunkCoords.z
     );
     return chunk?.Status === "minecraft:full" ? chunk : null;
   }
 
+  /**
+   * Given the coordinates of a chunk in a Minecraft world, returns a
+   * promise that resolves with the chunk's generated image if it exists or null
+   * if Minecraft has not yet generated the chunk.
+   *
+   * Additionally, each chunk's image depends on the y levels of the chunk to the north.
+   */
   private async getChunkImage(
     chunkX: number,
     chunkZ: number
   ): Promise<ImageBitmap | null> {
     try {
-      // Get the chunk map info
       const chunkKey = `${chunkX},${chunkZ}`;
-
-      let colorIds = this.chunkColorIds.get(chunkKey);
-      this.chunkColorIds.delete(chunkKey);
-      let yLevels = this.chunkYLevels.get(chunkKey);
-      this.chunkYLevels.delete(chunkKey);
-      if (colorIds === undefined || yLevels === undefined) {
-        // Get the chunk
-        const chunk = await this.getChunk(chunkX, chunkZ);
-        if (!chunk) {
-          return null;
-        }
-
-        // Get the chunk map info
-        let mapInfo = this.anvilService.getChunkMapInfo(chunk, this.mapYLevel);
-        colorIds = mapInfo.colorIds;
-        yLevels = mapInfo.yLevels;
-      } else if (colorIds === null || yLevels === null) {
+      let mapData = this.chunkMapData.get(chunkKey);
+      if (mapData === null) {
         return null;
       }
-
-      // Await previous chunk image if present. This ensures previous chunk's y levels are already stored.
-      const previousChunkKey = `${chunkX},${chunkZ - 1}`;
-      const previousChunkImagePromise =
-        this.chunkImagePromises.get(previousChunkKey);
-      if (previousChunkImagePromise) {
-        await previousChunkImagePromise;
+      if (!mapData) {
+        const chunk = await this.getChunk(chunkX, chunkZ);
+        if (!chunk) {
+          this.chunkMapData.set(chunkKey, null);
+          return null;
+        }
+        mapData = this.anvilService.getChunkMapData(chunk, this.mapYLevel);
+        this.chunkMapData.set(chunkKey, { ...mapData, colorIds: [] });
       }
 
-      // Get and store the previous chunk's y levels
-      let previousYLevels = this.chunkYLevels.get(previousChunkKey);
-      if (previousYLevels === undefined) {
-        // Get the previous chunk
+      const previousChunkKey = `${chunkX},${chunkZ - 1}`;
+      let previousMapData = this.chunkMapData.get(previousChunkKey);
+      if (previousMapData === undefined) {
         const previousChunk = await this.getChunk(chunkX, chunkZ - 1);
         if (!previousChunk) {
-          previousYLevels = null;
-          this.chunkColorIds.set(previousChunkKey, null);
-          this.chunkYLevels.set(previousChunkKey, null);
+          previousMapData = null;
+          this.chunkMapData.set(previousChunkKey, null);
         } else {
-          let previousMapInfo = this.anvilService.getChunkMapInfo(
+          previousMapData = this.anvilService.getChunkMapData(
             previousChunk,
             this.mapYLevel
           );
-          previousYLevels = previousMapInfo.yLevels.slice(
-            this.BLOCKS_IN_CHUNK - this.CHUNK_LENGTH
-          );
-          this.chunkColorIds.set(previousChunkKey, previousMapInfo.colorIds);
-          this.chunkYLevels.set(previousChunkKey, previousMapInfo.yLevels);
+          this.chunkMapData.set(previousChunkKey, previousMapData);
         }
       }
 
-      // Create chunk image data
+      const previousYLevels = previousMapData?.yLevels.slice(
+        this.BLOCKS_IN_CHUNK - this.CHUNK_LENGTH
+      );
       const imageData = new ImageData(this.CHUNK_LENGTH, this.CHUNK_LENGTH);
       for (let i = 0; i < this.BLOCKS_IN_CHUNK; ++i) {
         let color: RGBAColor;
         if (i < this.CHUNK_LENGTH) {
           if (previousYLevels) {
             color = this.getMapColorIdColor(
-              colorIds[i],
-              yLevels[i],
+              mapData.colorIds[i],
+              mapData.yLevels[i],
               previousYLevels[i]
             );
           } else {
-            color = MapColors[colorIds[i]].color.same;
+            color = MapColors[mapData.colorIds[i]].color.same;
           }
         } else {
           color = this.getMapColorIdColor(
-            colorIds[i],
-            yLevels[i],
-            yLevels[i - this.CHUNK_LENGTH]
+            mapData.colorIds[i],
+            mapData.yLevels[i],
+            mapData.yLevels[i - this.CHUNK_LENGTH]
           );
         }
         const imageDataIndex = i * 4;
@@ -562,20 +556,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isMapDragging) return;
     this.isMapDragging = true;
     this.setNewDrawLicense();
-    this.draggingMapCoords.x = this.mapCoords.x;
-    this.draggingMapCoords.z = this.mapCoords.z;
-    this.dragStartHtmlCoords.x = event.x;
-    this.dragStartHtmlCoords.z = event.y;
-    this.dragHtmlCoords.x = event.x;
-    this.dragHtmlCoords.z = event.y;
+    this.dragStartHtmlCoords.set(event.x, event.y);
+    this.dragHtmlCoords.set(event.x, event.y);
     window.addEventListener("mouseup", this.mouseUp);
     requestAnimationFrame(this.animationFrame);
   };
 
   protected mouseMove = (event: MouseEvent) => {
     if (!this.isMapDragging) return;
-    this.dragHtmlCoords.x = event.x;
-    this.dragHtmlCoords.z = event.y;
+    this.dragHtmlCoords.set(event.x, event.y);
   };
 
   private mouseUp = () => {
@@ -587,27 +576,22 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private animationFrame = () => {
     if (!this.canvas || !this.ctx) return;
 
-    // Calculate the shift in html pixels and map pixels.
+    // Calculate the shift in html pixels.
     let htmlXShift = this.dragHtmlCoords.x - this.dragStartHtmlCoords.x;
-    let mapXShift = htmlXShift * this.htmlToMapRatio;
     let htmlZShift = this.dragHtmlCoords.z - this.dragStartHtmlCoords.z;
-    let mapZShift = htmlZShift * this.htmlToMapRatio;
 
     /**
      * Update the starting html coords to the current ones for
      * the next iteration.
      */
-    this.dragStartHtmlCoords.x = this.dragHtmlCoords.x;
-    this.dragStartHtmlCoords.z = this.dragHtmlCoords.z;
+    this.dragStartHtmlCoords.setWithCoords(this.dragHtmlCoords);
 
-    /**
-     * Update the map coords. One for accurately tracking the map's
-     * position and the other for the whole number display.
-     */
-    this.draggingMapCoords.x -= mapXShift;
-    this.draggingMapCoords.z -= mapZShift;
-    this.mapCoords.x = Math.round(this.draggingMapCoords.x);
-    this.mapCoords.z = Math.round(this.draggingMapCoords.z);
+    // Calculate the shift in map pixels.
+    let mapXShift = htmlXShift * this.htmlToMapRatio;
+    let mapZShift = htmlZShift * this.htmlToMapRatio;
+
+    // Update the map coords
+    this.mapCoords.subtract(mapXShift, mapZShift);
 
     this.clearMap();
     this.ctx.translate(mapXShift, mapZShift);
@@ -634,6 +618,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isMapDragging) {
       requestAnimationFrame(this.animationFrame);
     } else {
+      // Reset translation
       this.ctx.setTransform(
         this.canvasToMapRatio,
         0,
@@ -642,6 +627,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         0,
         0
       );
+
+      // Round map coords to whole numbers
+      this.mapCoords.round();
+
       this.drawMap();
     }
   };
