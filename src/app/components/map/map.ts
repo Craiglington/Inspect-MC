@@ -259,7 +259,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ctx.scale(this.canvasToMapRatio, this.canvasToMapRatio);
     this.ctx.imageSmoothingEnabled = false;
 
-    if (!this.isMapDragging) {
+    if (this.regionFilesProcessed && !this.isMapDragging) {
       this.drawMap();
     }
   }
@@ -419,6 +419,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Removes the first half of entries from a map.
+   */
   private reduceMapByHalf(map: Map<string, unknown>) {
     const keys = map.keys();
     for (let i = map.size / 2; i < map.size; ++i) {
@@ -471,6 +474,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     chunkZ: number
   ): Promise<ImageBitmap | null> {
     try {
+      /**
+       * Get the map data for the current chunk. If it has not already been stored,
+       * use the anvil service.
+       */
       const chunkKey = `${chunkX},${chunkZ}`;
       let mapData = this.chunkMapData.get(chunkKey);
       if (mapData === null) {
@@ -486,6 +493,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chunkMapData.set(chunkKey, { ...mapData, colorIds: [] });
       }
 
+      // Get the map data of the previous chunk.
       const previousChunkKey = `${chunkX},${chunkZ - 1}`;
       let previousMapData = this.chunkMapData.get(previousChunkKey);
       if (previousMapData === undefined) {
@@ -502,12 +510,23 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
+      // We only care about the last row of y levels from the previous chunk.
       const previousYLevels = previousMapData?.yLevels.slice(
         this.BLOCKS_IN_CHUNK - this.CHUNK_LENGTH
       );
+
+      /**
+       * Use the color ids and y levels to get the block's map color and build
+       * the chunk image. Each block's calculated map color depends on how its
+       * y level compares to the block to the north.
+       */
       const imageData = new ImageData(this.CHUNK_LENGTH, this.CHUNK_LENGTH);
       for (let i = 0; i < this.BLOCKS_IN_CHUNK; ++i) {
         let color: RGBAColor;
+        /**
+         * If we are looking at the first row of blocks in the chunk,
+         * we need the y levels of the last row of blocks in the previous chunk.
+         */
         if (i < this.CHUNK_LENGTH) {
           if (previousYLevels) {
             color = this.getMapColorIdColor(
@@ -535,9 +554,17 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (error) {
       console.error(error);
       return null;
+    } finally {
+      if (this.chunkMapData.size > this.MAX_STORED_CHUNK_IMAGES) {
+        this.reduceMapByHalf(this.chunkMapData);
+      }
     }
   }
 
+  /**
+   * Given a color id and two y levels, returns the color to be used
+   * on the map.
+   */
   private getMapColorIdColor(
     mapColorId: number,
     yLevel: number,
