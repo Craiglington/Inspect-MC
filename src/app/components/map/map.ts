@@ -18,12 +18,15 @@ import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
+import { Chunk } from "../../models/chunk";
+import { ChunkMapData } from "../../models/chunk-map-data";
+import { Coords } from "../../models/coords";
+import { Dimensions } from "../../models/dimensions";
 import { RGBAColor } from "../../models/map-color";
 import {
   MapColorPalette,
   MapDialogInputData,
-  MapDialogOutputData,
-  MapOrigin
+  MapDialogOutputData
 } from "../../models/map-dialog-data";
 import { AnvilService } from "../../services/anvil/anvil-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
@@ -33,10 +36,6 @@ import {
 } from "../../services/local-storage/local-storage";
 import { CoordInput } from "./coord-input/coord-input";
 import { MapDialogComponent } from "./map-dialog/map-dialog";
-import { Chunk } from "../../models/chunk";
-import { Coords } from "../../models/coords";
-import { Dimensions } from "../../models/dimensions";
-import { ChunkMapData } from "../../models/chunk-map-data";
 
 @Component({
   selector: "app-map",
@@ -68,6 +67,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MAX_MAP_LENGTH_CHUNKS = 25;
   private readonly MAX_STORED_CHUNK_IMAGES =
     this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 5;
+  private readonly CROSSHAIR_WIDTH = 0.5;
+  private readonly CROSSHAIR_LENGTH = 6;
 
   // An event emitter used to signal and time when the window is resized and thus the canvas should be resized.
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
@@ -113,8 +114,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private readonly dragStartHtmlCoords = new Coords();
   private readonly dragHtmlCoords = new Coords();
+
   private readonly mapDimensions = new Dimensions();
   private readonly mapClearDimensions = new Dimensions();
+  protected readonly crosshairDimensions = new Dimensions();
+  protected readonly crosshairCoords = new Coords();
 
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
@@ -123,8 +127,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private startingXCoord: number;
   private startingYLevel: number;
   private startingZCoord: number;
-  private origin: MapOrigin;
   private colorPalette: MapColorPalette;
+  protected showCrosshair: boolean;
   private drawLicense: number = 0;
 
   protected regionFilesProcessed = false;
@@ -139,8 +143,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mapCoords.set(this.startingXCoord, this.startingZCoord);
     this.startingYLevel = mapSettings?.startingYLevel ?? 319;
     this.mapYLevel = this.startingYLevel;
-    this.origin = mapSettings?.origin ?? "center";
     this.colorPalette = mapSettings?.colorPalette ?? "original";
+    this.showCrosshair = mapSettings?.showCrosshair ?? true;
   }
 
   ngOnInit(): void {
@@ -249,6 +253,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.htmlToMapRatio = dpr / this.canvasToMapRatio;
 
     /**
+     * Use the htmlToMapRatio to set the crosshair coords and dimensions in html pixels.
+     */
+    this.crosshairDimensions.set(
+      this.CROSSHAIR_WIDTH / this.htmlToMapRatio,
+      this.CROSSHAIR_LENGTH / this.htmlToMapRatio
+    );
+    this.crosshairCoords.set(
+      Math.ceil(this.mapDimensions.width / 2) / this.htmlToMapRatio,
+      Math.ceil(this.mapDimensions.height / 2) / this.htmlToMapRatio
+    );
+
+    /**
      * For drawing on the canvas, we have two coordinate systems that matter:
      * the canvas' internal dimensions and the map's dimensions. So which should we use to draw a Minecraft block/chunk?
      * Preferably, the map's dimensions because each map pixel is one Minecraft block!
@@ -274,8 +290,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         startingXCoord: this.startingXCoord,
         startingZCoord: this.startingZCoord,
         startingYLevel: this.startingYLevel,
-        origin: this.origin,
-        colorPalette: this.colorPalette
+        colorPalette: this.colorPalette,
+        showCrosshair: this.showCrosshair
       }
     });
 
@@ -285,8 +301,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startingXCoord = storedSettings.startingXCoord;
       this.startingZCoord = storedSettings.startingZCoord;
       this.startingYLevel = storedSettings.startingYLevel;
-      this.origin = storedSettings.origin;
       this.colorPalette = storedSettings.colorPalette;
+      this.showCrosshair = storedSettings.showCrosshair;
       if (files) {
         this.mapCoords.set(this.startingXCoord, this.startingZCoord);
         this.mapYLevel = this.startingYLevel;
@@ -358,13 +374,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     // Get current map coords
     const currentMapCoords = new Coords(this.mapCoords.x, this.mapCoords.z);
 
-    // Translate coords if origin is in the center
-    if (this.origin === "center") {
-      currentMapCoords.subtract(
-        Math.ceil(this.mapDimensions.width / 2),
-        Math.ceil(this.mapDimensions.height / 2)
-      );
-    }
+    // Translate coords to the center
+    currentMapCoords.subtract(
+      Math.ceil(this.mapDimensions.width / 2),
+      Math.ceil(this.mapDimensions.height / 2)
+    );
+
+    console.log(currentMapCoords);
+    console.log(this.htmlToMapRatio);
 
     // Get chunk coords of current map coords
     const chunkCoords = this.anvilService.worldBlockCoordsToChunkCoords(

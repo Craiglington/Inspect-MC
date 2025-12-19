@@ -5,7 +5,7 @@ import {
   DecompressionService
 } from "../decompression/decompression-service";
 import { NBTService } from "../nbt/nbt-service";
-import { BlockColors } from "../../constants/block-colors";
+import { originalBlockColors } from "../../constants/block-colors";
 import { Coords } from "../../models/coords";
 import { ChunkMapData } from "../../models/chunk-map-data";
 import { MapIds } from "../../constants/map-colors";
@@ -202,7 +202,7 @@ export class AnvilService {
    * Given a paletteEntry, returns the map color id associated with this palette/block
    */
   private getMapColorId(paletteEntry: BlockPaletteEntry): MapIds {
-    const blockColor = BlockColors[paletteEntry.Name.slice(10)];
+    const blockColor = originalBlockColors[paletteEntry.Name.slice(10)];
     if (!blockColor) return MapIds.NONE;
     if (typeof blockColor === "number") return blockColor;
     for (const color of blockColor) {

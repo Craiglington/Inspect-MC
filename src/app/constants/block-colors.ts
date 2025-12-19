@@ -7,12 +7,14 @@ export interface BlockColorWithProperties {
   };
 }
 
+export interface BlockColors {
+  [key: string]: MapIds | BlockColorWithProperties[] | undefined;
+}
+
 /**
  * The Minecraft block identifier and its map color id.
  */
-export const BlockColors: {
-  [key: string]: MapIds | BlockColorWithProperties[] | undefined;
-} = {
+export const originalBlockColors: BlockColors = {
   acacia_button: MapIds.NONE,
   acacia_door: MapIds.COLOR_ORANGE,
   acacia_fence: MapIds.COLOR_ORANGE,

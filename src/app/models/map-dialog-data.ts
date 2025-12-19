@@ -1,18 +1,6 @@
 import { FormControl } from "@angular/forms";
 
-export type MapOrigin = "center" | "top-left";
-export const MapOriginOptions = [
-  {
-    text: "Center",
-    value: "center"
-  },
-  {
-    text: "Top Left",
-    value: "top-left"
-  }
-];
-
-export type MapColorPalette = "original" | "blocks-only";
+export type MapColorPalette = "original" | "blocks-only" | "no-water";
 export const MapColorPaletteOptions = [
   {
     text: "Original",
@@ -21,6 +9,10 @@ export const MapColorPaletteOptions = [
   {
     text: "Blocks Only",
     value: "blocks-only"
+  },
+  {
+    text: "No Water",
+    value: "no-water"
   }
 ];
 
@@ -28,8 +20,8 @@ export interface MapDialogInputData {
   startingXCoord: number;
   startingZCoord: number;
   startingYLevel: number;
-  origin: MapOrigin;
   colorPalette: MapColorPalette;
+  showCrosshair: boolean;
 }
 
 export interface MapDialogOutputData extends MapDialogInputData {
@@ -40,6 +32,6 @@ export interface MapDialogForm {
   startingXCoord: FormControl<number>;
   startingZCoord: FormControl<number>;
   startingYLevel: FormControl<number>;
-  origin: FormControl<MapOrigin>;
   colorPalette: FormControl<MapColorPalette>;
+  showCrosshair: FormControl<boolean>;
 }

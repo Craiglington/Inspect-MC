@@ -42,3 +42,9 @@
 #map.isMapDragging {
   cursor: grabbing;
 }
+
+.crosshair {
+  position: absolute;
+  background-color: black;
+  pointer-events: none;
+}

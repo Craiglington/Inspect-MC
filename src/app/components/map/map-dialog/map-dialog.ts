@@ -7,12 +7,12 @@ import {
   Validators
 } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
   MatDialogClose,
   MatDialogContent,
-  MatDialogRef,
   MatDialogTitle
 } from "@angular/material/dialog";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -23,8 +23,7 @@ import {
   MapColorPaletteOptions,
   MapDialogForm,
   MapDialogInputData,
-  MapDialogOutputData,
-  MapOriginOptions
+  MapDialogOutputData
 } from "../../../models/map-dialog-data";
 import { FileInput } from "../../file-input/file-input";
 
@@ -41,7 +40,8 @@ import { FileInput } from "../../file-input/file-input";
     MatDialogClose,
     ReactiveFormsModule,
     MatSelectModule,
-    FileInput
+    FileInput,
+    MatCheckboxModule
   ],
   templateUrl: "./map-dialog.html",
   styleUrl: "./map-dialog.scss"
@@ -51,7 +51,6 @@ export class MapDialogComponent implements OnInit {
   private readonly data = inject<MapDialogInputData>(MAT_DIALOG_DATA);
   protected files?: FileList;
 
-  readonly originOptions = MapOriginOptions;
   readonly colorPaletteOptions = MapColorPaletteOptions;
 
   formGroup!: FormGroup<MapDialogForm>;
@@ -82,11 +81,11 @@ export class MapDialogComponent implements OnInit {
           Validators.required
         ]
       }),
-      origin: new FormControl(this.data.origin, {
+      colorPalette: new FormControl(this.data.colorPalette, {
         nonNullable: true,
         validators: [Validators.required]
       }),
-      colorPalette: new FormControl(this.data.colorPalette, {
+      showCrosshair: new FormControl(this.data.showCrosshair, {
         nonNullable: true,
         validators: [Validators.required]
       })

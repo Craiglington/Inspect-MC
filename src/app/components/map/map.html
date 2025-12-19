@@ -18,7 +18,21 @@
     [max]="319"
     (change)="mapYLevelChange()"></app-coord-input>
 </form>
-}
+
+@if (showCrosshair) {
+<div
+  [style.width.px]="crosshairDimensions.width"
+  [style.height.px]="crosshairDimensions.height"
+  [style.top.px]="crosshairCoords.z - (crosshairDimensions.height / 2)"
+  [style.left.px]="crosshairCoords.x - (crosshairDimensions.width / 2)"
+  class="crosshair"></div>
+<div
+  [style.width.px]="crosshairDimensions.height"
+  [style.height.px]="crosshairDimensions.width"
+  [style.top.px]="crosshairCoords.z - (crosshairDimensions.width / 2)"
+  [style.left.px]="crosshairCoords.x - (crosshairDimensions.height / 2)"
+  class="crosshair"></div>
+} }
 
 <button
   id="editButton"

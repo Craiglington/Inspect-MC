@@ -3,6 +3,9 @@
   <app-file-input
     label="Select Region Folder"
     (filesUploaded)="filesUploaded($event)"></app-file-input>
+
+  <mat-checkbox formControlName="showCrosshair">Show Crosshair</mat-checkbox>
+
   <mat-form-field subscriptSizing="dynamic">
     <mat-label>Starting X Coordinate</mat-label>
     <input
@@ -40,15 +43,6 @@
     @if (formGroup.controls.startingYLevel.invalid) {
     <mat-error>Range: [-64, 319]</mat-error>
     }
-  </mat-form-field>
-
-  <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Origin Location</mat-label>
-    <mat-select formControlName="origin">
-      @for (origin of originOptions; track $index) {
-      <mat-option [value]="origin.value">{{origin.text}}</mat-option>
-      }
-    </mat-select>
   </mat-form-field>
 
   <mat-form-field subscriptSizing="dynamic">
