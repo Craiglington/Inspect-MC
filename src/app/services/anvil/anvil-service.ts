@@ -174,7 +174,7 @@ export class AnvilService {
           Number((heightMapEntry >> BigInt(i * 9)) & 0x1ffn) - 65,
           max
         );
-        let colorId: number = MapIds.NONE;
+        let colorId: MapIds = MapIds.NONE;
         let isWater = false;
         for (; colorId === MapIds.NONE && yLevel >= -64; --yLevel) {
           const paletteEntry = this.getChunkPaletteEntry(
@@ -201,9 +201,9 @@ export class AnvilService {
   /**
    * Given a paletteEntry, returns the map color id associated with this palette/block
    */
-  private getMapColorId(paletteEntry: BlockPaletteEntry): number {
+  private getMapColorId(paletteEntry: BlockPaletteEntry): MapIds {
     const blockColor = BlockColors[paletteEntry.Name.slice(10)];
-    if (!blockColor) return 0;
+    if (!blockColor) return MapIds.NONE;
     if (typeof blockColor === "number") return blockColor;
     for (const color of blockColor) {
       let match = true;
