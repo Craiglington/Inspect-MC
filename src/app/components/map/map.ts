@@ -67,7 +67,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MIN_CANVAS_TO_MAP_RATIO = 4;
   private readonly MAX_MAP_LENGTH_CHUNKS = 25;
   private readonly MAX_STORED_CHUNK_IMAGES =
-    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10;
+    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 5;
 
   // An event emitter used to signal and time when the window is resized and thus the canvas should be resized.
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
@@ -95,7 +95,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly chunkMapData: Map<string, ChunkMapData | null> = new Map();
 
   // Keys are strings in the format "x,z".
-  private readonly currentlyDrawnChunkKeys: string[] = [];
+  private readonly currentlyDrawnChunkKeys: Set<string> = new Set();
 
   protected mapCoords = new Coords();
   protected mapYLevel: number;
@@ -388,7 +388,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.clearMap();
-    this.currentlyDrawnChunkKeys.length = 0;
+    this.currentlyDrawnChunkKeys.clear();
     for (
       let z = this.mapStartCoords.z, chunkZ = chunkCoords.z;
       z < this.mapDimensions.height;
@@ -400,7 +400,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         x += this.CHUNK_LENGTH, ++chunkX
       ) {
         const chunkKey = `${chunkX},${chunkZ}`;
-        this.currentlyDrawnChunkKeys.push(chunkKey);
+        this.currentlyDrawnChunkKeys.add(chunkKey);
 
         let chunkImagePromise = this.chunkImagePromises.get(chunkKey);
 
@@ -415,18 +415,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     if (this.chunkImagePromises.size > this.MAX_STORED_CHUNK_IMAGES) {
-      this.reduceMapByHalf(this.chunkImagePromises);
+      this.reduceChunkMapByHalf(this.chunkImagePromises);
     }
   }
 
   /**
-   * Removes the first half of entries from a map.
+   * Removes the first half of entries from a map as long as they do not align
+   * with chunks currently being drawn.
    */
-  private reduceMapByHalf(map: Map<string, unknown>) {
+  private reduceChunkMapByHalf(map: Map<string, unknown>) {
+    const reduceSize = Math.round(map.size / 2);
     const keys = map.keys();
-    for (let i = map.size / 2; i < map.size; ++i) {
+    for (let i = 0; i < reduceSize; ++i) {
       const key = keys.next().value;
-      if (key) map.delete(key);
+      if (key && !this.currentlyDrawnChunkKeys.has(key)) map.delete(key);
     }
   }
 
@@ -490,7 +492,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           return null;
         }
         mapData = this.anvilService.getChunkMapData(chunk, this.mapYLevel);
-        this.chunkMapData.set(chunkKey, { ...mapData, colorIds: [] });
+        this.chunkMapData.set(chunkKey, mapData);
       }
 
       // Get the map data of the previous chunk.
@@ -556,7 +558,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       return null;
     } finally {
       if (this.chunkMapData.size > this.MAX_STORED_CHUNK_IMAGES) {
-        this.reduceMapByHalf(this.chunkMapData);
+        this.reduceChunkMapByHalf(this.chunkMapData);
       }
     }
   }
@@ -622,6 +624,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.clearMap();
     this.ctx.translate(mapXShift, mapZShift);
+    const chunkKeys = this.currentlyDrawnChunkKeys.values();
     for (
       let z = this.mapStartCoords.z, chunkIndex = 0;
       z < this.mapDimensions.height;
@@ -633,7 +636,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         x += this.CHUNK_LENGTH, ++chunkIndex
       ) {
         let chunkImagePromise = this.chunkImagePromises.get(
-          this.currentlyDrawnChunkKeys[chunkIndex]
+          chunkKeys.next().value!
         );
 
         if (chunkImagePromise) {
