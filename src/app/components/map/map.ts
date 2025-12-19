@@ -24,9 +24,9 @@ import { Coords } from "../../models/coords";
 import { Dimensions } from "../../models/dimensions";
 import { RGBAColor } from "../../models/map-color";
 import {
-  MapColorPalette,
   MapDialogInputData,
-  MapDialogOutputData
+  MapDialogOutputData,
+  MapPaletteType
 } from "../../models/map-dialog-data";
 import { AnvilService } from "../../services/anvil/anvil-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
@@ -127,7 +127,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private startingXCoord: number;
   private startingYLevel: number;
   private startingZCoord: number;
-  private colorPalette: MapColorPalette;
+  private mapPalette: MapPaletteType;
   protected showCrosshair: boolean;
   private drawLicense: number = 0;
 
@@ -143,7 +143,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mapCoords.set(this.startingXCoord, this.startingZCoord);
     this.startingYLevel = mapSettings?.startingYLevel ?? 319;
     this.mapYLevel = this.startingYLevel;
-    this.colorPalette = mapSettings?.colorPalette ?? "original";
+    this.mapPalette = mapSettings?.mapPalette ?? "original";
     this.showCrosshair = mapSettings?.showCrosshair ?? true;
   }
 
@@ -290,7 +290,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         startingXCoord: this.startingXCoord,
         startingZCoord: this.startingZCoord,
         startingYLevel: this.startingYLevel,
-        colorPalette: this.colorPalette,
+        mapPalette: this.mapPalette,
         showCrosshair: this.showCrosshair
       }
     });
@@ -298,16 +298,22 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
       const { files, ...storedSettings } = data;
+      const clearChunkData = this.mapPalette !== storedSettings.mapPalette;
       this.startingXCoord = storedSettings.startingXCoord;
       this.startingZCoord = storedSettings.startingZCoord;
       this.startingYLevel = storedSettings.startingYLevel;
-      this.colorPalette = storedSettings.colorPalette;
+      this.mapPalette = storedSettings.mapPalette;
       this.showCrosshair = storedSettings.showCrosshair;
+
       if (files) {
         this.mapCoords.set(this.startingXCoord, this.startingZCoord);
         this.mapYLevel = this.startingYLevel;
         this.processRegionFiles(files);
       } else {
+        if (clearChunkData) {
+          this.chunkImagePromises.clear();
+          this.chunkMapData.clear();
+        }
         this.drawMap();
       }
       this.localStorageService.set(
@@ -379,9 +385,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       Math.ceil(this.mapDimensions.width / 2),
       Math.ceil(this.mapDimensions.height / 2)
     );
-
-    console.log(currentMapCoords);
-    console.log(this.htmlToMapRatio);
 
     // Get chunk coords of current map coords
     const chunkCoords = this.anvilService.worldBlockCoordsToChunkCoords(
@@ -508,7 +511,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           this.chunkMapData.set(chunkKey, null);
           return null;
         }
-        mapData = this.anvilService.getChunkMapData(chunk, this.mapYLevel);
+        mapData = this.anvilService.getChunkMapData(
+          chunk,
+          this.mapPalette,
+          this.mapYLevel
+        );
         this.chunkMapData.set(chunkKey, mapData);
       }
 
@@ -523,6 +530,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           previousMapData = this.anvilService.getChunkMapData(
             previousChunk,
+            this.mapPalette,
             this.mapYLevel
           );
           this.chunkMapData.set(previousChunkKey, previousMapData);

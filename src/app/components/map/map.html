@@ -6,17 +6,17 @@
     [(ngModel)]="mapCoords.x"
     (change)="mapCoordInputChange()"></app-coord-input>
   <app-coord-input
-    label="Z:"
-    name="mapZCoord"
-    [(ngModel)]="mapCoords.z"
-    (change)="mapCoordInputChange()"></app-coord-input>
-  <app-coord-input
     label="Y:"
     name="mapYLevel"
     [(ngModel)]="mapYLevel"
     [min]="-64"
     [max]="319"
     (change)="mapYLevelChange()"></app-coord-input>
+  <app-coord-input
+    label="Z:"
+    name="mapZCoord"
+    [(ngModel)]="mapCoords.z"
+    (change)="mapCoordInputChange()"></app-coord-input>
 </form>
 
 @if (showCrosshair) {

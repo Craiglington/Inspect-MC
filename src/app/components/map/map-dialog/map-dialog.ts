@@ -20,7 +20,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import {
-  MapColorPaletteOptions,
+  MapPaletteOptions,
   MapDialogForm,
   MapDialogInputData,
   MapDialogOutputData
@@ -51,7 +51,7 @@ export class MapDialogComponent implements OnInit {
   private readonly data = inject<MapDialogInputData>(MAT_DIALOG_DATA);
   protected files?: FileList;
 
-  readonly colorPaletteOptions = MapColorPaletteOptions;
+  readonly blockPaletteOptions = MapPaletteOptions;
 
   formGroup!: FormGroup<MapDialogForm>;
 
@@ -81,7 +81,7 @@ export class MapDialogComponent implements OnInit {
           Validators.required
         ]
       }),
-      colorPalette: new FormControl(this.data.colorPalette, {
+      mapPalette: new FormControl(this.data.mapPalette, {
         nonNullable: true,
         validators: [Validators.required]
       }),

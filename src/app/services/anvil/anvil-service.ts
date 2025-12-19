@@ -1,14 +1,18 @@
 import { inject, Injectable } from "@angular/core";
-import { Chunk, ChunkSection, BlockPaletteEntry } from "../../models/chunk";
+import { MapIds } from "../../constants/map-colors";
+import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
+import { MapPalette } from "../../constants/map-palettes/map-palette";
+import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
+import { originalMapPalette } from "../../constants/map-palettes/original-palette";
+import { BlockPaletteEntry, Chunk, ChunkSection } from "../../models/chunk";
+import { ChunkMapData } from "../../models/chunk-map-data";
+import { Coords } from "../../models/coords";
+import { MapPaletteType } from "../../models/map-dialog-data";
 import {
   CommonCompressionFormat,
   DecompressionService
 } from "../decompression/decompression-service";
 import { NBTService } from "../nbt/nbt-service";
-import { originalBlockColors } from "../../constants/block-colors";
-import { Coords } from "../../models/coords";
-import { ChunkMapData } from "../../models/chunk-map-data";
-import { MapIds } from "../../constants/map-colors";
 
 @Injectable({
   providedIn: "root"
@@ -147,7 +151,11 @@ export class AnvilService {
    * Given a chunk's data, returns a list of map color ids and y levels for each block in the chunk.
    * The list contains 256 entries (16x16).
    */
-  getChunkMapData(chunk: Chunk, maxYLevel?: number): ChunkMapData {
+  getChunkMapData(
+    chunk: Chunk,
+    mapPaletteType: MapPaletteType,
+    maxYLevel?: number
+  ): ChunkMapData {
     /**
      * In certain scenarios, a 25th section can be included.
      * Only use the 24 sections starting with Y: -4.
@@ -162,6 +170,15 @@ export class AnvilService {
 
     if (!chunk.Heightmaps.WORLD_SURFACE) {
       throw new Error("Chunk height map is not defined.");
+    }
+
+    let mapPalette: MapPalette;
+    if (mapPaletteType === "blocks-only") {
+      mapPalette = blocksOnlyMapPalette;
+    } else if (mapPaletteType === "no-water") {
+      mapPalette = noWaterMapPalette;
+    } else {
+      mapPalette = originalMapPalette;
     }
 
     const max = maxYLevel !== undefined ? maxYLevel : Number.POSITIVE_INFINITY;
@@ -182,7 +199,7 @@ export class AnvilService {
             blockIndex,
             yLevel
           );
-          colorId = this.getMapColorId(paletteEntry);
+          colorId = this.getMapColorId(paletteEntry, mapPalette);
           if (colorId === MapIds.WATER) {
             colorId = MapIds.NONE;
             isWater = true;
@@ -201,8 +218,11 @@ export class AnvilService {
   /**
    * Given a paletteEntry, returns the map color id associated with this palette/block
    */
-  private getMapColorId(paletteEntry: BlockPaletteEntry): MapIds {
-    const blockColor = originalBlockColors[paletteEntry.Name.slice(10)];
+  private getMapColorId(
+    paletteEntry: BlockPaletteEntry,
+    mapPalette: MapPalette
+  ): MapIds {
+    const blockColor = mapPalette[paletteEntry.Name.slice(10)];
     if (!blockColor) return MapIds.NONE;
     if (typeof blockColor === "number") return blockColor;
     for (const color of blockColor) {

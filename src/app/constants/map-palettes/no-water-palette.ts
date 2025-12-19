@@ -1,39 +1,13 @@
-import { MapIds } from "./map-colors";
+import { MapIds } from "../map-colors";
+import { MapPalette } from "./map-palette";
 
-export interface BlockColorWithProperties {
-  id: MapIds;
-  properties: {
-    [key: string]: string;
-  };
-}
-
-export interface BlockColors {
-  [key: string]: MapIds | BlockColorWithProperties[] | undefined;
-}
-
-/**
- * The Minecraft block identifier and its map color id.
- */
-export const originalBlockColors: BlockColors = {
+export const noWaterMapPalette: MapPalette = {
   acacia_button: MapIds.NONE,
   acacia_door: MapIds.COLOR_ORANGE,
   acacia_fence: MapIds.COLOR_ORANGE,
   acacia_fence_gate: MapIds.COLOR_ORANGE,
   acacia_hanging_sign: MapIds.COLOR_ORANGE,
-  acacia_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  acacia_leaves: MapIds.PLANT,
   acacia_log: [
     {
       id: MapIds.COLOR_ORANGE,
@@ -79,20 +53,7 @@ export const originalBlockColors: BlockColors = {
   attached_melon_stem: MapIds.PLANT,
   attached_pumpkin_stem: MapIds.PLANT,
   azalea: MapIds.PLANT,
-  azalea_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  azalea_leaves: MapIds.PLANT,
   azure_bluet: MapIds.PLANT,
   bamboo: MapIds.PLANT,
   bamboo_block: MapIds.PLANT,
@@ -130,20 +91,7 @@ export const originalBlockColors: BlockColors = {
   birch_fence: MapIds.SAND,
   birch_fence_gate: MapIds.SAND,
   birch_hanging_sign: MapIds.SAND,
-  birch_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  birch_leaves: MapIds.PLANT,
   birch_log: [
     {
       id: MapIds.SAND,
@@ -276,7 +224,7 @@ export const originalBlockColors: BlockColors = {
   brown_terracotta: MapIds.TERRACOTTA_BROWN,
   brown_wall_banner: MapIds.NONE,
   brown_wool: MapIds.COLOR_BROWN,
-  bubble_column: MapIds.WATER,
+  bubble_column: MapIds.NONE,
   bubble_coral: MapIds.COLOR_PURPLE,
   bubble_coral_block: MapIds.COLOR_PURPLE,
   bubble_coral_fan: MapIds.COLOR_PURPLE,
@@ -304,20 +252,7 @@ export const originalBlockColors: BlockColors = {
   cherry_fence: MapIds.TERRACOTTA_WHITE,
   cherry_fence_gate: MapIds.TERRACOTTA_WHITE,
   cherry_hanging_sign: MapIds.TERRACOTTA_WHITE,
-  cherry_leaves: [
-    {
-      id: MapIds.COLOR_PINK,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  cherry_leaves: MapIds.COLOR_PINK,
   cherry_log: [
     {
       id: MapIds.TERRACOTTA_WHITE,
@@ -488,20 +423,7 @@ export const originalBlockColors: BlockColors = {
   dark_oak_fence: MapIds.COLOR_BROWN,
   dark_oak_fence_gate: MapIds.COLOR_BROWN,
   dark_oak_hanging_sign: MapIds.COLOR_BROWN,
-  dark_oak_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  dark_oak_leaves: MapIds.PLANT,
   dark_oak_log: MapIds.COLOR_BROWN,
   dark_oak_planks: MapIds.COLOR_BROWN,
   dark_oak_pressure_plate: MapIds.COLOR_BROWN,
@@ -613,20 +535,7 @@ export const originalBlockColors: BlockColors = {
   fletching_table: MapIds.WOOD,
   flower_pot: MapIds.NONE,
   flowering_azalea: MapIds.PLANT,
-  flowering_azalea_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  flowering_azalea_leaves: MapIds.PLANT,
   frogspawn: MapIds.SAND,
   frosted_ice: MapIds.ICE,
   furnace: MapIds.STONE,
@@ -733,20 +642,7 @@ export const originalBlockColors: BlockColors = {
   jungle_fence: MapIds.DIRT,
   jungle_fence_gate: MapIds.DIRT,
   jungle_hanging_sign: MapIds.DIRT,
-  jungle_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  jungle_leaves: MapIds.PLANT,
   jungle_log: [
     {
       id: MapIds.DIRT,
@@ -778,8 +674,8 @@ export const originalBlockColors: BlockColors = {
   jungle_wall_hanging_sign: MapIds.NONE,
   jungle_wall_sign: MapIds.NONE,
   jungle_wood: MapIds.PODZOL,
-  kelp: MapIds.WATER,
-  kelp_plant: MapIds.WATER,
+  kelp: MapIds.NONE,
+  kelp_plant: MapIds.NONE,
   ladder: MapIds.NONE,
   lantern: MapIds.METAL,
   lapis_block: MapIds.LAPIS,
@@ -913,20 +809,7 @@ export const originalBlockColors: BlockColors = {
   mangrove_fence: MapIds.COLOR_RED,
   mangrove_fence_gate: MapIds.COLOR_RED,
   mangrove_hanging_sign: MapIds.COLOR_RED,
-  mangrove_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  mangrove_leaves: MapIds.PLANT,
   mangrove_log: [
     {
       id: MapIds.COLOR_RED,
@@ -1000,20 +883,7 @@ export const originalBlockColors: BlockColors = {
   oak_fence: MapIds.WOOD,
   oak_fence_gate: MapIds.WOOD,
   oak_hanging_sign: MapIds.WOOD,
-  oak_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  oak_leaves: MapIds.PLANT,
   oak_log: [
     {
       id: MapIds.WOOD,
@@ -1103,20 +973,7 @@ export const originalBlockColors: BlockColors = {
   pale_oak_fence: MapIds.QUARTZ,
   pale_oak_fence_gate: MapIds.QUARTZ,
   pale_oak_hanging_sign: MapIds.QUARTZ,
-  pale_oak_leaves: [
-    {
-      id: MapIds.METAL,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  pale_oak_leaves: MapIds.METAL,
   pale_oak_log: [
     {
       id: MapIds.QUARTZ,
@@ -1379,7 +1236,7 @@ export const originalBlockColors: BlockColors = {
   sculk_vein: MapIds.COLOR_BLACK,
   sea_lantern: MapIds.QUARTZ,
   sea_pickle: MapIds.COLOR_GREEN,
-  seagrass: MapIds.WATER,
+  seagrass: MapIds.NONE,
   short_dry_grass: MapIds.COLOR_YELLOW,
   short_grass: MapIds.PLANT,
   shroomlight: MapIds.COLOR_RED,
@@ -1421,20 +1278,7 @@ export const originalBlockColors: BlockColors = {
   spruce_fence: MapIds.PODZOL,
   spruce_fence_gate: MapIds.PODZOL,
   spruce_hanging_sign: MapIds.PODZOL,
-  spruce_leaves: [
-    {
-      id: MapIds.PLANT,
-      properties: {
-        waterlogged: "false"
-      }
-    },
-    {
-      id: MapIds.WATER,
-      properties: {
-        waterlogged: "true"
-      }
-    }
-  ],
+  spruce_leaves: MapIds.PLANT,
   spruce_log: [
     {
       id: MapIds.PODZOL,
@@ -1509,7 +1353,7 @@ export const originalBlockColors: BlockColors = {
   sweet_berry_bush: MapIds.PLANT,
   tall_dry_grass: MapIds.COLOR_YELLOW,
   tall_grass: MapIds.PLANT,
-  tall_seagrass: MapIds.WATER,
+  tall_seagrass: MapIds.NONE,
   target: MapIds.QUARTZ,
   terracotta: MapIds.COLOR_ORANGE,
   test_block: MapIds.COLOR_LIGHT_GRAY,
@@ -1582,7 +1426,7 @@ export const originalBlockColors: BlockColors = {
   warped_wall_hanging_sign: MapIds.NONE,
   warped_wall_sign: MapIds.NONE,
   warped_wart_block: MapIds.WARPED_WART_BLOCK,
-  water: MapIds.WATER,
+  water: MapIds.NONE,
   water_cauldron: MapIds.STONE,
   waxed_chiseled_copper: MapIds.COLOR_ORANGE,
   waxed_copper_bars: MapIds.NONE,

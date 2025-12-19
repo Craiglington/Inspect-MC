@@ -46,11 +46,11 @@
   </mat-form-field>
 
   <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Color Palette</mat-label>
-    <mat-select formControlName="colorPalette">
-      @for (colorPalette of colorPaletteOptions; track $index) {
-      <mat-option [value]="colorPalette.value"
-        >{{colorPalette.text}}</mat-option
+    <mat-label>Map Color Palette</mat-label>
+    <mat-select formControlName="mapPalette">
+      @for (blockPalette of blockPaletteOptions; track $index) {
+      <mat-option [value]="blockPalette.value"
+        >{{blockPalette.text}}</mat-option
       >
       }
     </mat-select>
