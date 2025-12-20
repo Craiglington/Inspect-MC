@@ -1,14 +1,20 @@
 <header>
   <mat-toolbar>
-    <button mat-icon-button matTooltip="Menu" [matMenuTriggerFor]="menu">
+    <!-- <button mat-icon-button matTooltip="Menu" [matMenuTriggerFor]="menu">
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
       <button mat-menu-item (click)="contactUs()">Contact Me</button>
-    </mat-menu>
-    <button mat-icon-button matTooltip="Map">
+    </mat-menu> -->
+    <a mat-icon-button matTooltip="Map" routerLink="/map">
       <mat-icon>map</mat-icon>
-    </button>
+    </a>
+    <a mat-icon-button matTooltip="Stats" routerLink="/stats">
+      <mat-icon>leaderboard</mat-icon>
+    </a>
+    <a mat-icon-button matTooltip="Advancements" routerLink="/advancements">
+      <mat-icon>workspace_premium</mat-icon>
+    </a>
     <span class="spacer"></span>
     <app-toggle-theme></app-toggle-theme>
   </mat-toolbar>

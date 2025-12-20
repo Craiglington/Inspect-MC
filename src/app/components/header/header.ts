@@ -7,6 +7,7 @@ import { NotificationService } from "../../services/notification/notification-se
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { AppConstants } from "../../constants/app-constants";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: "app-header",
@@ -16,7 +17,8 @@ import { AppConstants } from "../../constants/app-constants";
     MatMenuModule,
     ToggleTheme,
     MatButtonModule,
-    MatTooltipModule
+    MatTooltipModule,
+    RouterLink
   ],
   templateUrl: "./header.html",
   styleUrl: "./header.scss"
