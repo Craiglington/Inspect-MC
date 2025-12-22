@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  height: 100%;
+  position: relative;
+}
+
+#editButton {
+  position: absolute;
+  top: 0.25em;
+  right: 0.25em;
+  background-color: var(--mat-sys-surface);
+}

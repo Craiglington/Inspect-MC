@@ -1,0 +1,67 @@
+<!-- <h2 id="dialogTitle" mat-dialog-title>Map Settings</h2>
+<mat-dialog-content id="dialogContent" [formGroup]="formGroup">
+  <app-file-input
+    label="Select 'stats' Folder"
+    (filesUploaded)="filesUploaded($event)"></app-file-input>
+
+  <mat-checkbox formControlName="showCrosshair">Show Crosshair</mat-checkbox>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Starting X Coordinate</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="startingXCoord" />
+    @if (formGroup.controls.startingXCoord.invalid) {
+    <mat-error>Range: [-30 million, 30 million]</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Starting Z Coordinate</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="startingZCoord" />
+    @if (formGroup.controls.startingZCoord.invalid) {
+    <mat-error>Range: [-30 million, 30 million]</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Starting Y Level</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="startingYLevel" />
+    @if (formGroup.controls.startingYLevel.invalid) {
+    <mat-error>Range: [-64, 319]</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Map Color Palette</mat-label>
+    <mat-select formControlName="mapPalette">
+      @for (blockPalette of blockPaletteOptions; track $index) {
+      <mat-option [value]="blockPalette.value"
+        >{{blockPalette.text}}</mat-option
+      >
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="outlined" mat-dialog-close>Cancel</button>
+  <button
+    matButton="filled"
+    [mat-dialog-close]="getOutputData()"
+    [disabled]="formGroup.invalid || (!formGroup.dirty && !files)">
+    Save
+  </button>
+</mat-dialog-actions> -->

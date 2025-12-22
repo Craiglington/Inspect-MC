@@ -1,10 +1,10 @@
 {
-  "/mojang": {
-    "target": "https://sessionserver.mojang.com",
+  "/minecraft/profile": {
+    "target": "https://playerdb.co/api/player/minecraft",
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/mojang": ""
+      "^/minecraft/profile": ""
     }
   }
 }
