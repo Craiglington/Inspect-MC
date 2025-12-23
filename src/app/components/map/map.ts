@@ -67,8 +67,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MAX_MAP_LENGTH_CHUNKS = 25;
   private readonly MAX_STORED_CHUNK_IMAGES =
     this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 5;
-  private readonly CROSSHAIR_WIDTH = 0.5;
-  private readonly CROSSHAIR_LENGTH = 6;
+  private readonly CROSSHAIRS_WIDTH = 0.5;
+  private readonly CROSSHAIRS_LENGTH = 6;
 
   // An event emitter used to signal and time when the window is resized and thus the canvas should be resized.
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
@@ -117,8 +117,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly mapDimensions = new Dimensions();
   private readonly mapClearDimensions = new Dimensions();
-  protected readonly crosshairDimensions = new Dimensions();
-  protected readonly crosshairCoords = new Coords();
+  protected readonly crosshairsDimensions = new Dimensions();
+  protected readonly crosshairsCoords = new Coords();
 
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
@@ -128,7 +128,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private startingYLevel: number;
   private startingZCoord: number;
   private mapPalette: MapPaletteType;
-  protected showCrosshair: boolean;
+  protected showCrosshairs: boolean;
   private drawLicense: number = 0;
 
   protected regionFilesProcessed = false;
@@ -144,7 +144,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.startingYLevel = mapSettings?.startingYLevel ?? 319;
     this.mapYLevel = this.startingYLevel;
     this.mapPalette = mapSettings?.mapPalette ?? "original";
-    this.showCrosshair = mapSettings?.showCrosshair ?? true;
+    this.showCrosshairs = mapSettings?.showCrosshairs ?? true;
   }
 
   ngOnInit(): void {
@@ -253,13 +253,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.htmlToMapRatio = dpr / this.canvasToMapRatio;
 
     /**
-     * Use the htmlToMapRatio to set the crosshair coords and dimensions in html pixels.
+     * Use the htmlToMapRatio to set the crosshairs coords and dimensions in html pixels.
      */
-    this.crosshairDimensions.set(
-      this.CROSSHAIR_WIDTH / this.htmlToMapRatio,
-      this.CROSSHAIR_LENGTH / this.htmlToMapRatio
+    this.crosshairsDimensions.set(
+      this.CROSSHAIRS_WIDTH / this.htmlToMapRatio,
+      this.CROSSHAIRS_LENGTH / this.htmlToMapRatio
     );
-    this.crosshairCoords.set(
+    this.crosshairsCoords.set(
       Math.ceil(this.mapDimensions.width / 2) / this.htmlToMapRatio,
       Math.ceil(this.mapDimensions.height / 2) / this.htmlToMapRatio
     );
@@ -291,7 +291,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         startingZCoord: this.startingZCoord,
         startingYLevel: this.startingYLevel,
         mapPalette: this.mapPalette,
-        showCrosshair: this.showCrosshair
+        showCrosshairs: this.showCrosshairs
       }
     });
 
@@ -303,7 +303,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startingZCoord = storedSettings.startingZCoord;
       this.startingYLevel = storedSettings.startingYLevel;
       this.mapPalette = storedSettings.mapPalette;
-      this.showCrosshair = storedSettings.showCrosshair;
+      this.showCrosshairs = storedSettings.showCrosshairs;
 
       if (files) {
         this.mapCoords.set(this.startingXCoord, this.startingZCoord);

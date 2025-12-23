@@ -85,7 +85,7 @@ export class MapDialogComponent implements OnInit {
         nonNullable: true,
         validators: [Validators.required]
       }),
-      showCrosshair: new FormControl(this.data.showCrosshair, {
+      showCrosshairs: new FormControl(this.data.showCrosshairs, {
         nonNullable: true,
         validators: [Validators.required]
       })

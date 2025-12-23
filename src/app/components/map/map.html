@@ -19,19 +19,19 @@
     (change)="mapCoordInputChange()"></app-coord-input>
 </form>
 
-@if (showCrosshair) {
+@if (showCrosshairs) {
 <div
-  [style.width.px]="crosshairDimensions.width"
-  [style.height.px]="crosshairDimensions.height"
-  [style.top.px]="crosshairCoords.z - (crosshairDimensions.height / 2)"
-  [style.left.px]="crosshairCoords.x - (crosshairDimensions.width / 2)"
-  class="crosshair"></div>
+  [style.width.px]="crosshairsDimensions.width"
+  [style.height.px]="crosshairsDimensions.height"
+  [style.top.px]="crosshairsCoords.z - (crosshairsDimensions.height / 2)"
+  [style.left.px]="crosshairsCoords.x - (crosshairsDimensions.width / 2)"
+  class="crosshairs"></div>
 <div
-  [style.width.px]="crosshairDimensions.height"
-  [style.height.px]="crosshairDimensions.width"
-  [style.top.px]="crosshairCoords.z - (crosshairDimensions.width / 2)"
-  [style.left.px]="crosshairCoords.x - (crosshairDimensions.height / 2)"
-  class="crosshair"></div>
+  [style.width.px]="crosshairsDimensions.height"
+  [style.height.px]="crosshairsDimensions.width"
+  [style.top.px]="crosshairsCoords.z - (crosshairsDimensions.width / 2)"
+  [style.left.px]="crosshairsCoords.x - (crosshairsDimensions.height / 2)"
+  class="crosshairs"></div>
 } }
 
 <button

@@ -21,7 +21,7 @@ export interface MapDialogInputData {
   startingZCoord: number;
   startingYLevel: number;
   mapPalette: MapPaletteType;
-  showCrosshair: boolean;
+  showCrosshairs: boolean;
 }
 
 export interface MapDialogOutputData extends MapDialogInputData {
@@ -33,5 +33,5 @@ export interface MapDialogForm {
   startingZCoord: FormControl<number>;
   startingYLevel: FormControl<number>;
   mapPalette: FormControl<MapPaletteType>;
-  showCrosshair: FormControl<boolean>;
+  showCrosshairs: FormControl<boolean>;
 }
