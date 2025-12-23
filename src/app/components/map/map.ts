@@ -18,6 +18,10 @@ import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
+import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
+import { MapPalette } from "../../constants/map-palettes/map-palette";
+import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
+import { originalMapPalette } from "../../constants/map-palettes/original-palette";
 import { Chunk } from "../../models/chunk";
 import { ChunkMapData } from "../../models/chunk-map-data";
 import { Coords } from "../../models/coords";
@@ -127,7 +131,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private startingXCoord: number;
   private startingYLevel: number;
   private startingZCoord: number;
-  private mapPalette: MapPaletteType;
+  private mapPaletteType: MapPaletteType;
+  private mapPalette: MapPalette;
   protected showCrosshairs: boolean;
   private drawLicense: number = 0;
 
@@ -143,7 +148,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mapCoords.set(this.startingXCoord, this.startingZCoord);
     this.startingYLevel = mapSettings?.startingYLevel ?? 319;
     this.mapYLevel = this.startingYLevel;
-    this.mapPalette = mapSettings?.mapPalette ?? "original";
+    this.mapPaletteType = mapSettings?.mapPaletteType ?? "original";
+    this.mapPalette = originalMapPalette;
     this.showCrosshairs = mapSettings?.showCrosshairs ?? true;
   }
 
@@ -290,7 +296,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         startingXCoord: this.startingXCoord,
         startingZCoord: this.startingZCoord,
         startingYLevel: this.startingYLevel,
-        mapPalette: this.mapPalette,
+        mapPaletteType: this.mapPaletteType,
         showCrosshairs: this.showCrosshairs
       }
     });
@@ -298,11 +304,19 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
       const { files, ...storedSettings } = data;
-      const clearChunkData = this.mapPalette !== storedSettings.mapPalette;
+      const clearChunkData =
+        this.mapPaletteType !== storedSettings.mapPaletteType;
       this.startingXCoord = storedSettings.startingXCoord;
       this.startingZCoord = storedSettings.startingZCoord;
       this.startingYLevel = storedSettings.startingYLevel;
-      this.mapPalette = storedSettings.mapPalette;
+      this.mapPaletteType = storedSettings.mapPaletteType;
+      if (this.mapPaletteType === "blocks-only") {
+        this.mapPalette = blocksOnlyMapPalette;
+      } else if (this.mapPaletteType === "no-water") {
+        this.mapPalette = noWaterMapPalette;
+      } else {
+        this.mapPalette = originalMapPalette;
+      }
       this.showCrosshairs = storedSettings.showCrosshairs;
 
       if (files) {

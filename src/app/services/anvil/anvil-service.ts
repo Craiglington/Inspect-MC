@@ -1,13 +1,9 @@
 import { inject, Injectable } from "@angular/core";
 import { MapIds } from "../../constants/map-colors";
-import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
 import { MapPalette } from "../../constants/map-palettes/map-palette";
-import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
-import { originalMapPalette } from "../../constants/map-palettes/original-palette";
 import { BlockPaletteEntry, Chunk, ChunkSection } from "../../models/chunk";
 import { ChunkMapData } from "../../models/chunk-map-data";
 import { Coords } from "../../models/coords";
-import { MapPaletteType } from "../../models/map-dialog-data";
 import {
   CommonCompressionFormat,
   DecompressionService
@@ -153,25 +149,17 @@ export class AnvilService {
    */
   getChunkMapData(
     chunk: Chunk,
-    mapPaletteType: MapPaletteType,
-    maxYLevel?: number
+    mapPalette: MapPalette,
+    maxYLevel: number
   ): ChunkMapData {
-    const chunkSections = this.getChunkSections(chunk);
+    const chunkSections = chunk.sections.slice(
+      chunk.sections[0].block_states !== undefined ? 0 : 1
+    );
 
     if (!chunk.Heightmaps.WORLD_SURFACE) {
       throw new Error("Chunk height map is not defined.");
     }
 
-    let mapPalette: MapPalette;
-    if (mapPaletteType === "blocks-only") {
-      mapPalette = blocksOnlyMapPalette;
-    } else if (mapPaletteType === "no-water") {
-      mapPalette = noWaterMapPalette;
-    } else {
-      mapPalette = originalMapPalette;
-    }
-
-    const max = maxYLevel !== undefined ? maxYLevel : Number.POSITIVE_INFINITY;
     const colorIds: number[] = [];
     const yLevels: number[] = [];
     let minYLevel = chunkSections[0].Y * 16;
@@ -180,7 +168,7 @@ export class AnvilService {
       for (let i = 0; i < 7 && blockIndex < 256; ++i, ++blockIndex) {
         let yLevel = Math.min(
           Number((heightMapEntry >> BigInt(i * 9)) & 0x1ffn) - minYLevel - 1,
-          max
+          maxYLevel
         );
         let colorId: MapIds = MapIds.NONE;
         let isWater = false;
@@ -205,28 +193,6 @@ export class AnvilService {
       colorIds: colorIds,
       yLevels: yLevels
     };
-  }
-
-  /**
-   * In certain situations, a chunk's sections that contain block data
-   * can begin and/or end with sections that contain no block data.
-   * Given a chunk, return the relevant sections with block data.
-   */
-  private getChunkSections(chunk: Chunk): ChunkSection[] {
-    let startIndex = 0;
-    for (; startIndex < chunk.sections.length; ++startIndex) {
-      if (chunk.sections[startIndex].block_states !== undefined) {
-        break;
-      }
-    }
-
-    let lastIndex = chunk.sections.length - 1;
-    for (; lastIndex >= 0; --lastIndex) {
-      if (chunk.sections[lastIndex].block_states !== undefined) {
-        break;
-      }
-    }
-    return chunk.sections.slice(startIndex, lastIndex + 1);
   }
 
   /**

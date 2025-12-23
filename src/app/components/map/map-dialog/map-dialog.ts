@@ -20,10 +20,10 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import {
-  MapPaletteOptions,
   MapDialogForm,
   MapDialogInputData,
-  MapDialogOutputData
+  MapDialogOutputData,
+  MapPaletteOptions
 } from "../../../models/map-dialog-data";
 import { FileInput } from "../../file-input/file-input";
 
@@ -81,7 +81,7 @@ export class MapDialogComponent implements OnInit {
           Validators.required
         ]
       }),
-      mapPalette: new FormControl(this.data.mapPalette, {
+      mapPaletteType: new FormControl(this.data.mapPaletteType, {
         nonNullable: true,
         validators: [Validators.required]
       }),
