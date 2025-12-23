@@ -157,16 +157,12 @@ export class AnvilService {
     maxYLevel?: number
   ): ChunkMapData {
     /**
-     * In certain scenarios, a 25th section can be included.
-     * Only use the 24 sections starting with Y: -4.
+     * In certain scenarios, sections can be included that do not contain any block data.
+     * We only need those with block data.
      */
-    let chunkSections: ChunkSection[] = [];
-    for (let i = 0; i < chunk.sections.length; ++i) {
-      if (chunk.sections[i].Y === -4) {
-        chunkSections = chunk.sections.slice(i, i + 24);
-        break;
-      }
-    }
+    let chunkSections: ChunkSection[] = chunk.sections.filter(
+      (section) => section.block_states !== undefined
+    );
 
     if (!chunk.Heightmaps.WORLD_SURFACE) {
       throw new Error("Chunk height map is not defined.");
@@ -184,20 +180,22 @@ export class AnvilService {
     const max = maxYLevel !== undefined ? maxYLevel : Number.POSITIVE_INFINITY;
     const colorIds: number[] = [];
     const yLevels: number[] = [];
+    let minYLevel = chunkSections[0].Y * 16;
     let blockIndex = 0;
     for (const heightMapEntry of chunk.Heightmaps.WORLD_SURFACE) {
       for (let i = 0; i < 7 && blockIndex < 256; ++i, ++blockIndex) {
         let yLevel = Math.min(
-          Number((heightMapEntry >> BigInt(i * 9)) & 0x1ffn) - 65,
+          Number((heightMapEntry >> BigInt(i * 9)) & 0x1ffn) - minYLevel - 1,
           max
         );
         let colorId: MapIds = MapIds.NONE;
         let isWater = false;
-        for (; colorId === MapIds.NONE && yLevel >= -64; --yLevel) {
+        for (; colorId === MapIds.NONE && yLevel >= minYLevel; --yLevel) {
           const paletteEntry = this.getChunkPaletteEntry(
             chunkSections,
             blockIndex,
-            yLevel
+            yLevel,
+            minYLevel
           );
           colorId = this.getMapColorId(paletteEntry, mapPalette);
           if (colorId === MapIds.WATER) {
@@ -249,14 +247,14 @@ export class AnvilService {
   private getChunkPaletteEntry(
     chunkSections: ChunkSection[],
     chunkBlockIndex: number,
-    blockYLevel: number
+    blockYLevel: number,
+    minYLevel: number
   ): BlockPaletteEntry {
     /**
      * Sections in a chunk are split based on y level.
      * 16 block height per section.
-     * First section is y level -64 to -49, second is -48 to -33, ..., 304 to 319.
      */
-    const section = chunkSections[Math.floor(blockYLevel / 16) + 4];
+    const section = chunkSections[Math.floor((blockYLevel - minYLevel) / 16)];
 
     /**
      * If a section only contains 1 type of block.
@@ -282,8 +280,9 @@ export class AnvilService {
      * Use the relative y level of our block in the section.
      * Each y level consists of 256 entries.
      */
+    const remainder = blockYLevel % 16;
     const entryIndex =
-      ((blockYLevel >= 0 ? blockYLevel : blockYLevel + 64) % 16) * 256 +
+      ((remainder >= 0 ? remainder : remainder + 16) % 16) * 256 +
       chunkBlockIndex;
 
     /**
