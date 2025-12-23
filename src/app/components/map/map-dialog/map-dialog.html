@@ -1,7 +1,7 @@
 <h2 id="dialogTitle" mat-dialog-title>Map Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
   <app-file-input
-    label="Select Region Folder"
+    label="Select a Region Folder"
     (filesUploaded)="filesUploaded($event)"></app-file-input>
 
   <mat-checkbox formControlName="showCrosshair">Show Crosshair</mat-checkbox>
@@ -55,6 +55,15 @@
       }
     </mat-select>
   </mat-form-field>
+
+  <a href="https://minecraft.wiki/w/.minecraft#Location" target="_blank"
+    >Where are the world save folders?</a
+  >
+  <a
+    href="https://minecraft.wiki/w/Java_Edition_level_format#Directory_structure"
+    target="_blank"
+    >What are the three region folders?</a
+  >
 </mat-dialog-content>
 <mat-dialog-actions>
   <button matButton="outlined" mat-dialog-close>Cancel</button>
