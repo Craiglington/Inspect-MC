@@ -156,13 +156,7 @@ export class AnvilService {
     mapPaletteType: MapPaletteType,
     maxYLevel?: number
   ): ChunkMapData {
-    /**
-     * In certain scenarios, sections can be included that do not contain any block data.
-     * We only need those with block data.
-     */
-    let chunkSections: ChunkSection[] = chunk.sections.filter(
-      (section) => section.block_states !== undefined
-    );
+    const chunkSections = this.getChunkSections(chunk);
 
     if (!chunk.Heightmaps.WORLD_SURFACE) {
       throw new Error("Chunk height map is not defined.");
@@ -211,6 +205,28 @@ export class AnvilService {
       colorIds: colorIds,
       yLevels: yLevels
     };
+  }
+
+  /**
+   * In certain situations, a chunk's sections that contain block data
+   * can begin and/or end with sections that contain no block data.
+   * Given a chunk, return the relevant sections with block data.
+   */
+  private getChunkSections(chunk: Chunk): ChunkSection[] {
+    let startIndex = 0;
+    for (; startIndex < chunk.sections.length; ++startIndex) {
+      if (chunk.sections[startIndex].block_states !== undefined) {
+        break;
+      }
+    }
+
+    let lastIndex = chunk.sections.length - 1;
+    for (; lastIndex >= 0; --lastIndex) {
+      if (chunk.sections[lastIndex].block_states !== undefined) {
+        break;
+      }
+    }
+    return chunk.sections.slice(startIndex, lastIndex + 1);
   }
 
   /**
