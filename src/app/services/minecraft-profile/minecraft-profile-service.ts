@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { catchError, EMPTY, Observable } from "rxjs";
-import { MinecraftProfile } from "../../models/minecraft-profile";
+import { MinecraftProfileResponse } from "../../models/minecraft-profile";
 
 @Injectable({
   providedIn: "root"
@@ -11,13 +11,13 @@ export class MinecraftProfileService {
 
   private readonly http = inject(HttpClient);
 
-  getProfile(uuid: string): Observable<MinecraftProfile> {
-    return this.http.get<MinecraftProfile>(
+  getProfile(uuid: string): Observable<MinecraftProfileResponse> {
+    return this.http.get<MinecraftProfileResponse>(
       `${MinecraftProfileService.PROFILE_URL}${uuid}`
     );
   }
 
-  getSkinTexture(profile: MinecraftProfile): Observable<Blob> {
+  getSkinTexture(profile: MinecraftProfileResponse): Observable<Blob> {
     return this.http
       .get(profile.data.player.skin_texture, {
         responseType: "blob"
