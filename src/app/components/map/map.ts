@@ -193,6 +193,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected mapCoordInputChange() {
     if (!this.isMapDragging) {
+      this.clearMap();
       this.drawMap();
     }
   }
