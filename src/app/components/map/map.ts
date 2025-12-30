@@ -326,6 +326,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         if (clearChunkData) {
           this.chunkImages.clear();
           this.chunkMapData.clear();
+          this.clearMap();
         }
         this.drawMap();
       }
@@ -353,6 +354,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.regionFilesProcessed = true;
+    this.clearMap();
     this.drawMap();
   }
 
@@ -421,7 +423,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.CHUNK_LENGTH - this.mapStartCoords.z
     );
 
-    this.clearMap();
     this.currentlyDrawnChunkKeys.clear();
     for (
       let z = this.mapStartCoords.z, chunkZ = chunkCoords.z;
