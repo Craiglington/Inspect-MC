@@ -19,7 +19,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
 import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
-import { MapPalette } from "../../constants/map-palettes/map-palette";
+import { MapPalette } from "../../models/map-palette";
 import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
 import { originalMapPalette } from "../../constants/map-palettes/original-palette";
 import { Chunk } from "../../models/chunk";

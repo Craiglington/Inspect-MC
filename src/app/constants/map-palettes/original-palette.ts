@@ -1,5 +1,5 @@
 import { MapIds } from "../map-colors";
-import { MapPalette } from "./map-palette";
+import { MapPalette } from "../../models/map-palette";
 
 export const originalMapPalette: MapPalette = {
   acacia_button: MapIds.NONE,

@@ -1,4 +1,4 @@
-import { MapIds } from "../map-colors";
+import { MapIds } from "../constants/map-colors";
 
 export interface BlockColorWithProperties {
   id: MapIds;

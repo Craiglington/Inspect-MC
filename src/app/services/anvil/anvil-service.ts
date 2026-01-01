@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { MapIds } from "../../constants/map-colors";
-import { MapPalette } from "../../constants/map-palettes/map-palette";
+import { MapPalette } from "../../models/map-palette";
 import { BlockPaletteEntry, Chunk, ChunkSection } from "../../models/chunk";
 import { ChunkMapData } from "../../models/chunk-map-data";
 import { Coords } from "../../models/coords";
