@@ -20,3 +20,11 @@ body {
 .scrollable {
   overflow: auto;
 }
+
+.app-logo {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  background: url("/InspectMC-64.png");
+  background-size: cover;
+}

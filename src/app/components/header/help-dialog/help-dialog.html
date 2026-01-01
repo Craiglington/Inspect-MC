@@ -1,0 +1,26 @@
+<h2 id="dialogTitle" mat-dialog-title>About {{appTitle}}</h2>
+<mat-dialog-content id="dialogContent">
+  <div class="app-logo"></div>
+  <em>v{{version}}</em>
+  <p>
+    <strong>{{appTitle}} Only Supports Minecraft Java Edition</strong><br />
+    <em>(Sorry Bedrock players)</em>
+  </p>
+
+  <p>
+    {{appTitle}} is a Minecraft save file inspection tool. The relevant
+    Minecraft documentation can be found
+    <a target="_blank" href="https://minecraft.wiki/w/Java_Edition_level_format"
+      >here</a
+    >. The source code can be found <a target="_blank" href="">here</a>.
+  </p>
+
+  <p>
+    Looking for interesting worlds to explore?
+    <a target="_blank" href="https://hermitcraft.com/">HermitCraft</a> provides
+    a world download at the end of every season.
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="filled" mat-dialog-close>Close</button>
+</mat-dialog-actions>

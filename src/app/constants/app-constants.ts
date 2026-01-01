@@ -1,3 +1,4 @@
 export const AppConstants = {
-  appTitle: "Inspect MC"
+  appTitle: "Inspect MC",
+  version: "1.0.0"
 };
