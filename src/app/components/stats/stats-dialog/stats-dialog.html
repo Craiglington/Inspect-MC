@@ -1,4 +1,4 @@
-<h2 id="dialogTitle" mat-dialog-title>Map Settings</h2>
+<h2 id="dialogTitle" mat-dialog-title>Stats Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
   <app-file-input
     label="Select a Stats Folder"
@@ -12,6 +12,24 @@
       }
     </mat-select>
   </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="statsCategory">
+      @for (category of statsCategoryOptions; track $index) {
+      <mat-option [value]="category.value">{{category.text}}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <a href="https://minecraft.wiki/w/.minecraft#Location" target="_blank"
+    >Where are the world saves folders?</a
+  >
+  <a
+    href="https://minecraft.wiki/w/Java_Edition_level_format#Directory_structure"
+    target="_blank"
+    >Where is the stats folder?</a
+  >
 </mat-dialog-content>
 <mat-dialog-actions>
   <button matButton="outlined" mat-dialog-close>Cancel</button>

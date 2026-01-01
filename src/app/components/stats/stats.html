@@ -6,3 +6,9 @@
   (click)="openStatsDialog()">
   <mat-icon>settings</mat-icon>
 </button>
+
+<ag-grid-angular
+  [rowData]="rows"
+  [columnDefs]="colDefs"
+  [defaultColDef]="defaultColDef"
+  [theme]="(appTheme$ | async) === 'light' ? lightTheme : darkTheme"></ag-grid-angular>

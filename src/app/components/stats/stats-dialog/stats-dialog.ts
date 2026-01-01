@@ -3,7 +3,8 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  Validators
 } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import {
@@ -17,17 +18,6 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import { FileInput } from "../../file-input/file-input";
-import {
-  StatsDialogForm,
-  StatsDialogInputData,
-  StatsDialogOutputData
-} from "../../../models/stats-dialog-data";
-import {
-  MinecraftPlayerProfile,
-  MinecraftProfileResponse
-} from "../../../models/minecraft-profile";
-import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
 import {
   catchError,
   EMPTY,
@@ -38,7 +28,29 @@ import {
   switchMap,
   timeout
 } from "rxjs";
+import {
+  MinecraftPlayerProfile,
+  MinecraftProfileResponse
+} from "../../../models/minecraft-profile";
+import { StatsCategory } from "../../../models/stats";
+import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
 import { NotificationService } from "../../../services/notification/notification-service";
+import { FileInput } from "../../file-input/file-input";
+
+export interface StatsDialogInputData {
+  profiles: Map<string, MinecraftPlayerProfile>;
+  activeProfiles: string[];
+  statsCategory: StatsCategory;
+}
+
+export interface StatsDialogOutputData extends StatsDialogInputData {
+  files?: Map<string, File>;
+}
+
+export interface StatsDialogForm {
+  activeProfiles: FormControl<string[]>;
+  statsCategory: FormControl<StatsCategory>;
+}
 
 @Component({
   selector: "app-stats-dialog",
@@ -62,28 +74,78 @@ export class StatsDialogComponent implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly minecraftProfileService = inject(MinecraftProfileService);
   private readonly notificationService = inject(NotificationService);
+  private readonly dialogData = inject<StatsDialogInputData>(MAT_DIALOG_DATA);
 
-  private readonly data = inject<StatsDialogInputData>(MAT_DIALOG_DATA);
-  private readonly $profiles = new Subject<
+  protected readonly statsCategoryOptions: {
+    text: string;
+    value: StatsCategory;
+  }[] = [
+    {
+      text: "Broken",
+      value: "minecraft:broken"
+    },
+    {
+      text: "Crafted",
+      value: "minecraft:crafted"
+    },
+    {
+      text: "Dropped",
+      value: "minecraft:dropped"
+    },
+    {
+      text: "General",
+      value: "minecraft:custom"
+    },
+    {
+      text: "Killed",
+      value: "minecraft:killed"
+    },
+    {
+      text: "Killed By",
+      value: "minecraft:killed_by"
+    },
+    {
+      text: "Mined",
+      value: "minecraft:mined"
+    },
+
+    {
+      text: "Picked Up",
+      value: "minecraft:picked_up"
+    },
+    {
+      text: "Used",
+      value: "minecraft:used"
+    }
+  ];
+
+  private readonly profiles$ = new Subject<
     Observable<MinecraftProfileResponse[]>
   >();
-  protected files?: FileList;
-
-  profiles!: Map<string, MinecraftPlayerProfile>;
-  formGroup!: FormGroup<StatsDialogForm>;
+  protected files!: Map<string, File>;
+  protected profiles!: Map<string, MinecraftPlayerProfile>;
+  protected formGroup!: FormGroup<StatsDialogForm>;
 
   ngOnInit(): void {
-    this.profiles = this.data.profiles;
+    this.files = new Map();
+    this.profiles = this.dialogData.profiles;
     this.formGroup = this.formBuilder.group({
       activeProfiles: new FormControl<string[]>(
-        { value: this.data.activeProfiles, disabled: !this.profiles.size },
+        {
+          value: this.dialogData.activeProfiles,
+          disabled: !this.profiles.size
+        },
         {
           nonNullable: true
         }
-      )
+      ),
+      statsCategory: new FormControl(this.dialogData.statsCategory, {
+        nonNullable: true,
+        validators: Validators.required
+      })
     });
 
-    this.$profiles
+    this.profiles$
       .pipe(
         switchMap((newProfiles) =>
           newProfiles.pipe(
@@ -104,19 +166,29 @@ export class StatsDialogComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe((newProfiles) => {
-        for (const profile of newProfiles) {
-          if (!profile.success) continue;
+        const sortedProfiles = newProfiles
+          .filter((profile) => profile.success)
+          .sort((a, b) => {
+            if (a.data.player.username < b.data.player.username) {
+              return -1;
+            }
+            if (a.data.player.username > b.data.player.username) {
+              return 1;
+            }
+            return 0;
+          });
+        for (const profile of sortedProfiles) {
           this.profiles.set(profile.data.player.id, profile.data.player);
         }
       });
   }
 
   ngOnDestroy(): void {
-    this.$profiles.unsubscribe();
+    this.profiles$.unsubscribe();
   }
 
   filesUploaded(files: FileList) {
-    this.files = files;
+    this.files.clear();
     this.profiles.clear();
     this.formGroup.controls.activeProfiles.setValue([]);
     this.formGroup.controls.activeProfiles.disable();
@@ -127,18 +199,18 @@ export class StatsDialogComponent implements OnInit, OnDestroy {
     for (const file of files) {
       const regexResult = statsRegex.exec(file.name);
       if (!regexResult || !regexResult.groups) continue;
-      profileObservables.push(
-        this.minecraftProfileService.getProfile(regexResult.groups["uuid"])
-      );
+      const uuid = regexResult.groups["uuid"];
+      this.files.set(uuid, file);
+      profileObservables.push(this.minecraftProfileService.getProfile(uuid));
     }
-    this.$profiles.next(forkJoin(profileObservables));
+    this.profiles$.next(forkJoin(profileObservables));
   }
 
   getOutputData(): StatsDialogOutputData {
     return {
       ...this.formGroup.getRawValue(),
       profiles: this.profiles,
-      files: this.files
+      files: this.files.size ? this.files : undefined
     };
   }
 }
