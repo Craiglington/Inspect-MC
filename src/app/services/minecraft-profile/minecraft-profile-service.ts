@@ -1,20 +1,38 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { catchError, EMPTY, Observable } from "rxjs";
+import { catchError, EMPTY, Observable, of, tap } from "rxjs";
 import { MinecraftProfileResponse } from "../../models/minecraft-profile";
 
 @Injectable({
   providedIn: "root"
 })
 export class MinecraftProfileService {
-  private static readonly PROFILE_URL = "/minecraft/profile/";
-
   private readonly http = inject(HttpClient);
 
+  private static readonly PROFILE_URL = "/minecraft/profile/";
+  private readonly profiles: Map<string, MinecraftProfileResponse> = new Map();
+
+  /**
+   * Fetches a Minecraft profile if not already stored given the profile's uuid.
+   */
   getProfile(uuid: string): Observable<MinecraftProfileResponse> {
-    return this.http.get<MinecraftProfileResponse>(
-      `${MinecraftProfileService.PROFILE_URL}${uuid}`
-    );
+    const profile = this.profiles.get(uuid);
+    if (profile) return of(profile);
+    console.log(uuid);
+    return this.http
+      .get<MinecraftProfileResponse>(
+        `${MinecraftProfileService.PROFILE_URL}${uuid}`
+      )
+      .pipe(
+        tap((response) => {
+          if (
+            response.success ||
+            response.code === "minecraft.invalid_username"
+          ) {
+            this.profiles.set(uuid, response);
+          }
+        })
+      );
   }
 
   getSkinTexture(profile: MinecraftProfileResponse): Observable<Blob> {
