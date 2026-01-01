@@ -1,13 +1,12 @@
-import { Component, inject } from "@angular/core";
-import { MatToolbarModule } from "@angular/material/toolbar";
+import { Component } from "@angular/core";
+import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { MatMenuModule } from "@angular/material/menu";
-import { ToggleTheme } from "./toggle-theme/toggle-theme";
-import { NotificationService } from "../../services/notification/notification-service";
-import { MatButtonModule } from "@angular/material/button";
+import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { AppConstants } from "../../constants/app-constants";
 import { RouterLink } from "@angular/router";
+import { AppConstants } from "../../constants/app-constants";
+import { ToggleTheme } from "./toggle-theme/toggle-theme";
 
 @Component({
   selector: "app-header",
@@ -24,11 +23,5 @@ import { RouterLink } from "@angular/router";
   styleUrl: "./header.scss"
 })
 export class Header {
-  private readonly notification = inject(NotificationService);
-  title = AppConstants.appTitle;
-  contactUs() {
-    this.notification.notify({
-      message: `Email me at ${AppConstants.contactEmail}.`
-    });
-  }
+  protected readonly title = AppConstants.appTitle;
 }

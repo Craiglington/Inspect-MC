@@ -19,7 +19,6 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { debounceTime } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
 import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
-import { MapPalette } from "../../models/map-palette";
 import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
 import { originalMapPalette } from "../../constants/map-palettes/original-palette";
 import { Chunk } from "../../models/chunk";
@@ -32,6 +31,7 @@ import {
   MapDialogOutputData,
   MapPaletteType
 } from "../../models/map-dialog-data";
+import { MapPalette } from "../../models/map-palette";
 import { AnvilService } from "../../services/anvil/anvil-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
 import {
