@@ -1,0 +1,14 @@
+<button
+  id="editButton"
+  matIconButton
+  type="button"
+  matTooltip="World Settings"
+  (click)="openWorldDialog()">
+  <mat-icon>settings</mat-icon>
+</button>
+
+<ag-grid-angular
+  [rowData]="rows"
+  [columnDefs]="columns"
+  [defaultColDef]="defaultColDef"
+  [theme]="(appTheme$ | async) === 'light' ? lightTheme : darkTheme"></ag-grid-angular>

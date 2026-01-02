@@ -1,1 +1,5 @@
-export type RowData = { [key: string]: string | number | undefined };
+export type RowDataType = string | number | boolean | bigint | undefined;
+
+export type RowData = {
+  [key: string]: RowDataType;
+};

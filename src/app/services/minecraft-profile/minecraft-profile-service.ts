@@ -18,7 +18,6 @@ export class MinecraftProfileService {
   getProfile(uuid: string): Observable<MinecraftProfileResponse> {
     const profile = this.profiles.get(uuid);
     if (profile) return of(profile);
-    console.log(uuid);
     return this.http
       .get<MinecraftProfileResponse>(
         `${MinecraftProfileService.PROFILE_URL}${uuid}`

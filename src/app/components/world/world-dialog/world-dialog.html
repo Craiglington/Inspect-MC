@@ -1,23 +1,13 @@
-<h2 id="dialogTitle" mat-dialog-title>Stats Settings</h2>
+<h2 id="dialogTitle" mat-dialog-title>World Info Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
   <app-file-input
-    label="Select a Stats Folder"
-    [directory]="true"
+    label="Select a level.dat File"
     (filesUploaded)="filesUploaded($event)"></app-file-input>
 
   <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Players</mat-label>
-    <mat-select formControlName="activeProfiles" multiple>
-      @for (profile of profiles.values(); track profile.id) {
-      <mat-option [value]="profile.id">{{profile.username}}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field subscriptSizing="dynamic">
     <mat-label>Category</mat-label>
-    <mat-select formControlName="statsCategory">
-      @for (category of statsCategoryOptions; track $index) {
+    <mat-select formControlName="worldInfoCategory">
+      @for (category of worldInfoCategoryOptions; track $index) {
       <mat-option [value]="category.value">{{category.text}}</mat-option>
       }
     </mat-select>

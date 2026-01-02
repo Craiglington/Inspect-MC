@@ -17,6 +17,8 @@ import { RowData } from "../../models/row-data";
 import { Store } from "@ngrx/store";
 import { themeFeature } from "../../store/theme/theme.feature";
 import { AsyncPipe } from "@angular/common";
+import { darkTheme } from "../../constants/grid-themes/dark-theme";
+import { lightTheme } from "../../constants/grid-themes/light-theme";
 
 @Component({
   selector: "app-stats",
@@ -58,16 +60,8 @@ export class StatsComponent implements OnInit {
   protected readonly appTheme$ = this.store.select(
     themeFeature.selectThemeState
   );
-  protected readonly darkTheme = themeQuartz.withParams({
-    headerBackgroundColor: "#131313",
-    backgroundColor: "#121212",
-    foregroundColor: "#e1e2e6"
-  });
-  protected readonly lightTheme = themeQuartz.withParams({
-    headerBackgroundColor: "#fcf8f8",
-    backgroundColor: "#ffffff",
-    foregroundColor: "#44474a"
-  });
+  protected readonly darkTheme = darkTheme;
+  protected readonly lightTheme = lightTheme;
 
   ngOnInit(): void {
     this.openStatsDialog();
