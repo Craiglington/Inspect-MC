@@ -16,19 +16,19 @@ import { NBTService } from "../../services/nbt/nbt-service";
 import { NotificationService } from "../../services/notification/notification-service";
 import { themeFeature } from "../../store/theme/theme.feature";
 import {
-  WorldDialogComponent,
+  WorldInfoDialogComponent,
   WorldDialogInputData,
   WorldDialogOutputData,
   WorldInfoCategory
-} from "./world-dialog/world-dialog";
+} from "./world-info-dialog/world-info-dialog";
 
 @Component({
   selector: "app-world",
   imports: [MatIconModule, AgGridAngular, AsyncPipe, MatButtonModule],
-  templateUrl: "./world.html",
-  styleUrl: "./world.scss"
+  templateUrl: "./world-info.html",
+  styleUrl: "./world-info.scss"
 })
-export class WorldComponent implements OnInit {
+export class WorldInfoComponent implements OnInit {
   private readonly fileReaderService = inject(FileReaderService);
   private readonly decompressionService = inject(DecompressionService);
   private readonly notificationService = inject(NotificationService);
@@ -92,10 +92,10 @@ export class WorldComponent implements OnInit {
 
   protected openWorldDialog() {
     const dialogRef = this.dialog.open<
-      WorldDialogComponent,
+      WorldInfoDialogComponent,
       WorldDialogInputData,
       WorldDialogOutputData
-    >(WorldDialogComponent, {
+    >(WorldInfoDialogComponent, {
       data: {
         worldInfoCategory: this.worldInfoCategory
       }

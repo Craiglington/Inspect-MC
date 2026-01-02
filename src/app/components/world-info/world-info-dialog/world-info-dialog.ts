@@ -52,10 +52,10 @@ export interface WorldDialogForm {
     MatInputModule,
     MatSelectModule
   ],
-  templateUrl: "./world-dialog.html",
-  styleUrl: "./world-dialog.scss"
+  templateUrl: "./world-info-dialog.html",
+  styleUrl: "./world-info-dialog.scss"
 })
-export class WorldDialogComponent implements OnInit {
+export class WorldInfoDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialogData = inject<WorldDialogInputData>(MAT_DIALOG_DATA);
 

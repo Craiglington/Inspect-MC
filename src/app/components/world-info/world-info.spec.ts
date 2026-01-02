@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { WorldDialogComponent } from "./world-dialog";
+import { WorldInfoComponent } from "./world-info";
 
-describe("WorldDialogComponent", () => {
-  let component: WorldDialogComponent;
-  let fixture: ComponentFixture<WorldDialogComponent>;
+describe("WorldInfoComponent", () => {
+  let component: WorldInfoComponent;
+  let fixture: ComponentFixture<WorldInfoComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WorldDialogComponent]
+      imports: [WorldInfoComponent]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(WorldDialogComponent);
+    fixture = TestBed.createComponent(WorldInfoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
