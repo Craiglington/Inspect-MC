@@ -1,9 +1,5 @@
 <h2 id="dialogTitle" mat-dialog-title>World Info Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
-  <app-file-input
-    label="Select a level.dat File"
-    (filesUploaded)="filesUploaded($event)"></app-file-input>
-
   <mat-form-field subscriptSizing="dynamic">
     <mat-label>Category</mat-label>
     <mat-select formControlName="worldInfoCategory">
@@ -18,7 +14,7 @@
   <button
     matButton="filled"
     [mat-dialog-close]="getOutputData()"
-    [disabled]="formGroup.invalid || (!formGroup.dirty && !files)">
+    [disabled]="formGroup.invalid || !formGroup.dirty">
     Save
   </button>
 </mat-dialog-actions>

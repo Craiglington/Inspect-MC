@@ -16,7 +16,7 @@ export interface ChunkSection extends SNBT {
   biomes: {
     palette: string[];
   };
-  block_states: {
+  block_states?: {
     palette: BlockPaletteEntry[];
     data: bigint[];
   };
@@ -34,4 +34,5 @@ export interface Chunk extends SNBT {
   yPos: number;
   zPos: number;
   sections: ChunkSection[];
+  yMin: number;
 }

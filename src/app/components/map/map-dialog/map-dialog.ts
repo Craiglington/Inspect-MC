@@ -19,13 +19,27 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import {
-  MapDialogForm,
-  MapDialogInputData,
-  MapDialogOutputData,
-  MapPaletteOptions
-} from "../../../models/map-dialog-data";
-import { FileInput } from "../../file-input/file-input";
+
+export type MapDimensionType = "overworld" | "nether" | "end";
+export type MapPaletteType = "original" | "blocks-only" | "no-water";
+
+export interface MapDialogData {
+  mapDimension: MapDimensionType;
+  startingXCoord: number;
+  startingZCoord: number;
+  startingYLevel: number;
+  mapPaletteType: MapPaletteType;
+  showCrosshairs: boolean;
+}
+
+export interface MapDialogForm {
+  mapDimension: FormControl<MapDimensionType>;
+  startingXCoord: FormControl<number>;
+  startingZCoord: FormControl<number>;
+  startingYLevel: FormControl<number>;
+  mapPaletteType: FormControl<MapPaletteType>;
+  showCrosshairs: FormControl<boolean>;
+}
 
 @Component({
   selector: "app-map-dialog",
@@ -40,7 +54,6 @@ import { FileInput } from "../../file-input/file-input";
     MatDialogClose,
     ReactiveFormsModule,
     MatSelectModule,
-    FileInput,
     MatCheckboxModule
   ],
   templateUrl: "./map-dialog.html",
@@ -48,15 +61,51 @@ import { FileInput } from "../../file-input/file-input";
 })
 export class MapDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly data = inject<MapDialogInputData>(MAT_DIALOG_DATA);
-  protected files?: FileList;
+  private readonly data = inject<MapDialogData>(MAT_DIALOG_DATA);
 
-  readonly blockPaletteOptions = MapPaletteOptions;
+  protected readonly blockPaletteOptions: {
+    text: string;
+    value: MapPaletteType;
+  }[] = [
+    {
+      text: "Original",
+      value: "original"
+    },
+    {
+      text: "Blocks Only",
+      value: "blocks-only"
+    },
+    {
+      text: "No Water",
+      value: "no-water"
+    }
+  ];
+  protected readonly mapDimensionOptions: {
+    text: string;
+    value: MapDimensionType;
+  }[] = [
+    {
+      text: "The Overworld",
+      value: "overworld"
+    },
+    {
+      text: "The Nether",
+      value: "nether"
+    },
+    {
+      text: "The End",
+      value: "end"
+    }
+  ];
 
   formGroup!: FormGroup<MapDialogForm>;
 
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
+      mapDimension: new FormControl(this.data.mapDimension, {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
       startingXCoord: new FormControl(this.data.startingXCoord, {
         nonNullable: true,
         validators: [
@@ -92,14 +141,9 @@ export class MapDialogComponent implements OnInit {
     });
   }
 
-  filesUploaded(files: FileList) {
-    this.files = files;
-  }
-
-  getOutputData(): MapDialogOutputData {
+  getOutputData(): MapDialogData {
     return {
-      ...this.formGroup.getRawValue(),
-      files: this.files
+      ...this.formGroup.getRawValue()
     };
   }
 }

@@ -3,21 +3,37 @@
     <div id="logo" class="app-logo"></div>
     <span>{{title}}</span>
     <span class="spacer"></span>
+
+    @if (worldFiles?.level) {
     <a mat-icon-button matTooltip="World Info" routerLink="/world-info">
       <mat-icon>info</mat-icon>
     </a>
+    } @if (worldFiles?.region?.overworld || worldFiles?.region?.nether ||
+    worldFiles?.region?.end) {
     <a mat-icon-button matTooltip="Map" routerLink="/map">
       <mat-icon>map</mat-icon>
     </a>
+    } @if (worldFiles?.playerData) {
     <a mat-icon-button matTooltip="Players" routerLink="/players">
       <mat-icon>people</mat-icon>
     </a>
+    } @if(worldFiles?.stats) {
     <a mat-icon-button matTooltip="Stats" routerLink="/stats">
       <mat-icon>leaderboard</mat-icon>
     </a>
-    <app-toggle-theme></app-toggle-theme>
-    <button mat-icon-button (click)="help()" matTooltip="Help">
+    }
+
+    <div class="button-spacer"></div>
+
+    <button
+      mat-icon-button
+      (click)="openUploadDialog()"
+      matTooltip="Upload World Folder">
+      <mat-icon>upload</mat-icon>
+    </button>
+    <button mat-icon-button (click)="openHelpDialog()" matTooltip="Help">
       <mat-icon>help</mat-icon>
     </button>
+    <app-toggle-theme></app-toggle-theme>
   </mat-toolbar>
 </header>

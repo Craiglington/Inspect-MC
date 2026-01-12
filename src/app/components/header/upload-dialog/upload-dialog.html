@@ -1,0 +1,16 @@
+<h2 id="dialogTitle" mat-dialog-title>Upload a Minecraft World</h2>
+<mat-dialog-content id="dialogContent">
+  <app-file-input
+    label="Select a Minecraft World Folder"
+    [directory]="true"
+    (filesUploaded)="filesUploaded($event)"></app-file-input>
+  <a href="https://minecraft.wiki/w/.minecraft#Location" target="_blank"
+    >Where are world folders located?</a
+  >
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="outlined" mat-dialog-close>Cancel</button>
+  <button matButton="filled" [mat-dialog-close]="files" [disabled]="!files">
+    Save
+  </button>
+</mat-dialog-actions>

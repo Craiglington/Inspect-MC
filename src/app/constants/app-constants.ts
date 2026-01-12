@@ -1,4 +1,7 @@
 export const AppConstants = {
   appTitle: "Inspect MC",
-  version: "1.0.0"
+  supportedMinecraftVersions: {
+    min: "1.13",
+    max: "1.21.11"
+  }
 };

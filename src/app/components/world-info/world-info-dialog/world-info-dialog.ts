@@ -1,4 +1,11 @@
 import { Component, inject, OnInit } from "@angular/core";
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import {
   MAT_DIALOG_DATA,
@@ -7,16 +14,8 @@ import {
   MatDialogContent,
   MatDialogTitle
 } from "@angular/material/dialog";
-import { MatIconModule } from "@angular/material/icon";
-import { FileInput } from "../../file-input/file-input";
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
-} from "@angular/forms";
 import { MatFormField } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 
@@ -25,12 +24,8 @@ export type WorldInfoCategory =
   | "data_packs"
   | "game_rules";
 
-export interface WorldDialogInputData {
+export interface WorldDialogData {
   worldInfoCategory: WorldInfoCategory;
-}
-
-export interface WorldDialogOutputData extends WorldDialogInputData {
-  files?: FileList;
 }
 
 export interface WorldDialogForm {
@@ -46,7 +41,6 @@ export interface WorldDialogForm {
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
-    FileInput,
     ReactiveFormsModule,
     MatFormField,
     MatInputModule,
@@ -57,7 +51,7 @@ export interface WorldDialogForm {
 })
 export class WorldInfoDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogData = inject<WorldDialogInputData>(MAT_DIALOG_DATA);
+  private readonly dialogData = inject<WorldDialogData>(MAT_DIALOG_DATA);
 
   protected readonly worldInfoCategoryOptions: {
     text: string;
@@ -76,7 +70,6 @@ export class WorldInfoDialogComponent implements OnInit {
       value: "game_rules"
     }
   ];
-  protected files?: FileList;
   protected formGroup!: FormGroup<WorldDialogForm>;
 
   ngOnInit(): void {
@@ -88,14 +81,9 @@ export class WorldInfoDialogComponent implements OnInit {
     });
   }
 
-  filesUploaded(files: FileList) {
-    this.files = files;
-  }
-
-  getOutputData(): WorldDialogOutputData {
+  getOutputData(): WorldDialogData {
     return {
-      ...this.formGroup.getRawValue(),
-      files: this.files
+      ...this.formGroup.getRawValue()
     };
   }
 }

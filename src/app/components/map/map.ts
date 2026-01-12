@@ -1,6 +1,7 @@
 import { NgClass } from "@angular/common";
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -16,7 +17,8 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { debounceTime } from "rxjs";
+import { Store } from "@ngrx/store";
+import { debounceTime, Subscription } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
 import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
 import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
@@ -26,11 +28,6 @@ import { ChunkMapData } from "../../models/chunk-map-data";
 import { Coords } from "../../models/coords";
 import { Dimensions } from "../../models/dimensions";
 import { RGBAColor } from "../../models/map-color";
-import {
-  MapDialogInputData,
-  MapDialogOutputData,
-  MapPaletteType
-} from "../../models/map-dialog-data";
 import { MapPalette } from "../../models/map-palette";
 import { AnvilService } from "../../services/anvil/anvil-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
@@ -38,8 +35,14 @@ import {
   LocalStorageKey,
   LocalStorageService
 } from "../../services/local-storage/local-storage";
+import { worldFilesFeature } from "../../store/world-files/world-files.feature";
 import { CoordInput } from "./coord-input/coord-input";
-import { MapDialogComponent } from "./map-dialog/map-dialog";
+import {
+  MapDialogComponent,
+  MapDialogData,
+  MapDimensionType,
+  MapPaletteType
+} from "./map-dialog/map-dialog";
 
 @Component({
   selector: "app-map",
@@ -61,6 +64,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly anvilService = inject(AnvilService);
   private readonly localStorageService = inject(LocalStorageService);
   private readonly dialog = inject(MatDialog);
+  private readonly store = inject(Store);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // A reference to our canvas.
   @ViewChild("map") private canvasRef?: ElementRef<HTMLCanvasElement>;
@@ -74,11 +79,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly CROSSHAIRS_WIDTH = 0.5;
   private readonly CROSSHAIRS_LENGTH = 6;
 
+  private readonly regionFiles$ = this.store.select(
+    worldFilesFeature.selectRegion
+  );
+  private regionSubscription!: Subscription;
+  private overworldRegionFiles?: Map<string, File>;
+  private netherRegionFiles?: Map<string, File>;
+  private endRegionFiles?: Map<string, File>;
+  private regionFiles?: Map<string, File>;
+  private yMin!: number;
+
   // An event emitter used to signal and time when the window is resized and thus the canvas should be resized.
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
 
   // Region files provided via input and their data. Keys are strings in the format "x,z".
-  private readonly regionFiles: Map<string, File> = new Map();
   private readonly regionFileData: Map<string, Promise<ArrayBuffer>> =
     new Map();
 
@@ -112,11 +126,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly mapStartCoords = new Coords();
 
   /**
-   * These two coords are used to track the previous and current mouse positions
+   * These coords are used to track the previous and current mouse positions
    * during a dragging event. These coords will be set in html/css pixels.
    */
   private readonly dragStartHtmlCoords = new Coords();
   private readonly dragHtmlCoords = new Coords();
+
+  // Used to track the actual map position when dragging.
+  private readonly dragMapCoords = new Coords();
 
   private readonly mapDimensions = new Dimensions();
   private readonly mapClearDimensions = new Dimensions();
@@ -130,6 +147,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private startingXCoord: number;
   private startingYLevel: number;
   private startingZCoord: number;
+  private mapDimension: MapDimensionType;
   private mapPaletteType: MapPaletteType;
   private mapPalette: MapPalette;
   protected showCrosshairs: boolean;
@@ -139,9 +157,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected isMapDragging: boolean = false;
 
   constructor() {
-    const mapSettings = this.localStorageService.get<MapDialogInputData>(
+    const mapSettings = this.localStorageService.get<MapDialogData>(
       LocalStorageKey.MAP_SETTINGS
     );
+    this.mapDimension = mapSettings?.mapDimension ?? "overworld";
     this.startingXCoord = mapSettings?.startingXCoord ?? 0;
     this.startingZCoord = mapSettings?.startingZCoord ?? 0;
     this.mapCoords.set(this.startingXCoord, this.startingZCoord);
@@ -153,9 +172,33 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.openMapDialog();
     this.resizeCanvasEmitter.pipe(debounceTime(250)).subscribe(() => {
       this.resizeCanvas();
+    });
+    this.regionSubscription = this.regionFiles$.subscribe((regionFiles) => {
+      this.overworldRegionFiles = regionFiles.overworld;
+      this.netherRegionFiles = regionFiles.nether;
+      this.endRegionFiles = regionFiles.end;
+      this.mapCoords.set(this.startingXCoord, this.startingZCoord);
+      this.mapYLevel = this.startingYLevel;
+
+      if (this.mapDimension === "overworld") {
+        this.regionFiles = this.overworldRegionFiles;
+        this.yMin = -64;
+      } else if (this.mapDimension === "nether") {
+        this.regionFiles = this.netherRegionFiles;
+        this.yMin = 0;
+      } else if (this.mapDimension === "end") {
+        this.regionFiles = this.endRegionFiles;
+        this.yMin = 0;
+      }
+
+      this.regionFileData.clear();
+      this.chunkImages.clear();
+      this.chunkMapData.clear();
+      this.regionFilesProcessed = true;
+      this.clearMap();
+      this.drawMap();
     });
   }
 
@@ -169,6 +212,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     window.removeEventListener("resize", this.windowResizeHandler);
     this.resizeCanvasEmitter.unsubscribe();
+    this.regionSubscription.unsubscribe();
   }
 
   /**
@@ -281,6 +325,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ctx.scale(this.canvasToMapRatio, this.canvasToMapRatio);
     this.ctx.imageSmoothingEnabled = false;
 
+    this.cdr.detectChanges();
+
     if (this.regionFilesProcessed && !this.isMapDragging) {
       this.drawMap();
     }
@@ -289,10 +335,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected openMapDialog() {
     const dialogRef = this.dialog.open<
       MapDialogComponent,
-      MapDialogInputData,
-      MapDialogOutputData
+      MapDialogData,
+      MapDialogData
     >(MapDialogComponent, {
       data: {
+        mapDimension: this.mapDimension,
         startingXCoord: this.startingXCoord,
         startingZCoord: this.startingZCoord,
         startingYLevel: this.startingYLevel,
@@ -303,13 +350,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
-      const { files, ...storedSettings } = data;
       const clearChunkData =
-        this.mapPaletteType !== storedSettings.mapPaletteType;
-      this.startingXCoord = storedSettings.startingXCoord;
-      this.startingZCoord = storedSettings.startingZCoord;
-      this.startingYLevel = storedSettings.startingYLevel;
-      this.mapPaletteType = storedSettings.mapPaletteType;
+        this.mapPaletteType !== data.mapPaletteType ||
+        this.mapDimension !== data.mapDimension;
+      this.startingXCoord = data.startingXCoord;
+      this.startingZCoord = data.startingZCoord;
+      this.startingYLevel = data.startingYLevel;
+      this.mapPaletteType = data.mapPaletteType;
+      this.mapDimension = data.mapDimension;
       if (this.mapPaletteType === "blocks-only") {
         this.mapPalette = blocksOnlyMapPalette;
       } else if (this.mapPaletteType === "no-water") {
@@ -317,46 +365,27 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.mapPalette = originalMapPalette;
       }
-      this.showCrosshairs = storedSettings.showCrosshairs;
+      this.showCrosshairs = data.showCrosshairs;
 
-      if (files) {
-        this.mapCoords.set(this.startingXCoord, this.startingZCoord);
-        this.mapYLevel = this.startingYLevel;
-        this.processRegionFiles(files);
-      } else {
-        if (clearChunkData) {
-          this.chunkImages.clear();
-          this.chunkMapData.clear();
-          this.clearMap();
+      if (clearChunkData) {
+        if (this.mapDimension === "overworld") {
+          this.regionFiles = this.overworldRegionFiles;
+          this.yMin = -64;
+        } else if (this.mapDimension === "nether") {
+          this.regionFiles = this.netherRegionFiles;
+          this.yMin = 0;
+        } else if (this.mapDimension === "end") {
+          this.regionFiles = this.endRegionFiles;
+          this.yMin = 0;
         }
-        this.drawMap();
+        this.regionFileData.clear();
+        this.chunkImages.clear();
+        this.chunkMapData.clear();
+        this.clearMap();
       }
-      this.localStorageService.set(
-        LocalStorageKey.MAP_SETTINGS,
-        storedSettings
-      );
+      this.drawMap();
+      this.localStorageService.set(LocalStorageKey.MAP_SETTINGS, data);
     });
-  }
-
-  // Load and store all region files
-  private processRegionFiles(files: FileList) {
-    this.regionFiles.clear();
-    this.regionFileData.clear();
-    this.chunkImages.clear();
-    this.chunkMapData.clear();
-    const anvilRegex = new RegExp(/^r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/);
-    for (const file of files) {
-      const regexResult = anvilRegex.exec(file.name);
-      if (!regexResult || !regexResult.groups) continue;
-      this.regionFiles.set(
-        `${regexResult.groups["x"]},${regexResult.groups["z"]}`,
-        file
-      );
-    }
-
-    this.regionFilesProcessed = true;
-    this.clearMap();
-    this.drawMap();
   }
 
   /**
@@ -483,7 +512,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       chunkZ
     );
     const regionKey = `${regionCoords.x},${regionCoords.z}`;
-    const regionFile = this.regionFiles.get(regionKey);
+    const regionFile = this.regionFiles?.get(regionKey);
     if (!regionFile) {
       return null;
     }
@@ -500,9 +529,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     const chunk = await this.anvilService.getChunkData(
       await regionData,
       regionChunkCoords.x,
-      regionChunkCoords.z
+      regionChunkCoords.z,
+      this.yMin
     );
-    return chunk?.Status === "minecraft:full" ? chunk : null;
+    return chunk?.Status === "minecraft:full" ||
+      chunk?.Status === "minecraft:postprocessed"
+      ? chunk
+      : null;
   }
 
   /**
@@ -627,25 +660,26 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  protected mouseDown = (event: MouseEvent) => {
+  protected pointerDown = (event: MouseEvent) => {
     if (this.isMapDragging) return;
     this.isMapDragging = true;
     this.setNewDrawLicense();
     this.dragStartHtmlCoords.set(event.x, event.y);
     this.dragHtmlCoords.set(event.x, event.y);
-    window.addEventListener("mouseup", this.mouseUp);
+    this.dragMapCoords.setWithCoords(this.mapCoords);
+    window.addEventListener("pointerup", this.pointerUp);
     requestAnimationFrame(this.animationFrame);
   };
 
-  protected mouseMove = (event: MouseEvent) => {
+  protected pointerMove = (event: MouseEvent) => {
     if (!this.isMapDragging) return;
     this.dragHtmlCoords.set(event.x, event.y);
   };
 
-  private mouseUp = () => {
+  private pointerUp = () => {
     if (!this.isMapDragging) return;
     this.isMapDragging = false;
-    window.removeEventListener("mouseup", this.mouseUp);
+    window.removeEventListener("pointerup", this.pointerUp);
   };
 
   private animationFrame = () => {
@@ -666,7 +700,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     let mapZShift = htmlZShift * this.htmlToMapRatio;
 
     // Update the map coords
-    this.mapCoords.subtract(mapXShift, mapZShift);
+    this.dragMapCoords.subtract(mapXShift, mapZShift);
+    this.mapCoords.setWithCoords(this.dragMapCoords);
+    this.mapCoords.round();
 
     this.clearMap();
     this.ctx.translate(mapXShift, mapZShift);
@@ -701,9 +737,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         0,
         0
       );
-
-      // Round map coords to whole numbers
-      this.mapCoords.round();
 
       this.drawMap();
     }

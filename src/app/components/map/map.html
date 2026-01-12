@@ -47,6 +47,6 @@
   #map
   id="map"
   [ngClass]="{'isMapDragging': isMapDragging}"
-  (mousedown)="mouseDown($event)"
-  (mousemove)="mouseMove($event)">
+  (pointerdown)="pointerDown($event)"
+  (pointermove)="pointerMove($event)">
 </canvas>

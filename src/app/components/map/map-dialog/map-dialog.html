@@ -1,11 +1,15 @@
 <h2 id="dialogTitle" mat-dialog-title>Map Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
-  <app-file-input
-    label="Select a Region Folder"
-    [directory]="true"
-    (filesUploaded)="filesUploaded($event)"></app-file-input>
-
   <mat-checkbox formControlName="showCrosshairs">Show Crosshairs</mat-checkbox>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Map Dimension</mat-label>
+    <mat-select formControlName="mapDimension">
+      @for (dimension of mapDimensionOptions; track $index) {
+      <mat-option [value]="dimension.value">{{dimension.text}}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
 
   <mat-form-field subscriptSizing="dynamic">
     <mat-label>Starting X Coordinate</mat-label>
@@ -62,7 +66,7 @@
   <button
     matButton="filled"
     [mat-dialog-close]="getOutputData()"
-    [disabled]="formGroup.invalid || (!formGroup.dirty && !files)">
+    [disabled]="formGroup.invalid || !formGroup.dirty">
     Save
   </button>
 </mat-dialog-actions>

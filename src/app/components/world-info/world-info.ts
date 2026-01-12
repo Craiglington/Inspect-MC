@@ -1,5 +1,5 @@
 import { AsyncPipe } from "@angular/common";
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
@@ -17,10 +17,11 @@ import { NotificationService } from "../../services/notification/notification-se
 import { themeFeature } from "../../store/theme/theme.feature";
 import {
   WorldInfoDialogComponent,
-  WorldDialogInputData,
-  WorldDialogOutputData,
+  WorldDialogData,
   WorldInfoCategory
 } from "./world-info-dialog/world-info-dialog";
+import { worldFilesFeature } from "../../store/world-files/world-files.feature";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-world",
@@ -28,7 +29,7 @@ import {
   templateUrl: "./world-info.html",
   styleUrl: "./world-info.scss"
 })
-export class WorldInfoComponent implements OnInit {
+export class WorldInfoComponent implements OnInit, OnDestroy {
   private readonly fileReaderService = inject(FileReaderService);
   private readonly decompressionService = inject(DecompressionService);
   private readonly notificationService = inject(NotificationService);
@@ -42,7 +43,12 @@ export class WorldInfoComponent implements OnInit {
   protected readonly darkTheme = darkTheme;
   protected readonly lightTheme = lightTheme;
 
-  private worldData?: SNBT;
+  private readonly levelFile$ = this.store.select(
+    worldFilesFeature.selectLevel
+  );
+  private levelSubscription!: Subscription;
+  private levelData?: SNBT;
+
   private worldInfoCategory: WorldInfoCategory = "general_world_info";
   protected rows: RowData[] = [];
   protected columns: ColDef[] = [];
@@ -87,14 +93,25 @@ export class WorldInfoComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.openWorldDialog();
+    this.levelSubscription = this.levelFile$.subscribe(async (levelFile) => {
+      if (levelFile) {
+        this.levelData = await this.processWorldInfoFile(levelFile);
+      } else {
+        this.levelData = undefined;
+      }
+      this.updateTable();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.levelSubscription.unsubscribe();
   }
 
   protected openWorldDialog() {
     const dialogRef = this.dialog.open<
       WorldInfoDialogComponent,
-      WorldDialogInputData,
-      WorldDialogOutputData
+      WorldDialogData,
+      WorldDialogData
     >(WorldInfoDialogComponent, {
       data: {
         worldInfoCategory: this.worldInfoCategory
@@ -103,14 +120,7 @@ export class WorldInfoComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(async (data) => {
       if (!data) return;
-
       this.worldInfoCategory = data.worldInfoCategory;
-
-      const worldRegex = new RegExp(/^level\.dat$/);
-      if (data.files?.length && worldRegex.exec(data.files[0].name)) {
-        this.worldData = await this.processWorldInfoFile(data.files[0]);
-      }
-
       this.updateTable();
     });
   }
@@ -148,16 +158,18 @@ export class WorldInfoComponent implements OnInit {
   }
 
   private async updateTable() {
-    if (!this.worldData) return;
-    if (this.worldInfoCategory === "general_world_info") {
+    if (!this.levelData) {
+      this.columns = [];
+      this.rows = [];
+    } else if (this.worldInfoCategory === "general_world_info") {
       this.columns = this.generalTableCols;
-      this.rows = this.createGeneralWorldInfoData(this.worldData);
+      this.rows = this.createGeneralWorldInfoData(this.levelData);
     } else if (this.worldInfoCategory === "data_packs") {
       this.columns = this.dataPacksTableCols;
-      this.rows = this.createDataPacksData(this.worldData);
+      this.rows = this.createDataPacksData(this.levelData);
     } else if (this.worldInfoCategory === "game_rules") {
       this.columns = this.gameRulesTableCols;
-      this.rows = this.createGameRulesData(this.worldData);
+      this.rows = this.createGameRulesData(this.levelData);
     }
   }
 

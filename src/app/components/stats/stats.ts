@@ -1,24 +1,24 @@
+import { AsyncPipe } from "@angular/common";
 import { Component, inject, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { Store } from "@ngrx/store";
 import { AgGridAngular } from "ag-grid-angular";
-import { themeQuartz, type ColDef } from "ag-grid-community";
+import { type ColDef } from "ag-grid-community";
+import { darkTheme } from "../../constants/grid-themes/dark-theme";
+import { lightTheme } from "../../constants/grid-themes/light-theme";
 import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
+import { RowData } from "../../models/row-data";
 import { Stats, StatsCategory } from "../../models/stats";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
+import { themeFeature } from "../../store/theme/theme.feature";
 import {
   StatsDialogComponent,
   StatsDialogInputData,
   StatsDialogOutputData
 } from "./stats-dialog/stats-dialog";
-import { RowData } from "../../models/row-data";
-import { Store } from "@ngrx/store";
-import { themeFeature } from "../../store/theme/theme.feature";
-import { AsyncPipe } from "@angular/common";
-import { darkTheme } from "../../constants/grid-themes/dark-theme";
-import { lightTheme } from "../../constants/grid-themes/light-theme";
 
 @Component({
   selector: "app-stats",
