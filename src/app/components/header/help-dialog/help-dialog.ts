@@ -7,6 +7,7 @@ import {
   MatDialogClose
 } from "@angular/material/dialog";
 import { AppConstants } from "../../../constants/app-constants";
+import { environment } from "../../../../environments/environment";
 
 @Component({
   selector: "app-help-dialog",
@@ -23,5 +24,7 @@ import { AppConstants } from "../../../constants/app-constants";
 })
 export class HelpDialogComponent {
   protected readonly appTitle = AppConstants.appTitle;
-  protected readonly version = AppConstants.version;
+  protected readonly appVersion = environment.version;
+  protected readonly supportedMinecraftVersions =
+    AppConstants.supportedMinecraftVersions;
 }

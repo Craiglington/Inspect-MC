@@ -1,9 +1,14 @@
 <h2 id="dialogTitle" mat-dialog-title>About {{appTitle}}</h2>
 <mat-dialog-content id="dialogContent">
-  <div class="app-logo"></div>
-  <em>v{{version}}</em>
+  <div class="app-logo-large"></div>
+  <em>v{{appVersion}}</em>
   <p>
-    <strong>{{appTitle}} Only Supports Minecraft Java Edition</strong><br />
+    <strong
+      >{{appTitle}} Only Supports Minecraft Java Edition (<em
+        >{{supportedMinecraftVersions.min}} -
+        {{supportedMinecraftVersions.max}}</em
+      >)</strong
+    ><br />
     <em>(Sorry Bedrock players)</em>
   </p>
 
@@ -18,26 +23,15 @@
   </p>
 
   <p>
+    To begin, click on the upload icon and select a Minecraft world folder. Use
+    the other icons to navigate between different views.
+  </p>
+
+  <p>
     Looking for interesting worlds to explore?
     <a target="_blank" href="https://hermitcraft.com/">HermitCraft</a> provides
     a world download at the end of every season.
   </p>
-
-  <p>FAQ</p>
-  <ol id="faq-list">
-    <li>
-      <a href="https://minecraft.wiki/w/.minecraft#Location" target="_blank"
-        >Where are world save folders located?</a
-      >
-    </li>
-    <li>
-      <a
-        href="https://minecraft.wiki/w/Java_Edition_level_format#Directory_structure"
-        target="_blank"
-        >What is the structure of a save folder?</a
-      >
-    </li>
-  </ol>
 </mat-dialog-content>
 <mat-dialog-actions>
   <button matButton="filled" mat-dialog-close>Close</button>
