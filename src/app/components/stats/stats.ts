@@ -7,7 +7,7 @@ import { Store } from "@ngrx/store";
 import { catchError, EMPTY, finalize, Subscription } from "rxjs";
 import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
 import { GridColumn, GridRow } from "../../models/gird-data";
-import { Stats, StatsCategory } from "../../models/stats";
+import { Stats } from "../../models/stats";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
 import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
 import { NotificationService } from "../../services/notification/notification-service";
@@ -15,6 +15,7 @@ import { worldFilesFeature } from "../../store/world-files/world-files.feature";
 import { GridComponent } from "../grid/grid";
 import { SpinnerComponent } from "../spinner/spinner";
 import {
+  StatsCategory,
   StatsDialogComponent,
   StatsDialogInputData,
   StatsDialogOutputData

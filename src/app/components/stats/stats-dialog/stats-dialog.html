@@ -23,7 +23,7 @@
   <button
     matButton="filled"
     [mat-dialog-close]="formGroup.getRawValue()"
-    [disabled]="formGroup.invalid || (!formGroup.dirty && !files)">
+    [disabled]="formGroup.invalid || !formGroup.dirty">
     Save
   </button>
 </mat-dialog-actions>

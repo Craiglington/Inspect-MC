@@ -19,7 +19,9 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
-import { StatsCategory } from "../../../models/stats";
+import { Stats } from "../../../models/stats";
+
+export type StatsCategory = keyof Stats["stats"];
 
 export interface StatsDialogInputData {
   profiles: Map<string, MinecraftPlayerProfile>;
@@ -98,12 +100,10 @@ export class StatsDialogComponent implements OnInit {
     }
   ];
 
-  protected files!: Map<string, File>;
   protected profiles!: Map<string, MinecraftPlayerProfile>;
   protected formGroup!: FormGroup<StatsDialogForm>;
 
   ngOnInit(): void {
-    this.files = new Map();
     this.profiles = this.dialogData.profiles;
     this.formGroup = this.formBuilder.group({
       activeProfiles: new FormControl<string[]>(

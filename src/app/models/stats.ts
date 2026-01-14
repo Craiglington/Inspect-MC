@@ -29,5 +29,3 @@ export interface Stats {
     };
   };
 }
-
-export type StatsCategory = keyof Stats["stats"];
