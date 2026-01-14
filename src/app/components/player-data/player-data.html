@@ -1,0 +1,14 @@
+@if (loading) {
+<app-spinner></app-spinner>
+}
+
+<button
+  id="editButton"
+  matIconButton
+  type="button"
+  matTooltip="Stats Settings"
+  (click)="openPlayerDataDialog()">
+  <mat-icon>settings</mat-icon>
+</button>
+
+<app-grid [rows]="rows" [columns]="columns"></app-grid>
