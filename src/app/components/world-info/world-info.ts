@@ -5,22 +5,19 @@ import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { Subscription } from "rxjs";
 import { GridCell, GridColumn, GridRow } from "../../models/gird-data";
-import { SNBT } from "../../models/snbt";
-import { DecompressionService } from "../../services/decompression/decompression-service";
-import { FileReaderService } from "../../services/file-reader/file-reader-service";
-import { NBTService } from "../../services/nbt/nbt-service";
-import { NotificationService } from "../../services/notification/notification-service";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { GridComponent } from "../grid/grid";
-import {
-  WorldInfoDialogData,
-  WorldInfoCategory,
-  WorldInfoDialogComponent
-} from "./world-info-dialog/world-info-dialog";
+import { Level } from "../../models/level";
+import { DatService } from "../../services/dat/dat-service";
 import {
   LocalStorageKey,
   LocalStorageService
 } from "../../services/local-storage/local-storage";
+import { worldFilesFeature } from "../../store/world-files/world-files.feature";
+import { GridComponent } from "../grid/grid";
+import {
+  WorldInfoCategory,
+  WorldInfoDialogComponent,
+  WorldInfoDialogData
+} from "./world-info-dialog/world-info-dialog";
 
 @Component({
   selector: "app-world",
@@ -30,10 +27,7 @@ import {
 })
 export class WorldInfoComponent implements OnInit, OnDestroy {
   private readonly localStorageService = inject(LocalStorageService);
-  private readonly fileReaderService = inject(FileReaderService);
-  private readonly decompressionService = inject(DecompressionService);
-  private readonly notificationService = inject(NotificationService);
-  private readonly nbtService = inject(NBTService);
+  private readonly datService = inject(DatService);
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(Store);
 
@@ -41,7 +35,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     worldFilesFeature.selectLevel
   );
   private levelSubscription!: Subscription;
-  private levelData?: SNBT;
+  private levelData?: Level;
 
   private worldInfoCategory: WorldInfoCategory;
   protected rows: GridRow[] = [];
@@ -94,7 +88,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.levelSubscription = this.levelFile$.subscribe(async (levelFile) => {
       if (levelFile) {
-        this.levelData = await this.processWorldInfoFile(levelFile);
+        this.levelData = await this.datService.getSNBT<Level>(levelFile);
       } else {
         this.levelData = undefined;
       }
@@ -125,38 +119,6 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async processWorldInfoFile(file: File): Promise<SNBT | undefined> {
-    // Get the file data.
-    const compressedData = await this.fileReaderService.readAsArrayBuffer(file);
-
-    // Check which compression method was used and decompress the data.
-    let decompressedData: ArrayBuffer;
-    if (this.decompressionService.isValidGzipData(compressedData)) {
-      decompressedData = await this.decompressionService.decompressData(
-        compressedData,
-        "gzip"
-      );
-    } else if (this.decompressionService.isValidZlibData(compressedData)) {
-      decompressedData = await this.decompressionService.decompressData(
-        compressedData,
-        "deflate"
-      );
-    } else {
-      decompressedData = compressedData;
-    }
-
-    // Check the NBT validity.
-    if (!this.nbtService.isValidNBTData(decompressedData)) {
-      this.notificationService.notify({
-        message: "Invalid level.dat file/format."
-      });
-      return undefined;
-    }
-
-    // Parse the NBT data to get an SNBT.
-    return this.nbtService.getSNBT(decompressedData)["Data"] as SNBT;
-  }
-
   private async updateTable() {
     if (!this.levelData) {
       this.columns = [];
@@ -173,11 +135,11 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createGeneralWorldInfoData(worldData: SNBT): GridRow[] {
+  private createGeneralWorldInfoData(worldData: Level): GridRow[] {
     const rows: GridRow[] = [];
 
     // World Name
-    const worldName = worldData["LevelName"] as GridCell;
+    const worldName = worldData.Data?.LevelName;
     if (worldName !== undefined) {
       rows.push(
         this.createRow(this.generalTableColumns, "World Name", worldName)
@@ -185,15 +147,13 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Seed
-    const seed = (worldData["WorldGenSettings"] as SNBT)?.["seed"] as GridCell;
+    const seed = worldData.Data?.WorldGenSettings?.seed;
     if (seed !== undefined) {
       rows.push(this.createRow(this.generalTableColumns, "Seed", seed));
     }
 
     // Minecraft Version
-    const minecraftVersion = (worldData["Version"] as SNBT)?.[
-      "Name"
-    ] as GridCell;
+    const minecraftVersion = worldData.Data?.Version?.Name;
     if (minecraftVersion !== undefined) {
       rows.push(
         this.createRow(
@@ -205,10 +165,9 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Spawn Location
-    const spawn = worldData["spawn"] as SNBT;
-    if (spawn !== undefined) {
-      const pos = spawn["pos"] as number[];
-      const dimension = spawn["dimension"] as string;
+    const pos = worldData.Data?.spawn?.pos;
+    const dimension = worldData.Data?.spawn?.dimension;
+    if (pos !== undefined && dimension !== undefined) {
       rows.push(
         this.createRow(
           this.generalTableColumns,
@@ -219,7 +178,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Time of Day
-    const dayTime = worldData["DayTime"] as GridCell;
+    const dayTime = worldData.Data?.DayTime;
     if (dayTime !== undefined) {
       rows.push(
         this.createRow(
@@ -231,7 +190,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // World Age
-    const time = worldData["Time"] as GridCell;
+    const time = worldData.Data?.Time;
     if (time !== undefined) {
       rows.push(
         this.createRow(this.generalTableColumns, "World Age (Ticks)", time)
@@ -239,8 +198,8 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Difficulty
-    const difficulty = worldData["Difficulty"] as number;
-    const difficultyLocked = worldData["DifficultyLocked"] as number;
+    const difficulty = worldData.Data?.Difficulty;
+    const difficultyLocked = worldData.Data?.DifficultyLocked;
     if (difficulty !== undefined && difficultyLocked !== undefined) {
       let difficultyName = "";
       if (difficulty === 0) {
@@ -262,7 +221,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Hardcore
-    const hardcore = worldData["hardcore"] as number;
+    const hardcore = worldData.Data?.hardcore;
     if (hardcore !== undefined) {
       rows.push(
         this.createRow(
@@ -274,7 +233,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Default Game Type
-    const gameType = worldData["GameType"] as number;
+    const gameType = worldData.Data?.GameType;
     if (gameType !== undefined) {
       let gameTypeName = "";
       if (gameType === 0) {
@@ -296,7 +255,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Was Modded
-    const wasModded = worldData["WasModded"] as number;
+    const wasModded = worldData.Data?.WasModded;
     if (wasModded !== undefined) {
       rows.push(
         this.createRow(
@@ -308,7 +267,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Allow Commands
-    const allowCommands = worldData["allowCommands"] as number;
+    const allowCommands = worldData.Data?.allowCommands;
     if (allowCommands !== undefined) {
       rows.push(
         this.createRow(
@@ -321,11 +280,10 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     return rows;
   }
 
-  private createDataPacksData(worldData: SNBT): GridRow[] {
+  private createDataPacksData(worldData: Level): GridRow[] {
     const rows: GridRow[] = [];
-    const dataPacks = worldData["DataPacks"] as SNBT;
-    const disabledDataPacks = dataPacks?.["Disabled"] as string[];
-    const enabledDataPacks = dataPacks?.["Enabled"] as string[];
+    const disabledDataPacks = worldData.Data?.DataPacks?.Disabled;
+    const enabledDataPacks = worldData.Data?.DataPacks?.Enabled;
     if (disabledDataPacks !== undefined) {
       for (const dataPack of disabledDataPacks) {
         rows.push(this.createRow(this.dataPacksTableColumns, dataPack, false));
@@ -339,16 +297,16 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     return rows;
   }
 
-  private createGameRulesData(worldData: SNBT): GridRow[] {
+  private createGameRulesData(worldData: Level): GridRow[] {
     const rows: GridRow[] = [];
-    const gameRules = worldData["game_rules"] as SNBT;
+    const gameRules = worldData.Data?.game_rules;
     if (gameRules !== undefined) {
       for (const gameRule in gameRules) {
         rows.push(
           this.createRow(
             this.gameRulesTableColumns,
             gameRule,
-            gameRules[gameRule] as GridCell
+            gameRules[gameRule]
           )
         );
       }
