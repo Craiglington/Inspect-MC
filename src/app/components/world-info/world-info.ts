@@ -1,35 +1,35 @@
-import { AsyncPipe } from "@angular/common";
 import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
-import { AgGridAngular } from "ag-grid-angular";
-import { type ColDef } from "ag-grid-community";
-import { darkTheme } from "../../constants/grid-themes/dark-theme";
-import { lightTheme } from "../../constants/grid-themes/light-theme";
-import { RowData, RowDataType } from "../../models/row-data";
+import { Subscription } from "rxjs";
+import { GridCell, GridColumn, GridRow } from "../../models/gird-data";
 import { SNBT } from "../../models/snbt";
 import { DecompressionService } from "../../services/decompression/decompression-service";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
 import { NBTService } from "../../services/nbt/nbt-service";
 import { NotificationService } from "../../services/notification/notification-service";
-import { themeFeature } from "../../store/theme/theme.feature";
-import {
-  WorldInfoDialogComponent,
-  WorldDialogData,
-  WorldInfoCategory
-} from "./world-info-dialog/world-info-dialog";
 import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { Subscription } from "rxjs";
+import { GridComponent } from "../grid/grid";
+import {
+  WorldInfoDialogData,
+  WorldInfoCategory,
+  WorldInfoDialogComponent
+} from "./world-info-dialog/world-info-dialog";
+import {
+  LocalStorageKey,
+  LocalStorageService
+} from "../../services/local-storage/local-storage";
 
 @Component({
   selector: "app-world",
-  imports: [MatIconModule, AgGridAngular, AsyncPipe, MatButtonModule],
+  imports: [MatIconModule, MatButtonModule, GridComponent],
   templateUrl: "./world-info.html",
   styleUrl: "./world-info.scss"
 })
 export class WorldInfoComponent implements OnInit, OnDestroy {
+  private readonly localStorageService = inject(LocalStorageService);
   private readonly fileReaderService = inject(FileReaderService);
   private readonly decompressionService = inject(DecompressionService);
   private readonly notificationService = inject(NotificationService);
@@ -37,26 +37,17 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(Store);
 
-  protected readonly appTheme$ = this.store.select(
-    themeFeature.selectThemeState
-  );
-  protected readonly darkTheme = darkTheme;
-  protected readonly lightTheme = lightTheme;
-
   private readonly levelFile$ = this.store.select(
     worldFilesFeature.selectLevel
   );
   private levelSubscription!: Subscription;
   private levelData?: SNBT;
 
-  private worldInfoCategory: WorldInfoCategory = "general_world_info";
-  protected rows: RowData[] = [];
-  protected columns: ColDef[] = [];
-  protected readonly defaultColDef: ColDef = {
-    flex: 1
-  };
+  private worldInfoCategory: WorldInfoCategory;
+  protected rows: GridRow[] = [];
+  protected columns: GridColumn[] = [];
 
-  protected readonly generalTableCols: ColDef[] = [
+  protected readonly generalTableColumns: GridColumn[] = [
     {
       headerName: "Data",
       field: "data",
@@ -68,7 +59,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
   ];
 
-  protected readonly dataPacksTableCols: ColDef[] = [
+  protected readonly dataPacksTableColumns: GridColumn[] = [
     {
       headerName: "Data Pack",
       field: "dataPack",
@@ -80,7 +71,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
   ];
 
-  protected readonly gameRulesTableCols: ColDef[] = [
+  protected readonly gameRulesTableColumns: GridColumn[] = [
     {
       headerName: "Game Rule",
       field: "gameRule",
@@ -91,6 +82,14 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
       field: "value"
     }
   ];
+
+  constructor() {
+    const worldInfoSettings = this.localStorageService.get<WorldInfoDialogData>(
+      LocalStorageKey.WORLD_INFO_SETTINGS
+    );
+    this.worldInfoCategory =
+      worldInfoSettings?.worldInfoCategory ?? "general_world_info";
+  }
 
   ngOnInit(): void {
     this.levelSubscription = this.levelFile$.subscribe(async (levelFile) => {
@@ -110,8 +109,8 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
   protected openWorldDialog() {
     const dialogRef = this.dialog.open<
       WorldInfoDialogComponent,
-      WorldDialogData,
-      WorldDialogData
+      WorldInfoDialogData,
+      WorldInfoDialogData
     >(WorldInfoDialogComponent, {
       data: {
         worldInfoCategory: this.worldInfoCategory
@@ -121,6 +120,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(async (data) => {
       if (!data) return;
       this.worldInfoCategory = data.worldInfoCategory;
+      this.localStorageService.set(LocalStorageKey.WORLD_INFO_SETTINGS, data);
       this.updateTable();
     });
   }
@@ -162,42 +162,42 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
       this.columns = [];
       this.rows = [];
     } else if (this.worldInfoCategory === "general_world_info") {
-      this.columns = this.generalTableCols;
+      this.columns = this.generalTableColumns;
       this.rows = this.createGeneralWorldInfoData(this.levelData);
     } else if (this.worldInfoCategory === "data_packs") {
-      this.columns = this.dataPacksTableCols;
+      this.columns = this.dataPacksTableColumns;
       this.rows = this.createDataPacksData(this.levelData);
     } else if (this.worldInfoCategory === "game_rules") {
-      this.columns = this.gameRulesTableCols;
+      this.columns = this.gameRulesTableColumns;
       this.rows = this.createGameRulesData(this.levelData);
     }
   }
 
-  private createGeneralWorldInfoData(worldData: SNBT): RowData[] {
-    const rows: RowData[] = [];
+  private createGeneralWorldInfoData(worldData: SNBT): GridRow[] {
+    const rows: GridRow[] = [];
 
     // World Name
-    const worldName = worldData["LevelName"] as RowDataType;
+    const worldName = worldData["LevelName"] as GridCell;
     if (worldName !== undefined) {
-      rows.push(this.createRow(this.generalTableCols, "World Name", worldName));
+      rows.push(
+        this.createRow(this.generalTableColumns, "World Name", worldName)
+      );
     }
 
     // Seed
-    const seed = (worldData["WorldGenSettings"] as SNBT)?.[
-      "seed"
-    ] as RowDataType;
+    const seed = (worldData["WorldGenSettings"] as SNBT)?.["seed"] as GridCell;
     if (seed !== undefined) {
-      rows.push(this.createRow(this.generalTableCols, "Seed", seed));
+      rows.push(this.createRow(this.generalTableColumns, "Seed", seed));
     }
 
     // Minecraft Version
     const minecraftVersion = (worldData["Version"] as SNBT)?.[
       "Name"
-    ] as RowDataType;
+    ] as GridCell;
     if (minecraftVersion !== undefined) {
       rows.push(
         this.createRow(
-          this.generalTableCols,
+          this.generalTableColumns,
           "Minecraft Version",
           minecraftVersion
         )
@@ -211,7 +211,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
       const dimension = spawn["dimension"] as string;
       rows.push(
         this.createRow(
-          this.generalTableCols,
+          this.generalTableColumns,
           "Spawn Location",
           `${pos[0]}, ${pos[1]}, ${pos[2]} (${dimension})`
         )
@@ -219,18 +219,22 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     }
 
     // Time of Day
-    const dayTime = worldData["DayTime"] as RowDataType;
+    const dayTime = worldData["DayTime"] as GridCell;
     if (dayTime !== undefined) {
       rows.push(
-        this.createRow(this.generalTableCols, "Time of Day [0, 24000)", dayTime)
+        this.createRow(
+          this.generalTableColumns,
+          "Time of Day [0, 24000)",
+          dayTime
+        )
       );
     }
 
     // World Age
-    const time = worldData["Time"] as RowDataType;
+    const time = worldData["Time"] as GridCell;
     if (time !== undefined) {
       rows.push(
-        this.createRow(this.generalTableCols, "World Age (Ticks)", time)
+        this.createRow(this.generalTableColumns, "World Age (Ticks)", time)
       );
     }
 
@@ -250,7 +254,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
       }
       rows.push(
         this.createRow(
-          this.generalTableCols,
+          this.generalTableColumns,
           "Difficulty",
           `${difficultyName} (${!difficultyLocked ? "Not " : ""}Locked)`
         )
@@ -262,7 +266,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     if (hardcore !== undefined) {
       rows.push(
         this.createRow(
-          this.generalTableCols,
+          this.generalTableColumns,
           "Hardcore",
           hardcore ? true : false
         )
@@ -283,7 +287,11 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
         gameTypeName = "Spectator";
       }
       rows.push(
-        this.createRow(this.generalTableCols, "Default Game Type", gameTypeName)
+        this.createRow(
+          this.generalTableColumns,
+          "Default Game Type",
+          gameTypeName
+        )
       );
     }
 
@@ -292,7 +300,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     if (wasModded !== undefined) {
       rows.push(
         this.createRow(
-          this.generalTableCols,
+          this.generalTableColumns,
           "Was Modded",
           wasModded ? true : false
         )
@@ -304,7 +312,7 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     if (allowCommands !== undefined) {
       rows.push(
         this.createRow(
-          this.generalTableCols,
+          this.generalTableColumns,
           "Allow Commands",
           allowCommands ? true : false
         )
@@ -313,34 +321,34 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     return rows;
   }
 
-  private createDataPacksData(worldData: SNBT): RowData[] {
-    const rows: RowData[] = [];
+  private createDataPacksData(worldData: SNBT): GridRow[] {
+    const rows: GridRow[] = [];
     const dataPacks = worldData["DataPacks"] as SNBT;
     const disabledDataPacks = dataPacks?.["Disabled"] as string[];
     const enabledDataPacks = dataPacks?.["Enabled"] as string[];
     if (disabledDataPacks !== undefined) {
       for (const dataPack of disabledDataPacks) {
-        rows.push(this.createRow(this.dataPacksTableCols, dataPack, false));
+        rows.push(this.createRow(this.dataPacksTableColumns, dataPack, false));
       }
     }
     if (enabledDataPacks !== undefined) {
       for (const dataPack of enabledDataPacks) {
-        rows.push(this.createRow(this.dataPacksTableCols, dataPack, true));
+        rows.push(this.createRow(this.dataPacksTableColumns, dataPack, true));
       }
     }
     return rows;
   }
 
-  private createGameRulesData(worldData: SNBT): RowData[] {
-    const rows: RowData[] = [];
+  private createGameRulesData(worldData: SNBT): GridRow[] {
+    const rows: GridRow[] = [];
     const gameRules = worldData["game_rules"] as SNBT;
     if (gameRules !== undefined) {
       for (const gameRule in gameRules) {
         rows.push(
           this.createRow(
-            this.gameRulesTableCols,
+            this.gameRulesTableColumns,
             gameRule,
-            gameRules[gameRule] as RowDataType
+            gameRules[gameRule] as GridCell
           )
         );
       }
@@ -348,8 +356,8 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
     return rows;
   }
 
-  private createRow(cols: ColDef[], ...values: RowDataType[]): RowData {
-    const row: RowData = {};
+  private createRow(cols: GridColumn[], ...values: GridCell[]): GridRow {
+    const row: GridRow = {};
     for (let i = 0; i < cols.length; ++i) {
       const field = cols[i]?.field;
       const value = values[i];

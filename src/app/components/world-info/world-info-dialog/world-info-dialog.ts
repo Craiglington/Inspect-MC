@@ -24,11 +24,11 @@ export type WorldInfoCategory =
   | "data_packs"
   | "game_rules";
 
-export interface WorldDialogData {
+export interface WorldInfoDialogData {
   worldInfoCategory: WorldInfoCategory;
 }
 
-export interface WorldDialogForm {
+export interface WorldInfoDialogForm {
   worldInfoCategory: FormControl<WorldInfoCategory>;
 }
 
@@ -51,7 +51,7 @@ export interface WorldDialogForm {
 })
 export class WorldInfoDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogData = inject<WorldDialogData>(MAT_DIALOG_DATA);
+  private readonly dialogData = inject<WorldInfoDialogData>(MAT_DIALOG_DATA);
 
   protected readonly worldInfoCategoryOptions: {
     text: string;
@@ -70,7 +70,7 @@ export class WorldInfoDialogComponent implements OnInit {
       value: "game_rules"
     }
   ];
-  protected formGroup!: FormGroup<WorldDialogForm>;
+  protected formGroup!: FormGroup<WorldInfoDialogForm>;
 
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
@@ -81,7 +81,7 @@ export class WorldInfoDialogComponent implements OnInit {
     });
   }
 
-  getOutputData(): WorldDialogData {
+  getOutputData(): WorldInfoDialogData {
     return {
       ...this.formGroup.getRawValue()
     };

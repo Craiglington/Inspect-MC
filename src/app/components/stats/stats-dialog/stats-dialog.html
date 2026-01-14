@@ -1,10 +1,5 @@
 <h2 id="dialogTitle" mat-dialog-title>Stats Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
-  <app-file-input
-    label="Select a Stats Folder"
-    [directory]="true"
-    (filesUploaded)="filesUploaded($event)"></app-file-input>
-
   <mat-form-field subscriptSizing="dynamic">
     <mat-label>Players</mat-label>
     <mat-select formControlName="activeProfiles" multiple>
@@ -27,7 +22,7 @@
   <button matButton="outlined" mat-dialog-close>Cancel</button>
   <button
     matButton="filled"
-    [mat-dialog-close]="getOutputData()"
+    [mat-dialog-close]="formGroup.getRawValue()"
     [disabled]="formGroup.invalid || (!formGroup.dirty && !files)">
     Save
   </button>

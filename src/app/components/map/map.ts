@@ -383,8 +383,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chunkMapData.clear();
         this.clearMap();
       }
-      this.drawMap();
       this.localStorageService.set(LocalStorageKey.MAP_SETTINGS, data);
+      this.drawMap();
     });
   }
 

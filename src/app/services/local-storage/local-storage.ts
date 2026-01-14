@@ -1,7 +1,9 @@
 import { Injectable } from "@angular/core";
 
 export enum LocalStorageKey {
-  MAP_SETTINGS = "mapSettings"
+  WORLD_INFO_SETTINGS = "worldInfoSettings",
+  MAP_SETTINGS = "mapSettings",
+  STATS_SETTINGS = "statsSettings"
 }
 
 @Injectable({

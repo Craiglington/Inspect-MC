@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import {
   FormBuilder,
   FormControl,
@@ -18,24 +18,8 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import {
-  catchError,
-  EMPTY,
-  finalize,
-  forkJoin,
-  Observable,
-  Subject,
-  switchMap,
-  timeout
-} from "rxjs";
-import {
-  MinecraftPlayerProfile,
-  MinecraftProfileResponse
-} from "../../../models/minecraft-profile";
+import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
 import { StatsCategory } from "../../../models/stats";
-import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
-import { NotificationService } from "../../../services/notification/notification-service";
-import { FileInput } from "../../file-input/file-input";
 
 export interface StatsDialogInputData {
   profiles: Map<string, MinecraftPlayerProfile>;
@@ -43,9 +27,7 @@ export interface StatsDialogInputData {
   statsCategory: StatsCategory;
 }
 
-export interface StatsDialogOutputData extends StatsDialogInputData {
-  files?: Map<string, File>;
-}
+export type StatsDialogOutputData = Omit<StatsDialogInputData, "profiles">;
 
 export interface StatsDialogForm {
   activeProfiles: FormControl<string[]>;
@@ -64,16 +46,13 @@ export interface StatsDialogForm {
     MatDialogActions,
     MatDialogClose,
     ReactiveFormsModule,
-    MatSelectModule,
-    FileInput
+    MatSelectModule
   ],
   templateUrl: "./stats-dialog.html",
   styleUrl: "./stats-dialog.scss"
 })
-export class StatsDialogComponent implements OnInit, OnDestroy {
+export class StatsDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly minecraftProfileService = inject(MinecraftProfileService);
-  private readonly notificationService = inject(NotificationService);
   private readonly dialogData = inject<StatsDialogInputData>(MAT_DIALOG_DATA);
 
   protected readonly statsCategoryOptions: {
@@ -119,9 +98,6 @@ export class StatsDialogComponent implements OnInit, OnDestroy {
     }
   ];
 
-  private readonly profiles$ = new Subject<
-    Observable<MinecraftProfileResponse[]>
-  >();
   protected files!: Map<string, File>;
   protected profiles!: Map<string, MinecraftPlayerProfile>;
   protected formGroup!: FormGroup<StatsDialogForm>;
@@ -144,73 +120,5 @@ export class StatsDialogComponent implements OnInit, OnDestroy {
         validators: Validators.required
       })
     });
-
-    this.profiles$
-      .pipe(
-        switchMap((newProfiles) =>
-          newProfiles.pipe(
-            timeout(30000),
-            catchError((error) => {
-              console.error(error);
-              this.notificationService.notify({
-                message: "Failed to load Minecraft profiles."
-              });
-              return EMPTY;
-            }),
-            finalize(() => {
-              if (this.profiles.size) {
-                this.formGroup.controls.activeProfiles.enable();
-              }
-            })
-          )
-        )
-      )
-      .subscribe((newProfiles) => {
-        const sortedProfiles = newProfiles
-          .filter((profile) => profile.success)
-          .sort((a, b) => {
-            if (a.data.player.username < b.data.player.username) {
-              return -1;
-            }
-            if (a.data.player.username > b.data.player.username) {
-              return 1;
-            }
-            return 0;
-          });
-        for (const profile of sortedProfiles) {
-          this.profiles.set(profile.data.player.id, profile.data.player);
-        }
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.profiles$.unsubscribe();
-  }
-
-  filesUploaded(files: FileList) {
-    this.files.clear();
-    this.profiles.clear();
-    this.formGroup.controls.activeProfiles.setValue([]);
-    this.formGroup.controls.activeProfiles.disable();
-    const statsRegex = new RegExp(
-      /^(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
-    );
-    const profileObservables: Observable<MinecraftProfileResponse>[] = [];
-    for (const file of files) {
-      const regexResult = statsRegex.exec(file.name);
-      if (!regexResult || !regexResult.groups) continue;
-      const uuid = regexResult.groups["uuid"];
-      this.files.set(uuid, file);
-      profileObservables.push(this.minecraftProfileService.getProfile(uuid));
-    }
-    this.profiles$.next(forkJoin(profileObservables));
-  }
-
-  getOutputData(): StatsDialogOutputData {
-    return {
-      ...this.formGroup.getRawValue(),
-      profiles: this.profiles,
-      files: this.files.size ? this.files : undefined
-    };
   }
 }

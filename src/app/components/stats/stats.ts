@@ -1,24 +1,30 @@
-import { AsyncPipe } from "@angular/common";
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { AgGridAngular } from "ag-grid-angular";
-import { type ColDef } from "ag-grid-community";
-import { darkTheme } from "../../constants/grid-themes/dark-theme";
-import { lightTheme } from "../../constants/grid-themes/light-theme";
+import { catchError, EMPTY, finalize, Subscription } from "rxjs";
 import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
-import { RowData } from "../../models/row-data";
+import { GridColumn, GridRow } from "../../models/gird-data";
 import { Stats, StatsCategory } from "../../models/stats";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
-import { themeFeature } from "../../store/theme/theme.feature";
+import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
+import { NotificationService } from "../../services/notification/notification-service";
+import { worldFilesFeature } from "../../store/world-files/world-files.feature";
+import { GridComponent } from "../grid/grid";
+import { SpinnerComponent } from "../spinner/spinner";
 import {
   StatsDialogComponent,
   StatsDialogInputData,
   StatsDialogOutputData
 } from "./stats-dialog/stats-dialog";
+import {
+  LocalStorageKey,
+  LocalStorageService
+} from "../../services/local-storage/local-storage";
+
+export type StatsStoredSettings = Pick<StatsDialogInputData, "statsCategory">;
 
 @Component({
   selector: "app-stats",
@@ -26,45 +32,103 @@ import {
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    AgGridAngular,
-    AsyncPipe
+    SpinnerComponent,
+    GridComponent
   ],
   templateUrl: "./stats.html",
   styleUrl: "./stats.scss"
 })
-export class StatsComponent implements OnInit {
+export class StatsComponent implements OnInit, OnDestroy {
+  private readonly localStorageService = inject(LocalStorageService);
   private readonly fileReaderService = inject(FileReaderService);
+  private readonly minecraftProfileService = inject(MinecraftProfileService);
+  private readonly notificationService = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(Store);
+
+  protected loading: boolean = false;
+  private readonly subscriptions: Subscription[] = [];
 
   /**
    * Stored files, stats data, and profiles. Also the stats settings like
    * which profiles are currently active (displayed in the table) and which
    * category of stats is being displayed.
    */
+  private readonly statsFiles$ = this.store.select(
+    worldFilesFeature.selectStats
+  );
   private statsFiles?: Map<string, File>;
   private readonly statsFileData: Map<string, Stats> = new Map();
   private profiles: Map<string, MinecraftPlayerProfile> = new Map();
   private activeProfiles: string[] = [];
-  private statsCategory: StatsCategory = "minecraft:custom";
+  private statsCategory: StatsCategory;
 
   /**
    * AG Grid row and column data.
    */
-  protected rows: RowData[] = [];
-  protected colDefs: ColDef[] = [];
-  protected readonly defaultColDef: ColDef = {
-    flex: 1
-  };
+  protected rows: GridRow[] = [];
+  protected columns: GridColumn[] = [];
 
-  protected readonly appTheme$ = this.store.select(
-    themeFeature.selectThemeState
-  );
-  protected readonly darkTheme = darkTheme;
-  protected readonly lightTheme = lightTheme;
+  constructor() {
+    const statsSettings = this.localStorageService.get<StatsStoredSettings>(
+      LocalStorageKey.STATS_SETTINGS
+    );
+    this.statsCategory = statsSettings?.statsCategory ?? "minecraft:custom";
+  }
 
   ngOnInit(): void {
-    this.openStatsDialog();
+    this.subscriptions.push(
+      this.statsFiles$.subscribe((files) => {
+        this.statsFiles = files;
+        this.processStatsFiles();
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    for (const subscription of this.subscriptions) {
+      subscription.unsubscribe();
+    }
+  }
+
+  private processStatsFiles() {
+    this.statsFileData.clear();
+    this.profiles.clear();
+    this.activeProfiles = [];
+
+    if (!this.statsFiles) return;
+
+    this.loading = true;
+    const uuids: string[] = [];
+    for (const uuid of this.statsFiles.keys()) {
+      uuids.push(uuid);
+    }
+    this.minecraftProfileService
+      .getSortedProfiles(uuids)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          this.notificationService.notify({
+            message: `Failed to load Minecraft profiles: ${error.message ?? error}`
+          });
+          return EMPTY;
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe((sortedProfiles) => {
+        for (const profile of sortedProfiles) {
+          this.profiles.set(profile.data.player.id, profile.data.player);
+        }
+        if (this.profiles.size > 0) {
+          this.openStatsDialog();
+        } else {
+          this.notificationService.notify({
+            message: "No Minecraft profiles found."
+          });
+        }
+      });
   }
 
   protected openStatsDialog() {
@@ -82,21 +146,22 @@ export class StatsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
-      this.profiles = data.profiles;
       this.activeProfiles = data.activeProfiles;
       this.statsCategory = data.statsCategory;
 
-      if (data.files) {
-        this.statsFiles = data.files;
-        this.statsFileData.clear();
-      }
+      this.localStorageService.set<StatsStoredSettings>(
+        LocalStorageKey.STATS_SETTINGS,
+        { statsCategory: this.statsCategory }
+      );
       this.updateTable();
     });
   }
 
   private async updateTable() {
-    const newColDefs: ColDef[] = [{ field: this.statsCategory, filter: true }];
-    const newRows: RowData[] = [];
+    const newGridColumns: GridColumn[] = [
+      { field: this.statsCategory, filter: true }
+    ];
+    const newGridRows: GridRow[] = [];
 
     /**
      * Every stats category has subcategories. For instance, the mined
@@ -122,7 +187,7 @@ export class StatsComponent implements OnInit {
       const file = this.statsFiles?.get(activeProfile);
       const profile = this.profiles.get(activeProfile);
       if (!file || !profile) continue;
-      newColDefs.push({ field: profile.username });
+      newGridColumns.push({ field: profile.username });
 
       /**
        * Get the profile's stats. If it is not already loaded,
@@ -155,19 +220,19 @@ export class StatsComponent implements OnInit {
      * add the subcategory and the value for each active profile.
      */
     for (const subcategory of statsSubcategories.values()) {
-      const newRow: RowData = {};
-      newRow[this.statsCategory] = subcategory;
-      for (let i = 1; i < newColDefs.length; ++i) {
-        newRow[newColDefs[i].field!] =
+      const newGridRow: GridRow = {};
+      newGridRow[this.statsCategory] = subcategory;
+      for (let i = 1; i < newGridColumns.length; ++i) {
+        newGridRow[newGridColumns[i].field!] =
           activeStatsData[i - 1].stats[this.statsCategory]?.[subcategory];
       }
-      newRows.push(newRow);
+      newGridRows.push(newGridRow);
     }
 
     /**
      * Update the table data
      */
-    this.colDefs = newColDefs;
-    this.rows = newRows;
+    this.columns = newGridColumns;
+    this.rows = newGridRows;
   }
 }
