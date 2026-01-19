@@ -205,9 +205,9 @@ export class AnvilService {
     chunk: Chunk,
     mapPalette: MapPalette,
     maxYLevel: number
-  ): ChunkMapData {
-    if (!chunk.Heightmaps.WORLD_SURFACE) {
-      throw new Error("Chunk height map is not defined.");
+  ): ChunkMapData | null {
+    if (!chunk.Heightmaps?.WORLD_SURFACE) {
+      return null;
     }
 
     /**

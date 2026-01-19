@@ -556,10 +556,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
        */
       const chunkKey = `${chunkX},${chunkZ}`;
       let mapData = this.chunkMapData.get(chunkKey);
-      if (mapData === null) {
-        return null;
-      }
-      if (!mapData) {
+      if (mapData === undefined) {
         const chunk = await this.getChunk(chunkX, chunkZ);
         if (!chunk) {
           this.chunkMapData.set(chunkKey, null);
@@ -571,6 +568,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           this.mapYLevel
         );
         this.chunkMapData.set(chunkKey, mapData);
+      }
+      if (mapData === null) {
+        return null;
       }
 
       // Get the map data of the previous chunk.

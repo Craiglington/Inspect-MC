@@ -24,7 +24,7 @@ export interface ChunkSection extends SNBT {
 
 export interface Chunk extends SNBT {
   DataVersion: number;
-  Heightmaps: {
+  Heightmaps?: {
     WORLD_SURFACE?: bigint[];
   };
   InhabitedTime: bigint;
