@@ -1,19 +1,10 @@
 <h2 id="dialogTitle" mat-dialog-title>Player Data Settings</h2>
 <mat-dialog-content id="dialogContent" [formGroup]="formGroup">
   <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Players</mat-label>
-    <mat-select formControlName="activeProfiles" multiple>
+    <mat-label>Player</mat-label>
+    <mat-select formControlName="activeProfile">
       @for (profile of profiles.values(); track profile.id) {
-      <mat-option [value]="profile.id">{{profile.username}}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Category</mat-label>
-    <mat-select formControlName="playerDataCategory">
-      @for (category of playerDataCategoryOptions; track $index) {
-      <mat-option [value]="category.value">{{category.text}}</mat-option>
+        <mat-option [value]="profile.id">{{ profile.username }}</mat-option>
       }
     </mat-select>
   </mat-form-field>

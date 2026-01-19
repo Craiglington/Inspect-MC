@@ -1,38 +1,39 @@
 @if (regionFilesProcessed) {
-<form id="mapForm" class="flex-row">
-  <app-coord-input
-    label="X:"
-    name="mapXCoord"
-    [(ngModel)]="mapCoords.x"
-    (change)="mapCoordInputChange()"></app-coord-input>
-  <app-coord-input
-    label="Y:"
-    name="mapYLevel"
-    [(ngModel)]="mapYLevel"
-    [min]="-64"
-    [max]="319"
-    (change)="mapYLevelChange()"></app-coord-input>
-  <app-coord-input
-    label="Z:"
-    name="mapZCoord"
-    [(ngModel)]="mapCoords.z"
-    (change)="mapCoordInputChange()"></app-coord-input>
-</form>
+  <form id="mapForm" class="flex-row">
+    <app-coord-input
+      label="X:"
+      name="mapXCoord"
+      [(ngModel)]="mapCoords.x"
+      (change)="mapCoordInputChange()"></app-coord-input>
+    <app-coord-input
+      label="Y:"
+      name="mapYLevel"
+      [(ngModel)]="mapYLevel"
+      [min]="-64"
+      [max]="319"
+      (change)="mapYLevelChange()"></app-coord-input>
+    <app-coord-input
+      label="Z:"
+      name="mapZCoord"
+      [(ngModel)]="mapCoords.z"
+      (change)="mapCoordInputChange()"></app-coord-input>
+  </form>
 
-@if (showCrosshairs) {
-<div
-  [style.width.px]="crosshairsDimensions.width"
-  [style.height.px]="crosshairsDimensions.height"
-  [style.top.px]="crosshairsCoords.z - (crosshairsDimensions.height / 2)"
-  [style.left.px]="crosshairsCoords.x - (crosshairsDimensions.width / 2)"
-  class="crosshairs"></div>
-<div
-  [style.width.px]="crosshairsDimensions.height"
-  [style.height.px]="crosshairsDimensions.width"
-  [style.top.px]="crosshairsCoords.z - (crosshairsDimensions.width / 2)"
-  [style.left.px]="crosshairsCoords.x - (crosshairsDimensions.height / 2)"
-  class="crosshairs"></div>
-} }
+  @if (showCrosshairs) {
+    <div
+      [style.width.px]="crosshairsDimensions.width"
+      [style.height.px]="crosshairsDimensions.height"
+      [style.top.px]="crosshairsCoords.z - crosshairsDimensions.height / 2"
+      [style.left.px]="crosshairsCoords.x - crosshairsDimensions.width / 2"
+      class="crosshairs"></div>
+    <div
+      [style.width.px]="crosshairsDimensions.height"
+      [style.height.px]="crosshairsDimensions.width"
+      [style.top.px]="crosshairsCoords.z - crosshairsDimensions.width / 2"
+      [style.left.px]="crosshairsCoords.x - crosshairsDimensions.height / 2"
+      class="crosshairs"></div>
+  }
+}
 
 <button
   id="editButton"
@@ -46,7 +47,7 @@
 <canvas
   #map
   id="map"
-  [ngClass]="{'isMapDragging': isMapDragging}"
+  [ngClass]="{ isMapDragging: isMapDragging }"
   (pointerdown)="pointerDown($event)"
   (pointermove)="pointerMove($event)">
 </canvas>

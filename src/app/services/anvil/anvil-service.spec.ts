@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { AnvilService } from './anvil-service';
+import { AnvilService } from "./anvil-service";
 
-describe('AnvilService', () => {
+describe("AnvilService", () => {
   let service: AnvilService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('AnvilService', () => {
     service = TestBed.inject(AnvilService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { FileReaderService } from './file-reader-service';
+import { FileReaderService } from "./file-reader-service";
 
-describe('FileReaderService', () => {
+describe("FileReaderService", () => {
   let service: FileReaderService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('FileReaderService', () => {
     service = TestBed.inject(FileReaderService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

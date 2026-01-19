@@ -1,19 +1,20 @@
-<h2 id="dialogTitle" mat-dialog-title>About {{appTitle}}</h2>
+<h2 id="dialogTitle" mat-dialog-title>About {{ appTitle }}</h2>
 <mat-dialog-content id="dialogContent">
   <div class="app-logo-large"></div>
-  <em>v{{appVersion}}</em>
+  <em>v{{ appVersion }}</em>
   <p>
     <strong
-      >{{appTitle}} Only Supports <em>Vanilla*</em> Minecraft Java Edition (<em
-        >{{supportedMinecraftVersions.min}} -
-        {{supportedMinecraftVersions.max}}</em
+      >{{ appTitle }} Only Supports <em>Vanilla*</em> Minecraft Java Edition
+      (<em
+        >{{ supportedMinecraftVersions.min }} -
+        {{ supportedMinecraftVersions.max }}</em
       >)</strong
     ><br />
     <em>(Sorry Bedrock players)</em>
   </p>
 
   <p>
-    {{appTitle}} is a Minecraft save file inspection tool. The relevant
+    {{ appTitle }} is a Minecraft save file inspection tool. The relevant
     Minecraft documentation can be found
     <a target="_blank" href="https://minecraft.wiki/w/Java_Edition_level_format"
       >here</a

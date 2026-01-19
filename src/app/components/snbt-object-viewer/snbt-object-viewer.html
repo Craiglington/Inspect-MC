@@ -1,0 +1,24 @@
+@for (property of data(); track $index) {
+  @if (typeof property.value !== "object") {
+    <div class="row">
+      <code class="property-name"
+        >{{ property.name }}: {{ property.value }}</code
+      >
+    </div>
+  } @else {
+    <button class="row object-row" (click)="toggle($index)">
+      <code class="property-name"
+        >{{ property.name }}: <em>{{ property.objectDescription }}</em></code
+      >
+      <mat-icon
+        class="toggle-icon"
+        [ngClass]="{ 'open-toggle-icon': isOpen($index)() }"
+        >arrow_right</mat-icon
+      >
+    </button>
+
+    @if (isOpen($index)()) {
+      <app-snbt-object-viewer [data]="property.value"></app-snbt-object-viewer>
+    }
+  }
+}

@@ -5,11 +5,14 @@
   [multiple]="multiple"
   (change)="filesUploadedEvent($event)" />
 <button matButton="filled" type="button" (click)="fileInput.click()">
-  {{label}}
+  {{ label }}
   <mat-icon>upload</mat-icon>
 </button>
 @if (numFilesUploaded > 0) {
-<span id="filesUploadedMessage"
-  >{{numFilesUploaded}} File{{numFilesUploaded > 1 ? "s" : ""}} Uploaded</span
->
+  <span id="filesUploadedMessage"
+    >{{ numFilesUploaded }} File{{
+      numFilesUploaded > 1 ? "s" : ""
+    }}
+    Uploaded</span
+  >
 }

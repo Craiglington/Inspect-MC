@@ -4,7 +4,7 @@
     <mat-label>Players</mat-label>
     <mat-select formControlName="activeProfiles" multiple>
       @for (profile of profiles.values(); track profile.id) {
-      <mat-option [value]="profile.id">{{profile.username}}</mat-option>
+        <mat-option [value]="profile.id">{{ profile.username }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
@@ -13,7 +13,7 @@
     <mat-label>Category</mat-label>
     <mat-select formControlName="statsCategory">
       @for (category of statsCategoryOptions; track $index) {
-      <mat-option [value]="category.value">{{category.text}}</mat-option>
+        <mat-option [value]="category.value">{{ category.text }}</mat-option>
       }
     </mat-select>
   </mat-form-field>

@@ -6,7 +6,7 @@
     <mat-label>Map Dimension</mat-label>
     <mat-select formControlName="mapDimension">
       @for (dimension of mapDimensionOptions; track $index) {
-      <mat-option [value]="dimension.value">{{dimension.text}}</mat-option>
+        <mat-option [value]="dimension.value">{{ dimension.text }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
@@ -20,7 +20,7 @@
       step="1"
       formControlName="startingXCoord" />
     @if (formGroup.controls.startingXCoord.invalid) {
-    <mat-error>Range: [-30 million, 30 million]</mat-error>
+      <mat-error>Range: [-30 million, 30 million]</mat-error>
     }
   </mat-form-field>
 
@@ -33,7 +33,7 @@
       step="1"
       formControlName="startingZCoord" />
     @if (formGroup.controls.startingZCoord.invalid) {
-    <mat-error>Range: [-30 million, 30 million]</mat-error>
+      <mat-error>Range: [-30 million, 30 million]</mat-error>
     }
   </mat-form-field>
 
@@ -46,7 +46,7 @@
       step="1"
       formControlName="startingYLevel" />
     @if (formGroup.controls.startingYLevel.invalid) {
-    <mat-error>Range: [-64, 319]</mat-error>
+      <mat-error>Range: [-64, 319]</mat-error>
     }
   </mat-form-field>
 
@@ -54,9 +54,9 @@
     <mat-label>Map Color Palette</mat-label>
     <mat-select formControlName="mapPaletteType">
       @for (blockPalette of blockPaletteOptions; track $index) {
-      <mat-option [value]="blockPalette.value"
-        >{{blockPalette.text}}</mat-option
-      >
+        <mat-option [value]="blockPalette.value">{{
+          blockPalette.text
+        }}</mat-option>
       }
     </mat-select>
   </mat-form-field>

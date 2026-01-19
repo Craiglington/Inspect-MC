@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  padding-left: 1rem;
+  box-sizing: border-box;
+  font-size: large;
+  line-height: 1.5rem;
+}
+
+app-snbt-object-viewer {
+  border-left: solid 1px;
+}
+
+.row:hover {
+  background-color: var(--mat-sys-surface-variant);
+}
+
+.object-row {
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background-color: inherit;
+  font-size: large;
+  line-height: 1.5rem;
+}
+
+.object-row:focus-visible {
+  outline: none;
+  background-color: var(--mat-sys-surface-variant);
+}
+
+.toggle-icon {
+  padding: 0;
+  margin: 0;
+  transition: transform 0.15s;
+}
+
+.open-toggle-icon {
+  transform: rotate(90deg);
+}
+
+.property-name {
+  font-weight: bold;
+}

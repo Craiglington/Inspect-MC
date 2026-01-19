@@ -1,26 +1,32 @@
 <header>
   <mat-toolbar>
     <div id="logo" class="app-logo"></div>
-    <span>{{title}}</span>
+    <span>{{ title }}</span>
     <span class="spacer"></span>
 
     @if (worldFiles?.level) {
-    <a mat-icon-button matTooltip="World Info" routerLink="/world-info">
-      <mat-icon>info</mat-icon>
-    </a>
-    } @if (worldFiles?.region?.overworld || worldFiles?.region?.nether ||
-    worldFiles?.region?.end) {
-    <a mat-icon-button matTooltip="Map" routerLink="/map">
-      <mat-icon>map</mat-icon>
-    </a>
-    } @if (worldFiles?.playerData) {
-    <a mat-icon-button matTooltip="Player Data" routerLink="/player-data">
-      <mat-icon>people</mat-icon>
-    </a>
-    } @if(worldFiles?.stats) {
-    <a mat-icon-button matTooltip="Stats" routerLink="/stats">
-      <mat-icon>leaderboard</mat-icon>
-    </a>
+      <a mat-icon-button matTooltip="World Info" routerLink="/world-info">
+        <mat-icon>info</mat-icon>
+      </a>
+    }
+    @if (
+      worldFiles?.region?.overworld ||
+      worldFiles?.region?.nether ||
+      worldFiles?.region?.end
+    ) {
+      <a mat-icon-button matTooltip="Map" routerLink="/map">
+        <mat-icon>map</mat-icon>
+      </a>
+    }
+    @if (worldFiles?.playerData) {
+      <a mat-icon-button matTooltip="Player Data" routerLink="/player-data">
+        <mat-icon>people</mat-icon>
+      </a>
+    }
+    @if (worldFiles?.stats) {
+      <a mat-icon-button matTooltip="Stats" routerLink="/stats">
+        <mat-icon>leaderboard</mat-icon>
+      </a>
     }
 
     <div class="button-spacer"></div>

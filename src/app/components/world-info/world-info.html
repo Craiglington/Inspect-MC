@@ -1,10 +1,5 @@
-<button
-  id="editButton"
-  matIconButton
-  type="button"
-  matTooltip="World Settings"
-  (click)="openWorldDialog()">
-  <mat-icon>settings</mat-icon>
-</button>
-
-<app-grid [rows]="rows" [columns]="columns"></app-grid>
+@if (levelData) {
+  <app-snbt-object-viewer
+    [data]="levelData"
+    [startingOpenIndices]="[0]"></app-snbt-object-viewer>
+}

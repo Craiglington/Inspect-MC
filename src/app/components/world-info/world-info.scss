@@ -1,22 +1,14 @@
 :host {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   box-sizing: border-box;
-  height: 100%;
-  position: relative;
+  padding: 1rem;
 }
 
-#editButton {
-  position: absolute;
-  top: 0.25em;
-  right: 0.25em;
-  background-color: var(--mat-sys-surface);
-  z-index: 2;
-}
-
-ag-grid-angular {
+app-snbt-object-viewer {
   width: 100%;
-  height: 100%;
+  padding: 1rem;
+  overflow: auto;
 }

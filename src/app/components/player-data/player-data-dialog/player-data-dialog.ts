@@ -3,8 +3,7 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
-  ReactiveFormsModule,
-  Validators
+  ReactiveFormsModule
 } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import {
@@ -20,12 +19,9 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
 
-export type PlayerDataCategory = "general-info" | "inventory" | "ender-chest";
-
 export interface PlayerDataDialogInputData {
   profiles: Map<string, MinecraftPlayerProfile>;
-  activeProfiles: string[];
-  playerDataCategory: PlayerDataCategory;
+  activeProfile: string | null;
 }
 
 export type PlayerDataDialogOutputData = Omit<
@@ -34,8 +30,7 @@ export type PlayerDataDialogOutputData = Omit<
 >;
 
 export interface PlayerDataDialogForm {
-  activeProfiles: FormControl<string[]>;
-  playerDataCategory: FormControl<PlayerDataCategory>;
+  activeProfile: FormControl<string | null>;
 }
 
 @Component({
@@ -60,42 +55,15 @@ export class PlayerDataDialogComponent implements OnInit {
   private readonly dialogData =
     inject<PlayerDataDialogInputData>(MAT_DIALOG_DATA);
 
-  protected readonly playerDataCategoryOptions: {
-    text: string;
-    value: PlayerDataCategory;
-  }[] = [
-    {
-      text: "General Player Info",
-      value: "general-info"
-    },
-    {
-      text: "Player Inventory",
-      value: "inventory"
-    },
-    {
-      text: "Ender Chest Contents",
-      value: "ender-chest"
-    }
-  ];
-
   protected profiles!: Map<string, MinecraftPlayerProfile>;
   protected formGroup!: FormGroup<PlayerDataDialogForm>;
 
   ngOnInit(): void {
     this.profiles = this.dialogData.profiles;
     this.formGroup = this.formBuilder.group({
-      activeProfiles: new FormControl<string[]>(
-        {
-          value: this.dialogData.activeProfiles,
-          disabled: !this.profiles.size
-        },
-        {
-          nonNullable: true
-        }
-      ),
-      playerDataCategory: new FormControl(this.dialogData.playerDataCategory, {
-        nonNullable: true,
-        validators: Validators.required
+      activeProfile: new FormControl<string | null>({
+        value: this.dialogData.activeProfile,
+        disabled: !this.profiles.size
       })
     });
   }

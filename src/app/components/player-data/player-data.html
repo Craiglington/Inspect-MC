@@ -1,14 +1,18 @@
 @if (loading) {
-<app-spinner></app-spinner>
+  <app-spinner></app-spinner>
 }
 
 <button
   id="editButton"
   matIconButton
   type="button"
-  matTooltip="Stats Settings"
+  matTooltip="Player Data Settings"
   (click)="openPlayerDataDialog()">
   <mat-icon>settings</mat-icon>
 </button>
 
-<app-grid [rows]="rows" [columns]="columns"></app-grid>
+@if (activePlayerData) {
+  <app-snbt-object-viewer
+    id="snbt-viewer"
+    [data]="activePlayerData"></app-snbt-object-viewer>
+}
