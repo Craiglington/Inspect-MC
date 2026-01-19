@@ -25,19 +25,6 @@
   </mat-form-field>
 
   <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Starting Z Coordinate</mat-label>
-    <input
-      matInput
-      type="number"
-      placeholder="0"
-      step="1"
-      formControlName="startingZCoord" />
-    @if (formGroup.controls.startingZCoord.invalid) {
-      <mat-error>Range: [-30 million, 30 million]</mat-error>
-    }
-  </mat-form-field>
-
-  <mat-form-field subscriptSizing="dynamic">
     <mat-label>Starting Y Level</mat-label>
     <input
       matInput
@@ -51,7 +38,20 @@
   </mat-form-field>
 
   <mat-form-field subscriptSizing="dynamic">
-    <mat-label>Map Color Palette</mat-label>
+    <mat-label>Starting Z Coordinate</mat-label>
+    <input
+      matInput
+      type="number"
+      placeholder="0"
+      step="1"
+      formControlName="startingZCoord" />
+    @if (formGroup.controls.startingZCoord.invalid) {
+      <mat-error>Range: [-30 million, 30 million]</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Map Type</mat-label>
     <mat-select formControlName="mapPaletteType">
       @for (blockPalette of blockPaletteOptions; track $index) {
         <mat-option [value]="blockPalette.value">{{
