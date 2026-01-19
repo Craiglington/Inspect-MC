@@ -36,6 +36,7 @@ import {
   LocalStorageService
 } from "../../services/local-storage/local-storage";
 import { worldFilesFeature } from "../../store/world-files/world-files.feature";
+import { NoDataComponent } from "../no-data/no-data";
 import { CoordInput } from "./coord-input/coord-input";
 import {
   MapDialogComponent,
@@ -43,7 +44,6 @@ import {
   MapDimensionType,
   MapPaletteType
 } from "./map-dialog/map-dialog";
-import { NoDataComponent } from "../no-data/no-data";
 
 @Component({
   selector: "app-map",

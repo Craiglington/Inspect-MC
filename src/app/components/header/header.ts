@@ -1,24 +1,21 @@
 import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
+import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { RouterLink } from "@angular/router";
-import { AppConstants } from "../../constants/app-constants";
-import { ToggleTheme } from "./toggle-theme/toggle-theme";
-import { MatDialog } from "@angular/material/dialog";
-import { HelpDialogComponent } from "./help-dialog/help-dialog";
-import { UploadDialogComponent } from "./upload-dialog/upload-dialog";
+import { NavigationEnd, Router, RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { AsyncPipe } from "@angular/common";
-import { Subscription } from "rxjs";
-import {
-  initialWorldFilesState,
-  WorldFilesState
-} from "../../store/world-files/world-files.state";
+import { filter, Subscription } from "rxjs";
+import { AppConstants } from "../../constants/app-constants";
 import { setWorldFiles } from "../../store/world-files/world-files.actions";
+import { worldFilesFeature } from "../../store/world-files/world-files.feature";
+import { WorldFilesState } from "../../store/world-files/world-files.state";
+import { HelpDialogComponent } from "./help-dialog/help-dialog";
+import { ToggleTheme } from "./toggle-theme/toggle-theme";
+import { UploadDialogComponent } from "./upload-dialog/upload-dialog";
+import { NgClass } from "@angular/common";
 
 @Component({
   selector: "app-header",
@@ -29,7 +26,8 @@ import { setWorldFiles } from "../../store/world-files/world-files.actions";
     ToggleTheme,
     MatButtonModule,
     MatTooltipModule,
-    RouterLink
+    RouterLink,
+    NgClass
   ],
   templateUrl: "./header.html",
   styleUrl: "./header.scss"
@@ -37,12 +35,15 @@ import { setWorldFiles } from "../../store/world-files/world-files.actions";
 export class Header implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialog);
-  protected readonly title = AppConstants.appTitle;
+  private readonly router = inject(Router);
 
+  protected readonly title = AppConstants.appTitle;
+  protected route?: string;
+
+  private readonly subscriptions: Subscription[] = [];
   private readonly worldFiles$ = this.store.select(
     worldFilesFeature.selectWorldFilesState
   );
-  private worldFilesSubscription!: Subscription;
   protected worldFiles?: WorldFilesState;
 
   private readonly levelRegex = new RegExp(/^[^\/]+\/level\.dat$/);
@@ -61,17 +62,25 @@ export class Header implements OnInit, OnDestroy {
   private readonly playerDataRegex = new RegExp(
     /^[^\/]+\/playerdata\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.dat$/
   );
-  //private readonly overworldRegex
 
   ngOnInit(): void {
-    this.worldFilesSubscription = this.worldFiles$.subscribe((files) => {
-      this.worldFiles = files;
-    });
+    this.subscriptions.push(
+      this.worldFiles$.subscribe((files) => {
+        this.worldFiles = files;
+      }),
+      this.router.events
+        .pipe(filter((event) => event instanceof NavigationEnd))
+        .subscribe((event: NavigationEnd) => {
+          this.route = event.url;
+        })
+    );
     this.openUploadDialog();
   }
 
   ngOnDestroy(): void {
-    this.worldFilesSubscription.unsubscribe();
+    for (const subscription of this.subscriptions) {
+      subscription.unsubscribe();
+    }
   }
 
   protected openUploadDialog() {

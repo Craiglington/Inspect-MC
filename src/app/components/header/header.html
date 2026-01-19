@@ -4,19 +4,35 @@
     <span>{{ title }}</span>
     <span class="spacer"></span>
 
-    <a mat-icon-button matTooltip="World Info" routerLink="/world-info">
+    <a
+      mat-icon-button
+      matTooltip="World Info"
+      routerLink="/world-info"
+      [ngClass]="{ 'current-route': route === '/world-info' }">
       <mat-icon>info</mat-icon>
     </a>
 
-    <a mat-icon-button matTooltip="Map" routerLink="/map">
+    <a
+      mat-icon-button
+      matTooltip="Map"
+      routerLink="/map"
+      [ngClass]="{ 'current-route': route === '/map' }">
       <mat-icon>map</mat-icon>
     </a>
 
-    <a mat-icon-button matTooltip="Player Data" routerLink="/player-data">
+    <a
+      mat-icon-button
+      matTooltip="Player Data"
+      routerLink="/player-data"
+      [ngClass]="{ 'current-route': route === '/player-data' }">
       <mat-icon>people</mat-icon>
     </a>
 
-    <a mat-icon-button matTooltip="Stats" routerLink="/stats">
+    <a
+      mat-icon-button
+      matTooltip="Stats"
+      routerLink="/stats"
+      [ngClass]="{ 'current-route': route === '/stats' }">
       <mat-icon>leaderboard</mat-icon>
     </a>
 
@@ -28,9 +44,9 @@
       matTooltip="Upload World Folder">
       <mat-icon>upload</mat-icon>
     </button>
+    <app-toggle-theme></app-toggle-theme>
     <button mat-icon-button (click)="openHelpDialog()" matTooltip="Help">
       <mat-icon>help</mat-icon>
     </button>
-    <app-toggle-theme></app-toggle-theme>
   </mat-toolbar>
 </header>
