@@ -18,6 +18,7 @@ import {
   PlayerDataDialogOutputData
 } from "./player-data-dialog/player-data-dialog";
 import { SNBT } from "../../models/snbt";
+import { NoDataComponent } from "../no-data/no-data";
 
 @Component({
   selector: "app-player-data",
@@ -26,7 +27,8 @@ import { SNBT } from "../../models/snbt";
     MatIconModule,
     MatTooltipModule,
     SpinnerComponent,
-    SnbtObjectViewerComponent
+    SnbtObjectViewerComponent,
+    NoDataComponent
   ],
   templateUrl: "./player-data.html",
   styleUrl: "./player-data.scss"

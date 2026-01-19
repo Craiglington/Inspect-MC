@@ -24,6 +24,7 @@ import {
   LocalStorageKey,
   LocalStorageService
 } from "../../services/local-storage/local-storage";
+import { NoDataComponent } from "../no-data/no-data";
 
 export type StatsStoredSettings = Pick<StatsDialogInputData, "statsCategory">;
 
@@ -34,7 +35,8 @@ export type StatsStoredSettings = Pick<StatsDialogInputData, "statsCategory">;
     MatIconModule,
     MatTooltipModule,
     SpinnerComponent,
-    GridComponent
+    GridComponent,
+    NoDataComponent
   ],
   templateUrl: "./stats.html",
   styleUrl: "./stats.scss"

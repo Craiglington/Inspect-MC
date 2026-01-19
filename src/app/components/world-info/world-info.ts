@@ -7,10 +7,16 @@ import { DatService } from "../../services/dat/dat-service";
 import { worldFilesFeature } from "../../store/world-files/world-files.feature";
 import { SnbtObjectViewerComponent } from "../snbt-object-viewer/snbt-object-viewer";
 import { SNBT } from "../../models/snbt";
+import { NoDataComponent } from "../no-data/no-data";
 
 @Component({
   selector: "app-world-info",
-  imports: [MatIconModule, MatButtonModule, SnbtObjectViewerComponent],
+  imports: [
+    MatIconModule,
+    MatButtonModule,
+    SnbtObjectViewerComponent,
+    NoDataComponent
+  ],
   templateUrl: "./world-info.html",
   styleUrl: "./world-info.scss"
 })

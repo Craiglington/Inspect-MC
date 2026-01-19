@@ -43,6 +43,7 @@ import {
   MapDimensionType,
   MapPaletteType
 } from "./map-dialog/map-dialog";
+import { NoDataComponent } from "../no-data/no-data";
 
 @Component({
   selector: "app-map",
@@ -54,7 +55,8 @@ import {
     FormsModule,
     MatTooltipModule,
     CoordInput,
-    NgClass
+    NgClass,
+    NoDataComponent
   ],
   templateUrl: "./map.html",
   styleUrl: "./map.scss"
@@ -86,7 +88,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private overworldRegionFiles?: Map<string, File>;
   private netherRegionFiles?: Map<string, File>;
   private endRegionFiles?: Map<string, File>;
-  private regionFiles?: Map<string, File>;
+  protected regionFiles?: Map<string, File>;
   private yMin!: number;
 
   // An event emitter used to signal and time when the window is resized and thus the canvas should be resized.
@@ -153,7 +155,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected showCrosshairs: boolean;
   private drawLicense: number = 0;
 
-  protected regionFilesProcessed = false;
   protected isMapDragging: boolean = false;
 
   constructor() {
@@ -196,7 +197,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.regionFileData.clear();
       this.chunkImages.clear();
       this.chunkMapData.clear();
-      this.regionFilesProcessed = true;
       this.clearMap();
       this.drawMap();
     });
@@ -327,7 +327,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.cdr.detectChanges();
 
-    if (this.regionFilesProcessed && !this.isMapDragging) {
+    if (this.regionFiles && !this.isMapDragging) {
       this.drawMap();
     }
   }

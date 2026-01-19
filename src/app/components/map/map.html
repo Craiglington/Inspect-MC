@@ -1,4 +1,4 @@
-@if (regionFilesProcessed) {
+@if (regionFiles) {
   <form id="mapForm" class="flex-row">
     <app-coord-input
       label="X:"
@@ -33,6 +33,8 @@
       [style.left.px]="crosshairsCoords.x - crosshairsDimensions.height / 2"
       class="crosshairs"></div>
   }
+} @else {
+  <app-no-data></app-no-data>
 }
 
 <button

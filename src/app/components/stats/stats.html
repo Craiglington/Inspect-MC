@@ -11,4 +11,8 @@
   <mat-icon>settings</mat-icon>
 </button>
 
-<app-grid [rows]="rows" [columns]="columns"></app-grid>
+@if (rows.length > 0 || columns.length > 0) {
+  <app-grid [rows]="rows" [columns]="columns"></app-grid>
+} @else {
+  <app-no-data></app-no-data>
+}
