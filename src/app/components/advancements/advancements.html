@@ -1,0 +1,18 @@
+@if (loading) {
+  <app-spinner></app-spinner>
+}
+
+<button
+  id="editButton"
+  matIconButton
+  type="button"
+  matTooltip="Advancements Settings"
+  (click)="openAdvancementsDialog()">
+  <mat-icon>settings</mat-icon>
+</button>
+
+@if (rows.length > 0 || columns.length > 0) {
+  <app-grid [rows]="rows" [columns]="columns"></app-grid>
+} @else {
+  <app-no-data></app-no-data>
+}

@@ -22,3 +22,7 @@ export const setPlayerDataFiles = createAction(
   "[World Files] Set Player Data Files",
   props<{ files: Map<string, File> | undefined }>()
 );
+export const setAdvancementsFiles = createAction(
+  "[World Files] Set Advancements Files",
+  props<{ files: Map<string, File> | undefined }>()
+);

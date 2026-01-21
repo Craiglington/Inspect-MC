@@ -33,7 +33,15 @@
       matTooltip="Stats"
       routerLink="/stats"
       [ngClass]="{ 'current-route': route === '/stats' }">
-      <mat-icon>leaderboard</mat-icon>
+      <mat-icon>bar_chart</mat-icon>
+    </a>
+
+    <a
+      mat-icon-button
+      matTooltip="Advancements"
+      routerLink="/advancements"
+      [ngClass]="{ 'current-route': route === '/advancements' }">
+      <mat-icon>workspace_premium</mat-icon>
     </a>
 
     <div class="button-spacer"></div>

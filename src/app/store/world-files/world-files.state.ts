@@ -7,6 +7,7 @@ export interface WorldFilesState {
   };
   stats: Map<string, File> | undefined;
   playerData: Map<string, File> | undefined;
+  advancements: Map<string, File> | undefined;
 }
 
 export const initialWorldFilesState: WorldFilesState = {
@@ -17,5 +18,6 @@ export const initialWorldFilesState: WorldFilesState = {
     end: undefined
   },
   stats: undefined,
-  playerData: undefined
+  playerData: undefined,
+  advancements: undefined
 };

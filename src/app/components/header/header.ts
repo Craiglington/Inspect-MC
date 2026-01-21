@@ -62,6 +62,9 @@ export class Header implements OnInit, OnDestroy {
   private readonly playerDataRegex = new RegExp(
     /^[^\/]+\/playerdata\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.dat$/
   );
+  private readonly advancementsRegex = new RegExp(
+    /^[^\/]+\/advancements\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
+  );
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -103,6 +106,7 @@ export class Header implements OnInit, OnDestroy {
     const endFiles: Map<string, File> = new Map();
     const statsFiles: Map<string, File> = new Map();
     const playerDataFiles: Map<string, File> = new Map();
+    const advancementsFiles: Map<string, File> = new Map();
     for (const file of files) {
       // Level
       if (this.levelRegex.exec(file.webkitRelativePath)) {
@@ -132,7 +136,12 @@ export class Header implements OnInit, OnDestroy {
       }
 
       // PlayerData
-      this.processUuidFile(file, this.playerDataRegex, playerDataFiles);
+      if (this.processUuidFile(file, this.playerDataRegex, playerDataFiles)) {
+        continue;
+      }
+
+      // Advancements
+      this.processUuidFile(file, this.advancementsRegex, advancementsFiles);
     }
 
     this.store.dispatch(
@@ -145,7 +154,9 @@ export class Header implements OnInit, OnDestroy {
             end: endFiles.size > 0 ? endFiles : undefined
           },
           stats: statsFiles.size > 0 ? statsFiles : undefined,
-          playerData: playerDataFiles.size > 0 ? playerDataFiles : undefined
+          playerData: playerDataFiles.size > 0 ? playerDataFiles : undefined,
+          advancements:
+            advancementsFiles.size > 0 ? advancementsFiles : undefined
         }
       })
     );

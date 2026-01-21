@@ -5,31 +5,34 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
 import { catchError, EMPTY, finalize, Subscription } from "rxjs";
-import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
+import { Advancements } from "../../models/advancements";
 import { GridColumn, GridRow } from "../../models/gird-data";
-import { Stats } from "../../models/stats";
+import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
 import { FileReaderService } from "../../services/file-reader/file-reader-service";
-import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
-import { NotificationService } from "../../services/notification/notification-service";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { GridComponent } from "../grid/grid";
-import { SpinnerComponent } from "../spinner/spinner";
-import {
-  StatsCategory,
-  StatsDialogComponent,
-  StatsDialogInputData,
-  StatsDialogOutputData
-} from "./stats-dialog/stats-dialog";
 import {
   LocalStorageKey,
   LocalStorageService
 } from "../../services/local-storage/local-storage";
+import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
+import { NotificationService } from "../../services/notification/notification-service";
+import { worldFilesFeature } from "../../store/world-files/world-files.feature";
+import { GridComponent } from "../grid/grid";
 import { NoDataComponent } from "../no-data/no-data";
+import { SpinnerComponent } from "../spinner/spinner";
+import {
+  AdvancementsCategory,
+  AdvancementsDialogComponent,
+  AdvancementsDialogInputData,
+  AdvancementsDialogOutputData
+} from "./advancements-dialog/advancements-dialog";
 
-export type StatsStoredSettings = Pick<StatsDialogInputData, "statsCategory">;
+export type AdvancementsStoredSettings = Pick<
+  AdvancementsDialogInputData,
+  "advancementsCategory"
+>;
 
 @Component({
-  selector: "app-stats",
+  selector: "app-advancements",
   imports: [
     MatButtonModule,
     MatIconModule,
@@ -38,10 +41,10 @@ export type StatsStoredSettings = Pick<StatsDialogInputData, "statsCategory">;
     GridComponent,
     NoDataComponent
   ],
-  templateUrl: "./stats.html",
-  styleUrl: "./stats.scss"
+  templateUrl: "./advancements.html",
+  styleUrl: "./advancements.scss"
 })
-export class StatsComponent implements OnInit, OnDestroy {
+export class AdvancementsComponent implements OnInit, OnDestroy {
   private readonly localStorageService = inject(LocalStorageService);
   private readonly fileReaderService = inject(FileReaderService);
   private readonly minecraftProfileService = inject(MinecraftProfileService);
@@ -52,19 +55,14 @@ export class StatsComponent implements OnInit, OnDestroy {
   protected loading: boolean = false;
   private readonly subscriptions: Subscription[] = [];
 
-  /**
-   * Stored files, stats data, and profiles. Also the stats settings like
-   * which profiles are currently active (displayed in the table) and which
-   * category of stats is being displayed.
-   */
-  private readonly statsFiles$ = this.store.select(
-    worldFilesFeature.selectStats
+  private readonly advancementsFiles$ = this.store.select(
+    worldFilesFeature.selectAdvancements
   );
-  private statsFiles?: Map<string, File>;
-  private readonly statsFileData: Map<string, Stats> = new Map();
+  private advancementsFiles?: Map<string, File>;
+  private readonly advancementsFileData: Map<string, Advancements> = new Map();
   private profiles: Map<string, MinecraftPlayerProfile> = new Map();
   private activeProfiles: string[] = [];
-  private statsCategory: StatsCategory;
+  private advancementsCategory: AdvancementsCategory;
 
   /**
    * AG Grid row and column data.
@@ -73,17 +71,19 @@ export class StatsComponent implements OnInit, OnDestroy {
   protected columns: GridColumn[] = [];
 
   constructor() {
-    const statsSettings = this.localStorageService.get<StatsStoredSettings>(
-      LocalStorageKey.STATS_SETTINGS
-    );
-    this.statsCategory = statsSettings?.statsCategory ?? "minecraft:custom";
+    const advancementsSettings =
+      this.localStorageService.get<AdvancementsStoredSettings>(
+        LocalStorageKey.ADVANCEMENTS_SETTINGS
+      );
+    this.advancementsCategory =
+      advancementsSettings?.advancementsCategory ?? "minecraft:story";
   }
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.statsFiles$.subscribe((files) => {
-        this.statsFiles = files;
-        this.processStatsFiles();
+      this.advancementsFiles$.subscribe((files) => {
+        this.advancementsFiles = files;
+        this.processAdvancementsFiles();
       })
     );
   }
@@ -94,18 +94,18 @@ export class StatsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private processStatsFiles() {
+  private processAdvancementsFiles() {
     this.columns = [];
     this.rows = [];
-    this.statsFileData.clear();
+    this.advancementsFileData.clear();
     this.profiles.clear();
     this.activeProfiles = [];
 
-    if (!this.statsFiles) return;
+    if (!this.advancementsFiles) return;
 
     this.loading = true;
     const uuids: string[] = [];
-    for (const uuid of this.statsFiles.keys()) {
+    for (const uuid of this.advancementsFiles.keys()) {
       uuids.push(uuid);
     }
     this.minecraftProfileService
@@ -127,7 +127,7 @@ export class StatsComponent implements OnInit, OnDestroy {
           this.profiles.set(profile.data.player.id, profile.data.player);
         }
         if (this.profiles.size > 0) {
-          this.openStatsDialog();
+          this.openAdvancementsDialog();
         } else {
           this.notificationService.notify({
             message: "No Minecraft profiles found."
@@ -136,27 +136,27 @@ export class StatsComponent implements OnInit, OnDestroy {
       });
   }
 
-  protected openStatsDialog() {
+  protected openAdvancementsDialog() {
     const dialogRef = this.dialog.open<
-      StatsDialogComponent,
-      StatsDialogInputData,
-      StatsDialogOutputData
-    >(StatsDialogComponent, {
+      AdvancementsDialogComponent,
+      AdvancementsDialogInputData,
+      AdvancementsDialogOutputData
+    >(AdvancementsDialogComponent, {
       data: {
         profiles: this.profiles,
         activeProfiles: this.activeProfiles,
-        statsCategory: this.statsCategory
+        advancementsCategory: this.advancementsCategory
       }
     });
 
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
       this.activeProfiles = data.activeProfiles;
-      this.statsCategory = data.statsCategory;
+      this.advancementsCategory = data.advancementsCategory;
 
-      this.localStorageService.set<StatsStoredSettings>(
+      this.localStorageService.set<AdvancementsStoredSettings>(
         LocalStorageKey.STATS_SETTINGS,
-        { statsCategory: this.statsCategory }
+        { advancementsCategory: this.advancementsCategory }
       );
       this.updateTable();
     });
@@ -164,72 +164,48 @@ export class StatsComponent implements OnInit, OnDestroy {
 
   private async updateTable() {
     const newGridColumns: GridColumn[] = [
-      { field: this.statsCategory, filter: true }
+      { field: this.advancementsCategory, filter: true }
     ];
     const newGridRows: GridRow[] = [];
 
-    /**
-     * Every stats category has subcategories. For instance, the mined
-     * category has subcategories for every block that can be mined.
-     * This is a collection of unique subcategories to display in our table.
-     * In other words, there is a column for every active profile and a row
-     * for every subcategory.
-     */
-    const statsSubcategories: Set<string> = new Set();
+    const uniqueAdvancements: Set<string> = new Set();
+    const activeAdvancementsData: Advancements[] = [];
 
-    /**
-     * A list of stats data that corresponds to the list
-     * of active profiles or profiles that are being displayed.
-     */
-    const activeStatsData: Stats[] = [];
-
-    // We need a column for every profile being displayed.
     for (const activeProfile of this.activeProfiles) {
-      /**
-       * Make sure the stats file and profile exist.
-       * Add a new column for the active profile.
-       */
-      const file = this.statsFiles?.get(activeProfile);
+      const file = this.advancementsFiles?.get(activeProfile);
       const profile = this.profiles.get(activeProfile);
       if (!file || !profile) continue;
       newGridColumns.push({ field: profile.username });
 
-      /**
-       * Get the profile's stats. If it is not already loaded,
-       * retrieve and store. Also add it to the list of
-       * active stats.
-       */
-      let statsData = this.statsFileData.get(activeProfile);
-      if (!statsData) {
-        statsData = JSON.parse(
+      let advancementsData = this.advancementsFileData.get(activeProfile);
+      if (!advancementsData) {
+        advancementsData = JSON.parse(
           await this.fileReaderService.readAsText(file)
-        ) as Stats;
-        this.statsFileData.set(activeProfile, statsData);
+        ) as Advancements;
+        this.advancementsFileData.set(activeProfile, advancementsData);
       }
-      activeStatsData.push(statsData);
+      activeAdvancementsData.push(advancementsData);
 
-      /**
-       * If this profile's stats has the current category, add
-       * every subcategory to the collection of unique
-       * subcategories to display.
-       */
-      const category = statsData.stats[this.statsCategory];
-      if (!category) continue;
-      for (const subcategory in category) {
-        statsSubcategories.add(subcategory);
+      const advancementEntries = Object.entries(advancementsData).filter(
+        (entry) =>
+          entry[0].startsWith(this.advancementsCategory) && entry[1]?.done
+      );
+      for (const advancementEntry of advancementEntries) {
+        uniqueAdvancements.add(advancementEntry[0]);
       }
     }
 
-    /**
-     * Add a new row for each unique subcategory. For each row,
-     * add the subcategory and the value for each active profile.
-     */
-    for (const subcategory of statsSubcategories.values()) {
+    for (const advancementName of uniqueAdvancements.values()) {
       const newGridRow: GridRow = {};
-      newGridRow[this.statsCategory] = subcategory;
+      newGridRow[this.advancementsCategory] = advancementName.slice(
+        this.advancementsCategory.length + 1
+      );
       for (let i = 1; i < newGridColumns.length; ++i) {
-        newGridRow[newGridColumns[i].field!] =
-          activeStatsData[i - 1].stats[this.statsCategory]?.[subcategory];
+        const criteria =
+          activeAdvancementsData[i - 1][advancementName]?.criteria;
+        newGridRow[newGridColumns[i].field!] = criteria
+          ? this.getDateAchieved(Object.values(criteria))
+          : undefined;
       }
       newGridRows.push(newGridRow);
     }
@@ -239,5 +215,15 @@ export class StatsComponent implements OnInit, OnDestroy {
      */
     this.columns = newGridColumns;
     this.rows = newGridRows;
+  }
+
+  private getDateAchieved(dates: string[]): string {
+    let date: Date;
+    if (dates.length === 1) {
+      date = new Date(dates[0]);
+    } else {
+      date = new Date([...dates].sort()[dates.length - 1]);
+    }
+    return date.toISOString().slice(0, 10);
   }
 }
