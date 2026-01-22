@@ -74,7 +74,7 @@ export class Header implements OnInit, OnDestroy {
       this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe((event: NavigationEnd) => {
-          this.route = event.url;
+          this.route = event.urlAfterRedirects;
         })
     );
     this.openUploadDialog();
