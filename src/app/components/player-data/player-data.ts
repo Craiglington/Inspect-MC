@@ -146,6 +146,8 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
         )) || null;
       this.playerData.set(this.activeProfile, storedPlayerData);
     }
-    this.activePlayerData = storedPlayerData;
+    this.activePlayerData = storedPlayerData
+      ? { [`${this.activeProfile}.dat`]: storedPlayerData }
+      : null;
   }
 }

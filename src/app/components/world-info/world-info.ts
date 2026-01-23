@@ -35,7 +35,12 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.levelSubscription = this.levelFile$.subscribe(async (levelFile) => {
       if (levelFile) {
-        this.levelData = await this.datService.getSNBT(levelFile);
+        const snbtData = (await this.datService.getSNBT(levelFile))?.["Data"];
+        this.levelData = snbtData
+          ? {
+              [levelFile.name]: snbtData
+            }
+          : undefined;
       } else {
         this.levelData = undefined;
       }
