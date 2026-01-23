@@ -14,9 +14,9 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,js,html}": "eslint --fix",
+    "*.{ts,js,html}": "npx eslint --fix",
     "*": [
-      "prettier --ignore-unknown --write"
+      "npx prettier --ignore-unknown --write"
     ]
   },
   "private": true,
