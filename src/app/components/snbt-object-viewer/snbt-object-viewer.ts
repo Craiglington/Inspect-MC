@@ -42,10 +42,7 @@ export class SnbtObjectViewerComponent {
 
   private readonly _openIndices = signal<Set<number>>(new Set());
   @Input() set startingOpenIndices(indices: number[]) {
-    this._openIndices.update(
-      (
-        openIndices
-      ) => {
+    this._openIndices.update((openIndices) => {
       const next = new Set(openIndices);
       for (const index of indices) {
         next.add(index);
