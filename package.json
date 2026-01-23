@@ -13,6 +13,12 @@
     "prettier": "prettier --write src",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.{ts,js,html}": "eslint --fix",
+    "*": [
+      "prettier --ignore-unknown --write"
+    ]
+  },
   "private": true,
   "dependencies": {
     "@angular/cdk": "^21.0.0",
@@ -47,6 +53,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.6.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "8.46.1"
