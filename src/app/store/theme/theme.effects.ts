@@ -22,7 +22,7 @@ export class ThemeEffects implements OnInitEffects {
         withLatestFrom(
           this.store.select((state: { theme: string }) => state.theme)
         ),
-        tap(([_, theme]) => {
+        tap(([, theme]) => {
           localStorage.setItem("theme", theme);
           if (theme === "light") {
             this.document.documentElement.classList.remove("dark-mode");

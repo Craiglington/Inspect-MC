@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
@@ -64,7 +64,7 @@ export interface AdvancementsDialogForm {
   templateUrl: "./advancements-dialog.html",
   styleUrl: "./advancements-dialog.scss"
 })
-export class AdvancementsDialogComponent {
+export class AdvancementsDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialogData =
     inject<AdvancementsDialogInputData>(MAT_DIALOG_DATA);

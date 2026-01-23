@@ -21,11 +21,10 @@ import { MatIconModule } from "@angular/material/icon";
   styleUrl: "./file-input.scss"
 })
 export class FileInput implements AfterViewInit, OnChanges {
-  @Input("label") label: string = "";
-  @Input("multiple") multiple: boolean = false;
-  @Input("directory") directory: boolean = false;
-  @Output("filesUploaded") filesUploaded: EventEmitter<FileList> =
-    new EventEmitter();
+  @Input() label: string = "";
+  @Input() multiple: boolean = false;
+  @Input() directory: boolean = false;
+  @Output() filesUploaded: EventEmitter<FileList> = new EventEmitter();
   @ViewChild("fileInput") fileInput?: ElementRef<HTMLInputElement>;
 
   protected numFilesUploaded: number = 0;

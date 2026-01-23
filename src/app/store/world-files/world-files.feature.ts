@@ -12,7 +12,7 @@ import { initialWorldFilesState, WorldFilesState } from "./world-files.state";
 
 const worldFilesReducer = createReducer<WorldFilesState>(
   { ...initialWorldFilesState },
-  on(clearWorldFiles, (_) => ({ ...initialWorldFilesState })),
+  on(clearWorldFiles, () => ({ ...initialWorldFilesState })),
   on(setWorldFiles, (_, action) => action.files),
   on(setLevelFile, (state, action) => ({
     ...state,

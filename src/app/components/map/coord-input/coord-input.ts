@@ -20,13 +20,13 @@ import {
   styleUrl: "./coord-input.scss"
 })
 export class CoordInput implements ControlValueAccessor {
-  @Input("label") label: string = "";
-  @Input("name") name: string = "";
-  @Input("placeholder") placeholder: number = 0;
-  @Input("step") step: number = 1;
-  @Input("disabled") disabled: boolean = false;
-  @Input("min") min: number = -30000000;
-  @Input("max") max: number = 30000000;
+  @Input() label: string = "";
+  @Input() name: string = "";
+  @Input() placeholder: number = 0;
+  @Input() step: number = 1;
+  @Input() disabled: boolean = false;
+  @Input() min: number = -30000000;
+  @Input() max: number = 30000000;
   protected value?: number;
   private onChange?: (value: number) => void;
   private onTouched?: () => void;

@@ -46,24 +46,24 @@ export class Header implements OnInit, OnDestroy {
   );
   protected worldFiles?: WorldFilesState;
 
-  private readonly levelRegex = new RegExp(/^[^\/]+\/level\.dat$/);
+  private readonly levelRegex = new RegExp(/^[^/]+\/level\.dat$/);
   private readonly overworldRegionRegex = new RegExp(
-    /^[^\/]+\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
+    /^[^/]+\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
   private readonly netherRegionRegex = new RegExp(
-    /^[^\/]+\/DIM-1\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
+    /^[^/]+\/DIM-1\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
   private readonly endRegionRegex = new RegExp(
-    /^[^\/]+\/DIM1\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
+    /^[^/]+\/DIM1\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
   private readonly statsRegex = new RegExp(
-    /^[^\/]+\/stats\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
+    /^[^/]+\/stats\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
   );
   private readonly playerDataRegex = new RegExp(
-    /^[^\/]+\/playerdata\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.dat$/
+    /^[^/]+\/playerdata\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.dat$/
   );
   private readonly advancementsRegex = new RegExp(
-    /^[^\/]+\/advancements\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
+    /^[^/]+\/advancements\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
   );
 
   ngOnInit(): void {

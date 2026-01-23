@@ -14,8 +14,8 @@ import { AsyncPipe } from "@angular/common";
 })
 export class GridComponent {
   private readonly store = inject(Store);
-  @Input("rows") rows: GridRow[] = [];
-  @Input("columns") columns: GridColumn[] = [];
+  @Input() rows: GridRow[] = [];
+  @Input() columns: GridColumn[] = [];
 
   protected readonly defaultColDef: GridColumn = {
     flex: 1

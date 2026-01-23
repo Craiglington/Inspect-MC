@@ -467,7 +467,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         const chunkKey = `${chunkX},${chunkZ}`;
         this.currentlyDrawnChunkKeys.add(chunkKey);
 
-        let chunkImage = this.chunkImages.get(chunkKey);
+        const chunkImage = this.chunkImages.get(chunkKey);
 
         if (chunkImage) {
           this.drawChunkImage(chunkImage, x, z, currentDrawLicense);
@@ -686,8 +686,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.canvas || !this.ctx) return;
 
     // Calculate the shift in html pixels.
-    let htmlXShift = this.dragHtmlCoords.x - this.dragStartHtmlCoords.x;
-    let htmlZShift = this.dragHtmlCoords.z - this.dragStartHtmlCoords.z;
+    const htmlXShift = this.dragHtmlCoords.x - this.dragStartHtmlCoords.x;
+    const htmlZShift = this.dragHtmlCoords.z - this.dragStartHtmlCoords.z;
 
     /**
      * Update the starting html coords to the current ones for
@@ -696,8 +696,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dragStartHtmlCoords.setWithCoords(this.dragHtmlCoords);
 
     // Calculate the shift in map pixels.
-    let mapXShift = htmlXShift * this.htmlToMapRatio;
-    let mapZShift = htmlZShift * this.htmlToMapRatio;
+    const mapXShift = htmlXShift * this.htmlToMapRatio;
+    const mapZShift = htmlZShift * this.htmlToMapRatio;
 
     // Update the map coords
     this.dragMapCoords.subtract(mapXShift, mapZShift);
@@ -717,7 +717,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         x < this.mapDimensions.width;
         x += this.CHUNK_LENGTH, ++chunkIndex
       ) {
-        let chunkImage = this.chunkImages.get(chunkKeys.next().value!);
+        const chunkImage = this.chunkImages.get(chunkKeys.next().value!);
 
         if (chunkImage) {
           this.drawChunkImage(chunkImage, x, z, this.drawLicense);
