@@ -1,4 +1,4 @@
-@if (regionFiles) {
+@if (activeRegionFiles()) {
   <form id="mapForm" class="flex-row">
     <app-coord-input
       label="X:"
@@ -41,7 +41,7 @@
   id="editButton"
   matIconButton
   type="button"
-  (click)="openMapDialog()"
+  (click)="openMapSettings()"
   matTooltip="Map Settings">
   <mat-icon>settings</mat-icon>
 </button>
