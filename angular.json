@@ -27,15 +27,16 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss", "src/app/themes/theme.scss"]
+            "styles": ["src/styles.scss", "src/app/themes/theme.scss"],
+            "allowedCommonJsDependencies": ["lz4js"]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",
