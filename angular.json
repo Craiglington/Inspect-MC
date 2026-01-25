@@ -28,7 +28,8 @@
               }
             ],
             "styles": ["src/styles.scss", "src/app/themes/theme.scss"],
-            "allowedCommonJsDependencies": ["lz4js"]
+            "allowedCommonJsDependencies": ["lz4js"],
+            "baseHref": "/Inspect-MC/"
           },
           "configurations": {
             "production": {
