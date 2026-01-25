@@ -29,6 +29,9 @@ jobs:
       - name: Build
         run: npm run build -- --base-href /Inspect-MC/
 
+      - name: SPA fallback (404.html)
+        run: cp dist/inspect-mc/browser/index.html dist/inspect-mc/browser/404.html
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v4
         with:
