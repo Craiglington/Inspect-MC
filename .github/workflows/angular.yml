@@ -2,9 +2,9 @@ name: Angular
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -16,23 +16,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js 22
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-    - name: Install
-      run: npm ci
+      - name: Install
+        run: npm install
 
-    - name: Build
-      run: npm run build -- --base-href /Inspect-MC/
+      - name: Build
+        run: npm run build -- --base-href /Inspect-MC/
 
-    - name: Upload Artifact
-      uses: actions/upload-pages-artifact@v4
-      with:
-        path: dist/inspect-mc/browser
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/inspect-mc/browser
 
   deploy:
     needs: build
