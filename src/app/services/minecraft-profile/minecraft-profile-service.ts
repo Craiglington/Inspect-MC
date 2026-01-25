@@ -19,7 +19,8 @@ import { MinecraftProfileResponse } from "../../models/minecraft-profile";
 export class MinecraftProfileService {
   private readonly http = inject(HttpClient);
 
-  private static readonly PROFILE_URL = "/minecraft/profile/";
+  private static readonly PROFILE_URL =
+    "https://playerdb.co/api/player/minecraft/";
   private readonly profiles: Map<string, MinecraftProfileResponse> = new Map();
 
   /**
