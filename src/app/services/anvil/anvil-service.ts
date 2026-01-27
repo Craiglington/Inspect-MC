@@ -243,9 +243,8 @@ export class AnvilService {
             (heightMapEntry >>
               BigInt(i * AnvilService.BIT_IN_HEIGHTMAP_ENTRY)) &
               0x1ffn
-          ) -
-            chunk.yMin -
-            1,
+          ) +
+            (chunk.yMin - 1),
           maxYLevel
         );
         const blockMapData = this.getBlockMapData(
@@ -282,7 +281,7 @@ export class AnvilService {
         AnvilService.BIT_IN_HEIGHTMAP_ENTRY
       );
 
-      const yLevel = Math.min(heightMapValue - chunk.yMin - 1, maxYLevel);
+      const yLevel = Math.min(heightMapValue + (chunk.yMin - 1), maxYLevel);
       const blockMapData = this.getBlockMapData(
         chunk,
         blockIndex,
