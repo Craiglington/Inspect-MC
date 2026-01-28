@@ -19,9 +19,7 @@ export interface Property {
 export class SnbtObjectViewerComponent {
   private _data = signal<Property[]>([]);
   @Input() set data(value: SNBT | SNBTValue[] | undefined) {
-    this._openIndices.update(() => {
-      return new Set();
-    });
+    this._openIndices.set(new Set(this.initialOpenIndices));
     if (!value) {
       this._data.set([]);
     } else if (Array.isArray(value)) {
@@ -40,15 +38,11 @@ export class SnbtObjectViewerComponent {
     return computed(() => this._data());
   }
 
-  private readonly _openIndices = signal<Set<number>>(new Set());
-  @Input() set startingOpenIndices(indices: number[]) {
-    this._openIndices.update((openIndices) => {
-      const next = new Set(openIndices);
-      for (const index of indices) {
-        next.add(index);
-      }
-      return next;
-    });
+  private initialOpenIndices: number[] = [];
+  private _openIndices = signal<Set<number>>(new Set());
+  @Input() set openIndices(indices: number[]) {
+    this.initialOpenIndices = [...indices];
+    this._openIndices.set(new Set(this.initialOpenIndices));
   }
 
   protected isOpen(index: number) {
