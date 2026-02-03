@@ -97,6 +97,11 @@ export class AnvilService {
        */
       const dataLength = dataView.getInt32(payloadOffset) - 1;
 
+      const compressedData = dataView.buffer.slice(
+        payloadOffset + 5,
+        payloadOffset + 5 + dataLength
+      );
+
       /**
        * (1) gzip (RFC1952) (unused in practice)
        * (2) zlib (RFC1950)
@@ -105,32 +110,17 @@ export class AnvilService {
        * (127) Custom
        */
       const compressionType = dataView.getUint8(payloadOffset + 4);
-      if (compressionType < 1 || compressionType > 4) {
+      let compressionFormat: CommonCompressionFormat | undefined = undefined;
+      if (compressionType === 1) {
+        compressionFormat = "gzip";
+      } else if (compressionType === 2) {
+        compressionFormat = "deflate";
+      } else if (compressionType === 4) {
+        compressionFormat = "lz4";
+      } else if (compressionType !== 3) {
         throw new Error(
           `Invalid compression type: ${compressionType}. Custom compression is not supported.`
         );
-      }
-
-      const compressedData = dataView.buffer.slice(
-        payloadOffset + 5,
-        payloadOffset + 5 + dataLength
-      );
-      let compressionFormat: CommonCompressionFormat | undefined = undefined;
-      if (compressionType === 1) {
-        if (!this.decompressionService.isValidGzipData(compressedData)) {
-          throw new Error("Invalid gzip data.");
-        }
-        compressionFormat = "gzip";
-      } else if (compressionType === 2) {
-        if (!this.decompressionService.isValidZlibData(compressedData)) {
-          throw new Error("Invalid zlib data.");
-        }
-        compressionFormat = "deflate";
-      } else if (compressionType === 4) {
-        if (!this.decompressionService.isValidLz4Data(compressedData)) {
-          throw new Error("Invalid LZ4 data.");
-        }
-        compressionFormat = "lz4";
       }
 
       const decompressedData = compressionFormat
