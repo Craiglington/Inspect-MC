@@ -28,29 +28,11 @@ export class DecompressionService {
     }
 
     // Process remaining decompression with DecompressionStream
-    const decompressionStream = new DecompressionStream(compressionFormat);
-    const decompressedStreamReader = new Blob([compressedData])
+    const decompressionStream = new Blob([compressedData])
       .stream()
-      .pipeThrough(decompressionStream)
-      .getReader();
+      .pipeThrough(new DecompressionStream(compressionFormat));
 
-    let numBytes = 0;
-    const chunks: Uint8Array<ArrayBuffer>[] = [];
-    while (true) {
-      const chunk = await decompressedStreamReader.read();
-      if (chunk.done) {
-        break;
-      }
-      numBytes += chunk.value.byteLength;
-      chunks.push(chunk.value);
-    }
-
-    const allBytes = new Uint8Array(numBytes);
-    chunks.reduce((offset, chunk) => {
-      allBytes.set(chunk, offset);
-      return offset + chunk.byteLength;
-    }, 0);
-    return allBytes.buffer;
+    return await new Response(decompressionStream).arrayBuffer();
   }
 
   /**
