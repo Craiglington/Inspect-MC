@@ -81,7 +81,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   // Constants.
   private readonly CHUNK_LENGTH = 16; // Minecraft blocks/map pixels
   private readonly BLOCKS_IN_CHUNK = this.CHUNK_LENGTH * this.CHUNK_LENGTH; // Minecraft blocks
-  private readonly MIN_CANVAS_TO_MAP_RATIO = 4;
+  private readonly MIN_CANVAS_TO_MAP_RATIO = 1;
   private readonly MAX_MAP_LENGTH_CHUNKS = 25; // Minecraft chunks
   private readonly MAX_STORED_CHUNK_IMAGES =
     this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10;
@@ -317,8 +317,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
      * of the size of the canvas.
      */
     this.canvasToMapRatio = Math.max(
-      Math.trunc(
-        this.canvas.width / this.MAX_MAP_LENGTH_CHUNKS / this.CHUNK_LENGTH
+      Math.ceil(
+        Math.max(this.canvas.width, this.canvas.height) /
+          this.MAX_MAP_LENGTH_CHUNKS /
+          this.CHUNK_LENGTH
       ),
       this.MIN_CANVAS_TO_MAP_RATIO
     );
