@@ -14,5 +14,5 @@
 @if (rows.length > 0 || columns.length > 0) {
   <app-grid [rows]="rows" [columns]="columns"></app-grid>
 } @else {
-  <app-no-data></app-no-data>
+  <app-no-data [title]="title" [description]="description"></app-no-data>
 }

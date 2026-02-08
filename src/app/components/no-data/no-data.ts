@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, Input } from "@angular/core";
 
 @Component({
   selector: "app-no-data",
@@ -6,4 +6,7 @@ import { Component } from "@angular/core";
   templateUrl: "./no-data.html",
   styleUrl: "./no-data.scss"
 })
-export class NoDataComponent {}
+export class NoDataComponent {
+  @Input() title: string = "";
+  @Input() description: string = "";
+}

@@ -17,5 +17,5 @@
     [data]="activePlayerData"
     [openIndices]="[0]"></app-snbt-object-viewer>
 } @else {
-  <app-no-data></app-no-data>
+  <app-no-data [title]="title" [description]="description"></app-no-data>
 }

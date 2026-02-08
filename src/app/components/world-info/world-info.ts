@@ -24,6 +24,10 @@ export class WorldInfoComponent implements OnInit, OnDestroy {
   private readonly datService = inject(DatService);
   private readonly store = inject(Store);
 
+  protected title = "General World Information";
+  protected description =
+    "World version, spawn location, game rules, time of day, difficulty, etc.";
+
   private readonly levelFile$ = this.store.select(
     worldFilesFeature.selectLevel
   );

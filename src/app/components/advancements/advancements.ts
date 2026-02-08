@@ -52,6 +52,9 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(Store);
 
+  protected title = "Player Advancements";
+  protected description = "Compare dates of advancements and recipes.";
+
   protected loading: boolean = false;
   private readonly subscriptions: Subscription[] = [];
 

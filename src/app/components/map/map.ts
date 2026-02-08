@@ -75,6 +75,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  protected title = "World Maps";
+  protected description = "Interactive maps of all three Minecraft dimensions.";
+
   // Constants.
   private readonly CHUNK_LENGTH = 16; // Minecraft blocks/map pixels
   private readonly BLOCKS_IN_CHUNK = this.CHUNK_LENGTH * this.CHUNK_LENGTH; // Minecraft blocks

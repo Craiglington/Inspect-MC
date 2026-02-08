@@ -40,6 +40,10 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(Store);
 
+  protected title = "Player Data";
+  protected description =
+    "Current location, respawn location, xp level, inventory items, health, hunger, etc.";
+
   protected loading: boolean = false;
   private readonly subscriptions: Subscription[] = [];
 
