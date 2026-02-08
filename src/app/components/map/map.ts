@@ -49,6 +49,7 @@ import {
   MapDimensionType,
   MapPaletteType
 } from "./map-dialog/map-dialog";
+import { LruEvictionMap } from "../../utils/lru-eviction-map";
 
 @Component({
   selector: "app-map",
@@ -84,7 +85,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MIN_CANVAS_TO_MAP_RATIO = 1;
   private readonly MAX_MAP_LENGTH_CHUNKS = 25; // Minecraft chunks
   private readonly MAX_STORED_CHUNK_IMAGES =
-    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10;
+    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 1;
   private readonly CROSSHAIRS_WIDTH = 0.5; // Minecraft blocks/map pixels
   private readonly CROSSHAIRS_LENGTH = 6; // Minecraft blocks/map pixels
 
@@ -107,21 +108,21 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly activeRegionFiles: Signal<Map<string, File> | undefined>;
   // Region file data mapped by key. Keys are strings in the format `x,z`.
   private readonly regionFileData: Map<string, Promise<ArrayBuffer>> =
-    new Map();
+    new LruEvictionMap(5);
 
   /**
    * A Chunk's data is required to create its own chunk image as well as others.
    * Keys are strings in the format `x,z`.
    */
   private readonly chunkMapData: Map<string, Promise<ChunkMapData | null>> =
-    new Map();
+    new LruEvictionMap(this.MAX_STORED_CHUNK_IMAGES);
   /**
    * Generated Chunk images. Keys are strings in the format `x,z`.
    * If the chunk's data was available, the value contains the created chunk image.
    * Otherwise, the value is null.
    */
   private readonly chunkImages: Map<string, Promise<ImageBitmap | null>> =
-    new Map();
+    new LruEvictionMap(this.MAX_STORED_CHUNK_IMAGES);
   // The lowest a Minecraft block can be. Based on the current dimension being viewed.
   private chunkYMin: Signal<number>;
 
@@ -486,9 +487,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.drawChunkImage(chunkImage, x, z, currentDrawLicense);
       }
     }
-    if (this.chunkImages.size > this.MAX_STORED_CHUNK_IMAGES) {
-      this.reduceMapByHalf(this.chunkImages);
-    }
   }
 
   /**
@@ -627,10 +625,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (error) {
       console.error(error);
       return null;
-    } finally {
-      if (this.chunkMapData.size > this.MAX_STORED_CHUNK_IMAGES) {
-        this.reduceMapByHalf(this.chunkMapData);
-      }
     }
   }
 
@@ -650,16 +644,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       return MapColors[mapColorId].color.below;
     }
     return MapColors[mapColorId].color.same;
-  }
-
-  // Removes the first half of entries from a map.
-  private reduceMapByHalf(map: Map<unknown, unknown>) {
-    const reduceSize = Math.round(map.size / 2);
-    const keys = map.keys();
-    for (let i = 0; i < reduceSize; ++i) {
-      const key = keys.next().value;
-      if (key) map.delete(key);
-    }
   }
 
   protected pointerDown = (event: PointerEvent) => {
