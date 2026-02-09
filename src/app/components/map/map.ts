@@ -85,7 +85,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MIN_CANVAS_TO_MAP_RATIO = 1;
   private readonly MAX_MAP_LENGTH_CHUNKS = 25; // Minecraft chunks
   private readonly MAX_STORED_CHUNK_IMAGES =
-    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 1;
+    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10;
   private readonly CROSSHAIRS_WIDTH = 0.5; // Minecraft blocks/map pixels
   private readonly CROSSHAIRS_LENGTH = 6; // Minecraft blocks/map pixels
 

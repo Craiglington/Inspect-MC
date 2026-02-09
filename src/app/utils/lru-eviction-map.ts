@@ -1,4 +1,7 @@
-export class LruEvictionMap<K, V> extends Map {
+/**
+ * A Map with an automatic least-recently-used eviction policy.
+ */
+export class LruEvictionMap<K, V> extends Map<K, V> {
   private _maxSize: number;
 
   constructor(sizeLimit?: number) {
@@ -6,7 +9,6 @@ export class LruEvictionMap<K, V> extends Map {
     this._maxSize = sizeLimit ?? 1;
   }
 
-  // Getters and setters.
   get maxSize(): number {
     return this._maxSize;
   }
@@ -16,10 +18,10 @@ export class LruEvictionMap<K, V> extends Map {
   }
 
   override get(key: K): V | undefined {
-    const value = super.get(key);
-    if (value !== undefined && this.delete(key)) {
-      super.set(key, value);
-    }
+    if (!this.has(key)) return undefined;
+    const value = super.get(key)!;
+    this.delete(key);
+    super.set(key, value);
     return value;
   }
 
