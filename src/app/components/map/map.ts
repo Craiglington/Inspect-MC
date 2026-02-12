@@ -41,6 +41,8 @@ import {
 } from "../../services/local-storage/local-storage";
 import { worldFilesFeature } from "../../store/world-files/world-files.feature";
 import { WorldFilesState } from "../../store/world-files/world-files.state";
+import { AsyncQueue } from "../../utils/async-queue";
+import { LruEvictionMap } from "../../utils/lru-eviction-map";
 import { NoDataComponent } from "../no-data/no-data";
 import { CoordInput } from "./coord-input/coord-input";
 import {
@@ -49,7 +51,6 @@ import {
   MapDimensionType,
   MapPaletteType
 } from "./map-dialog/map-dialog";
-import { LruEvictionMap } from "../../utils/lru-eviction-map";
 
 @Component({
   selector: "app-map",
@@ -80,14 +81,33 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected description = "Interactive maps of all three Minecraft dimensions.";
 
   // Constants.
-  private readonly CHUNK_LENGTH = 16; // Minecraft blocks/map pixels
-  private readonly BLOCKS_IN_CHUNK = this.CHUNK_LENGTH * this.CHUNK_LENGTH; // Minecraft blocks
+  private readonly CHUNK_BLOCK_LENGTH = 16; // Minecraft blocks/map pixels
+  private readonly BLOCKS_IN_CHUNK =
+    this.CHUNK_BLOCK_LENGTH * this.CHUNK_BLOCK_LENGTH; // Minecraft blocks
+  private readonly SUPER_CHUNK_CHUNK_LENGTH = 8;
+  private readonly SUPER_CHUNK_BLOCK_LENGTH =
+    this.SUPER_CHUNK_CHUNK_LENGTH * this.CHUNK_BLOCK_LENGTH;
   private readonly MIN_CANVAS_TO_MAP_RATIO = 1;
-  private readonly MAX_MAP_LENGTH_CHUNKS = 25; // Minecraft chunks
-  private readonly MAX_STORED_CHUNK_IMAGES =
-    this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10;
+  private readonly MAX_MAP_LENGTH_CHUNKS = 64; // Minecraft chunks
   private readonly CROSSHAIRS_WIDTH = 0.5; // Minecraft blocks/map pixels
   private readonly CROSSHAIRS_LENGTH = 6; // Minecraft blocks/map pixels
+
+  /**
+   * Constants for iterating through chunk and block indices
+   * while generating super chunk images.
+   */
+  private readonly IMAGE_INDEX_STEP = 4;
+  private readonly OUTER_IMAGE_INDEX_STEP =
+    (this.SUPER_CHUNK_BLOCK_LENGTH - this.SUPER_CHUNK_CHUNK_LENGTH) *
+    this.CHUNK_BLOCK_LENGTH *
+    this.IMAGE_INDEX_STEP;
+  private readonly INNER_IMAGE_INDEX_STEP =
+    this.CHUNK_BLOCK_LENGTH * this.IMAGE_INDEX_STEP;
+  private readonly OUTER_BLOCK_INDEX_STEP =
+    this.CHUNK_BLOCK_LENGTH *
+      this.SUPER_CHUNK_CHUNK_LENGTH *
+      this.IMAGE_INDEX_STEP -
+    this.INNER_IMAGE_INDEX_STEP;
 
   // Our component's subscriptions.
   private readonly subscriptions: Subscription[] = [];
@@ -115,14 +135,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
    * Keys are strings in the format `x,z`.
    */
   private readonly chunkMapData: Map<string, Promise<ChunkMapData | null>> =
-    new LruEvictionMap(this.MAX_STORED_CHUNK_IMAGES);
+    new LruEvictionMap(
+      this.MAX_MAP_LENGTH_CHUNKS * this.MAX_MAP_LENGTH_CHUNKS * 10
+    );
   /**
-   * Generated Chunk images. Keys are strings in the format `x,z`.
+   * Generated super chunk images. Keys are strings in the format `x,z`.
    * If the chunk's data was available, the value contains the created chunk image.
    * Otherwise, the value is null.
    */
-  private readonly chunkImages: Map<string, Promise<ImageBitmap | null>> =
-    new LruEvictionMap(this.MAX_STORED_CHUNK_IMAGES);
+  private readonly superChunkImages: Map<string, Promise<ImageBitmap | null>> =
+    new LruEvictionMap(500);
+  // The queue for getting images.
+  private getImageQueue = new AsyncQueue(1);
   // The lowest a Minecraft block can be. Based on the current dimension being viewed.
   private chunkYMin: Signal<number>;
 
@@ -235,8 +259,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mapCoords.set(this.startingXCoord, this.startingZCoord);
         this.mapYLevel = this.startingYLevel;
         this.regionFileData.clear();
-        this.chunkImages.clear();
+        this.superChunkImages.clear();
         this.chunkMapData.clear();
+        this.getImageQueue.clear();
         this.drawMap();
       })
     );
@@ -268,8 +293,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected mapYLevelChange() {
-    this.chunkImages.clear();
+    this.superChunkImages.clear();
     this.chunkMapData.clear();
+    this.getImageQueue.clear();
     this.mapCoordInputChange();
   }
 
@@ -321,7 +347,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       Math.ceil(
         Math.max(this.canvas.width, this.canvas.height) /
           this.MAX_MAP_LENGTH_CHUNKS /
-          this.CHUNK_LENGTH
+          this.CHUNK_BLOCK_LENGTH
       ),
       this.MIN_CANVAS_TO_MAP_RATIO
     );
@@ -412,8 +438,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (clearChunkData) {
         this.regionFileData.clear();
-        this.chunkImages.clear();
+        this.superChunkImages.clear();
         this.chunkMapData.clear();
+        this.getImageQueue.clear();
       }
       this.localStorageService.set(LocalStorageKey.MAP_SETTINGS, data);
       this.drawMap();
@@ -460,31 +487,49 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       currentMapCoords.z
     );
 
-    // Get starting map coords to begin drawing the chunks. Range (-this.CHUNK_LENGTH, 0]
-    const xRemainder = currentMapCoords.x % this.CHUNK_LENGTH;
-    const zRemainder = currentMapCoords.z % this.CHUNK_LENGTH;
+    // Adjust to get the top-left (-x,-z) chunk of the super chunk
+    chunkCoords.set(
+      Math.floor(chunkCoords.x / this.SUPER_CHUNK_CHUNK_LENGTH) *
+        this.SUPER_CHUNK_CHUNK_LENGTH,
+      Math.floor(chunkCoords.z / this.SUPER_CHUNK_CHUNK_LENGTH) *
+        this.SUPER_CHUNK_CHUNK_LENGTH
+    );
+
+    // Get starting map coords to begin drawing the chunks. Range (-this.SUPER_CHUNK_BLOCK_LENGTH, 0]
+    const xRemainder = currentMapCoords.x % this.SUPER_CHUNK_BLOCK_LENGTH;
+    const zRemainder = currentMapCoords.z % this.SUPER_CHUNK_BLOCK_LENGTH;
     const mapStartCoords = new Coords(
-      -1 * (xRemainder >= 0 ? xRemainder : this.CHUNK_LENGTH + xRemainder),
-      -1 * (zRemainder >= 0 ? zRemainder : this.CHUNK_LENGTH + zRemainder)
+      -1 *
+        (xRemainder >= 0
+          ? xRemainder
+          : this.SUPER_CHUNK_BLOCK_LENGTH + xRemainder),
+      -1 *
+        (zRemainder >= 0
+          ? zRemainder
+          : this.SUPER_CHUNK_BLOCK_LENGTH + zRemainder)
     );
 
     for (
       let z = mapStartCoords.z, chunkZ = chunkCoords.z;
       z < this.mapDimensions.height;
-      z += this.CHUNK_LENGTH, ++chunkZ
+      z += this.SUPER_CHUNK_BLOCK_LENGTH,
+        chunkZ += this.SUPER_CHUNK_CHUNK_LENGTH
     ) {
       for (
         let x = mapStartCoords.x, chunkX = chunkCoords.x;
         x < this.mapDimensions.width;
-        x += this.CHUNK_LENGTH, ++chunkX
+        x += this.SUPER_CHUNK_BLOCK_LENGTH,
+          chunkX += this.SUPER_CHUNK_CHUNK_LENGTH
       ) {
-        const chunkKey = `${chunkX},${chunkZ}`;
-        let chunkImage = this.chunkImages.get(chunkKey);
-        if (!chunkImage) {
-          chunkImage = this.getChunkImage(chunkX, chunkZ);
-          this.chunkImages.set(chunkKey, chunkImage);
+        const superChunkKey = `${chunkX},${chunkZ}`;
+        let superChunkImage = this.superChunkImages.get(superChunkKey);
+        if (!superChunkImage) {
+          superChunkImage = this.getImageQueue.enqueue(() =>
+            this.getSuperChunkImage(chunkX, chunkZ)
+          );
+          this.superChunkImages.set(superChunkKey, superChunkImage);
         }
-        this.drawChunkImage(chunkImage, x, z, currentDrawLicense);
+        this.drawChunkImage(superChunkImage, x, z, currentDrawLicense);
       }
     }
   }
@@ -564,62 +609,101 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
    *
    * Additionally, each chunk's image depends on the y levels of the chunk to the north.
    */
-  private async getChunkImage(
-    chunkX: number,
-    chunkZ: number
+  private async getSuperChunkImage(
+    superChunkX: number,
+    superChunkZ: number
   ): Promise<ImageBitmap | null> {
     try {
-      // Get the map data for the current chunk.
-      const currentChunkMapData = await this.getChunkMapData(chunkX, chunkZ);
-      if (currentChunkMapData === null) {
-        return null;
-      }
-
-      // Get the map data for the previous chunk.
-      const previousChunkMapData = await this.getChunkMapData(
-        chunkX,
-        chunkZ - 1
+      // Create the image.
+      const imageData = new ImageData(
+        this.SUPER_CHUNK_BLOCK_LENGTH,
+        this.SUPER_CHUNK_BLOCK_LENGTH
       );
 
-      // We only care about the last row of y levels from the previous chunk.
-      const previousYLevels = previousChunkMapData?.yLevels.slice(
-        this.BLOCKS_IN_CHUNK - this.CHUNK_LENGTH
-      );
+      const chunkZMax = superChunkZ + this.SUPER_CHUNK_CHUNK_LENGTH;
+      const chunkXMax = superChunkX + this.SUPER_CHUNK_CHUNK_LENGTH;
 
-      /**
-       * Use the color ids and y levels to get the block's map color and build
-       * the chunk image. Each block's calculated map color depends on how its
-       * y level compares to the block to the north.
-       */
-      const imageData = new ImageData(this.CHUNK_LENGTH, this.CHUNK_LENGTH);
-      for (let i = 0; i < this.BLOCKS_IN_CHUNK; ++i) {
-        let color: RGBAColor;
-        /**
-         * If we are looking at the first row of blocks in the chunk,
-         * we need the y levels of the last row of blocks in the previous chunk.
-         */
-        if (i < this.CHUNK_LENGTH) {
-          if (previousYLevels) {
-            color = this.getMapColorIdColor(
-              currentChunkMapData.colorIds[i],
-              currentChunkMapData.yLevels[i],
-              previousYLevels[i]
-            );
-          } else {
-            color = MapColors[currentChunkMapData.colorIds[i]].color.same;
-          }
-        } else {
-          color = this.getMapColorIdColor(
-            currentChunkMapData.colorIds[i],
-            currentChunkMapData.yLevels[i],
-            currentChunkMapData.yLevels[i - this.CHUNK_LENGTH]
+      for (
+        let chunkZ = superChunkZ, imageIndex = 0;
+        chunkZ < chunkZMax;
+        ++chunkZ, imageIndex += this.OUTER_IMAGE_INDEX_STEP
+      ) {
+        for (
+          let chunkX = superChunkX;
+          chunkX < chunkXMax;
+          ++chunkX, imageIndex += this.INNER_IMAGE_INDEX_STEP
+        ) {
+          // Get the map data for the current chunk.
+          const currentChunkMapData = await this.getChunkMapData(
+            chunkX,
+            chunkZ
           );
+          if (currentChunkMapData === null) {
+            continue;
+          }
+
+          // Get the map data for the previous chunk.
+          const previousChunkMapData = await this.getChunkMapData(
+            chunkX,
+            chunkZ - 1
+          );
+
+          // We only care about the last row of y levels from the previous chunk.
+          const previousYLevels = previousChunkMapData?.yLevels.slice(
+            this.BLOCKS_IN_CHUNK - this.CHUNK_BLOCK_LENGTH
+          );
+
+          /**
+           * Use the color ids and y levels to get the block's map color and build
+           * the chunk image. Each block's calculated map color depends on how its
+           * y level compares to the block to the north.
+           */
+          for (
+            let i = 0, blockIndex = imageIndex;
+            i < this.BLOCKS_IN_CHUNK;
+            i += this.CHUNK_BLOCK_LENGTH,
+              blockIndex += this.OUTER_BLOCK_INDEX_STEP
+          ) {
+            const chunkBlockIndexMax = i + this.CHUNK_BLOCK_LENGTH;
+            for (
+              let chunkBlockIndex = i;
+              chunkBlockIndex < chunkBlockIndexMax;
+              ++chunkBlockIndex, blockIndex += this.IMAGE_INDEX_STEP
+            ) {
+              let color: RGBAColor;
+              /**
+               * If we are looking at the first row of blocks in the chunk,
+               * we need the y levels of the last row of blocks in the previous chunk.
+               */
+              if (i === 0) {
+                if (previousYLevels) {
+                  color = this.getMapColorIdColor(
+                    currentChunkMapData.colorIds[chunkBlockIndex],
+                    currentChunkMapData.yLevels[chunkBlockIndex],
+                    previousYLevels[chunkBlockIndex]
+                  );
+                } else {
+                  color =
+                    MapColors[currentChunkMapData.colorIds[chunkBlockIndex]]
+                      .color.same;
+                }
+              } else {
+                color = this.getMapColorIdColor(
+                  currentChunkMapData.colorIds[chunkBlockIndex],
+                  currentChunkMapData.yLevels[chunkBlockIndex],
+                  currentChunkMapData.yLevels[
+                    chunkBlockIndex - this.CHUNK_BLOCK_LENGTH
+                  ]
+                );
+              }
+
+              imageData.data[blockIndex] = color.r;
+              imageData.data[blockIndex + 1] = color.g;
+              imageData.data[blockIndex + 2] = color.b;
+              imageData.data[blockIndex + 3] = color.a;
+            }
+          }
         }
-        const imageDataIndex = i * 4;
-        imageData.data[imageDataIndex] = color.r;
-        imageData.data[imageDataIndex + 1] = color.g;
-        imageData.data[imageDataIndex + 2] = color.b;
-        imageData.data[imageDataIndex + 3] = color.a;
       }
       return await createImageBitmap(imageData);
     } catch (error) {
