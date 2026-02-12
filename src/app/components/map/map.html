@@ -51,5 +51,6 @@
   id="map"
   [ngClass]="{ isMapDragging: isMapDragging }"
   (pointerdown)="pointerDown($event)"
-  (pointermove)="pointerMove($event)">
+  (pointermove)="pointerMove($event)"
+  (wheel)="wheel($event)">
 </canvas>
