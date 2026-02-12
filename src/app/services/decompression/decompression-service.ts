@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { decompress } from "lz4js";
+import { AsyncQueue } from "../../utils/async-queue";
 
 export type CommonCompressionFormat =
   | Exclude<CompressionFormat, "deflate-raw">
@@ -9,30 +10,39 @@ export type CommonCompressionFormat =
   providedIn: "root"
 })
 export class DecompressionService {
+  private decompressionQueue = new AsyncQueue(10);
+
   /**
    * Decompresses data using a decompression stream.
    * @param compressedData The compressed data as an `ArrayBuffer`.
    * @param compressionFormat The compression format that was used.
    * @returns The decompressed data as an `ArrayBuffer`.
    */
-  async decompressData(
+  decompressData(
     compressedData: ArrayBuffer,
     compressionFormat: CommonCompressionFormat
   ): Promise<ArrayBuffer> {
-    // Handle lz4 decompression with lz4js
-    if (compressionFormat === "lz4") {
-      const decompressedData = decompress(new Uint8Array(compressedData));
-      return decompressedData.buffer instanceof ArrayBuffer
-        ? decompressedData.buffer
-        : decompressedData.slice().buffer;
-    }
+    return this.decompressionQueue.enqueue(() => {
+      // Handle lz4 decompression with lz4js
+      if (compressionFormat === "lz4") {
+        const decompressedData = decompress(new Uint8Array(compressedData));
+        return Promise.resolve(
+          decompressedData.buffer instanceof ArrayBuffer
+            ? decompressedData.buffer
+            : decompressedData.slice().buffer
+        );
+      }
 
-    // Process remaining decompression with DecompressionStream
-    const decompressionStream = new Blob([compressedData])
-      .stream()
-      .pipeThrough(new DecompressionStream(compressionFormat));
-
-    return await new Response(decompressionStream).arrayBuffer();
+      // Process remaining decompression with DecompressionStream
+      return new Promise((resolve) => {
+        const decompressionStream = new Blob([compressedData])
+          .stream()
+          .pipeThrough(new DecompressionStream(compressionFormat));
+        new Response(decompressionStream).arrayBuffer().then((arrayBuffer) => {
+          resolve(arrayBuffer);
+        });
+      });
+    });
   }
 
   /**

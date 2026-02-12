@@ -2,11 +2,11 @@
  * A Map with an automatic least-recently-used eviction policy.
  */
 export class LruEvictionMap<K, V> extends Map<K, V> {
-  private _maxSize: number;
+  private _maxSize!: number;
 
-  constructor(sizeLimit?: number) {
+  constructor(maxSize?: number) {
     super();
-    this._maxSize = sizeLimit ?? 1;
+    this.maxSize = maxSize ?? 1;
   }
 
   get maxSize(): number {
@@ -14,6 +14,9 @@ export class LruEvictionMap<K, V> extends Map<K, V> {
   }
 
   set maxSize(maxSize: number) {
+    if (maxSize < 0) {
+      throw new Error(`Invalid maximum size: ${maxSize}.`);
+    }
     this._maxSize = maxSize;
   }
 
