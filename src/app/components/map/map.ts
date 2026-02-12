@@ -22,7 +22,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { debounceTime, Subscription } from "rxjs";
+import { debounceTime, filter, scan, Subscription } from "rxjs";
 import { MapColors } from "../../constants/map-colors";
 import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
 import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
@@ -91,6 +91,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MAX_MAP_LENGTH_CHUNKS = 64; // Minecraft chunks
   private readonly CROSSHAIRS_WIDTH = 0.5; // Minecraft blocks/map pixels
   private readonly CROSSHAIRS_LENGTH = 6; // Minecraft blocks/map pixels
+  private readonly MIN_ZOOM = 0;
+  private readonly MAX_ZOOM = 15;
 
   /**
    * Constants for iterating through chunk and block indices
@@ -118,6 +120,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private ctx?: CanvasRenderingContext2D;
   // An event emitter used to handle window resize events and when the canvas should be resized.
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
+  private readonly wheelCanvasEmitter: EventEmitter<number> =
+    new EventEmitter();
 
   // Region files from the store.
   private readonly regionFiles$ = this.store.select(
@@ -189,6 +193,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private mapPaletteType: WritableSignal<MapPaletteType>;
   private mapPalette: Signal<MapPalette>;
   protected showCrosshairs: boolean;
+  private zoom: number = this.MIN_ZOOM;
 
   // The current draw license is needed to draw on the canvas.
   private drawLicense: number = 0;
@@ -254,6 +259,31 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.resizeCanvasEmitter.pipe(debounceTime(250)).subscribe(() => {
         this.resizeCanvas();
       }),
+      this.wheelCanvasEmitter
+        .pipe(
+          scan(
+            (acc, delta) => {
+              const totalDelta = acc.totalDelta + delta;
+              if (Math.abs(totalDelta) >= 10) {
+                return {
+                  totalDelta: 0,
+                  delta: totalDelta > 0 ? 1 : -1
+                };
+              }
+              return { totalDelta: totalDelta, delta: 0 };
+            },
+            { totalDelta: 0, delta: 0 }
+          ),
+          filter((acc) => acc.delta !== 0)
+        )
+        .subscribe((acc) => {
+          if (acc.delta > 0) {
+            this.zoom = Math.max(this.MIN_ZOOM, this.zoom - 1);
+          } else if (acc.delta < 0) {
+            this.zoom = Math.min(this.MAX_ZOOM, this.zoom + 1);
+          }
+          this.resizeCanvas();
+        }),
       this.regionFiles$.subscribe((regionFiles) => {
         this.regionFiles.set(regionFiles);
         this.mapCoords.set(this.startingXCoord, this.startingZCoord);
@@ -343,14 +373,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
      * control the number of Minecraft blocks shown on the map regardless
      * of the size of the canvas.
      */
-    this.canvasToMapRatio = Math.max(
-      Math.ceil(
-        Math.max(this.canvas.width, this.canvas.height) /
-          this.MAX_MAP_LENGTH_CHUNKS /
-          this.CHUNK_BLOCK_LENGTH
-      ),
-      this.MIN_CANVAS_TO_MAP_RATIO
-    );
+    this.canvasToMapRatio =
+      Math.max(
+        Math.ceil(
+          Math.max(this.canvas.width, this.canvas.height) /
+            this.MAX_MAP_LENGTH_CHUNKS /
+            this.CHUNK_BLOCK_LENGTH
+        ),
+        this.MIN_CANVAS_TO_MAP_RATIO
+      ) + this.zoom;
+
     /**
      * Set the map dimensions (measured in Minecraft blocks).
      * Round up so that the map takes up the entire canvas.
@@ -728,6 +760,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       return MapColors[mapColorId].color.below;
     }
     return MapColors[mapColorId].color.same;
+  }
+
+  protected wheel(event: WheelEvent) {
+    this.wheelCanvasEmitter.emit(event.deltaY);
   }
 
   protected pointerDown = (event: PointerEvent) => {
