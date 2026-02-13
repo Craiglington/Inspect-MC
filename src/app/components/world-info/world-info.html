@@ -1,6 +1,15 @@
-@if (levelData) {
+<button
+  id="editButton"
+  matIconButton
+  type="button"
+  matTooltip="World Info Settings"
+  (click)="openWorldInfoDialog()">
+  <mat-icon>settings</mat-icon>
+</button>
+
+@if (worldInfoData) {
   <app-snbt-object-viewer
-    [data]="levelData"
+    [data]="worldInfoData"
     [openIndices]="[0]"></app-snbt-object-viewer>
 } @else {
   <app-no-data [title]="title" [description]="description"></app-no-data>

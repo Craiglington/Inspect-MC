@@ -132,11 +132,11 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
       this.activeProfile = data.activeProfile;
-      this.updateTable();
+      this.updatePlayerData();
     });
   }
 
-  private async updateTable() {
+  private async updatePlayerData() {
     if (!this.playerDataFiles || !this.activeProfile) {
       this.activePlayerData = null;
       return;

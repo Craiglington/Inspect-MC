@@ -47,23 +47,32 @@ export class Header implements OnInit, OnDestroy {
   protected worldFiles?: WorldFilesState;
 
   private readonly levelRegex = new RegExp(/^[^/]+\/level\.dat$/);
+  private readonly gameRulesRegex = new RegExp(
+    /^[^/]+\/data\/minecraft\/game_rules\.dat$/
+  );
+  private readonly weatherRegex = new RegExp(
+    /^[^/]+\/data\/minecraft\/weather\.dat$/
+  );
+  private readonly wanderingTraderRegex = new RegExp(
+    /^[^/]+\/data\/minecraft\/wandering_trader\.dat$/
+  );
   private readonly overworldRegionRegex = new RegExp(
-    /^[^/]+\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
+    /^[^/]+(?:\/dimensions\/minecraft\/overworld)?\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
   private readonly netherRegionRegex = new RegExp(
-    /^[^/]+\/DIM-1\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
+    /^[^/]+\/(?:(?:DIM-1)|(?:dimensions\/minecraft\/the_nether))\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
   private readonly endRegionRegex = new RegExp(
-    /^[^/]+\/DIM1\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
+    /^[^/]+\/(?:(?:DIM1)|(?:dimensions\/minecraft\/the_end))\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
   private readonly statsRegex = new RegExp(
-    /^[^/]+\/stats\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
+    /^[^/]+(?:\/players)?\/stats\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
   );
   private readonly playerDataRegex = new RegExp(
-    /^[^/]+\/playerdata\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.dat$/
+    /^[^/]+\/(?:(?:playerdata)|(?:players\/data))\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.dat$/
   );
   private readonly advancementsRegex = new RegExp(
-    /^[^/]+\/advancements\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
+    /^[^/]+(?:\/players)?\/advancements\/(?<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})\.json$/
   );
 
   ngOnInit(): void {
@@ -101,6 +110,9 @@ export class Header implements OnInit, OnDestroy {
 
   private async processFiles(files: FileList) {
     let levelFile: File | undefined = undefined;
+    let gameRulesFile: File | undefined = undefined;
+    let weatherFile: File | undefined = undefined;
+    let wanderingTraderFile: File | undefined = undefined;
     const overworldFiles: Map<string, File> = new Map();
     const netherFiles: Map<string, File> = new Map();
     const endFiles: Map<string, File> = new Map();
@@ -108,11 +120,6 @@ export class Header implements OnInit, OnDestroy {
     const playerDataFiles: Map<string, File> = new Map();
     const advancementsFiles: Map<string, File> = new Map();
     for (const file of files) {
-      // Level
-      if (this.levelRegex.exec(file.webkitRelativePath)) {
-        levelFile = file;
-      }
-
       // Overworld
       if (
         this.processRegionFile(file, this.overworldRegionRegex, overworldFiles)
@@ -142,12 +149,41 @@ export class Header implements OnInit, OnDestroy {
 
       // Advancements
       this.processUuidFile(file, this.advancementsRegex, advancementsFiles);
+
+      // Level
+      if (this.levelRegex.exec(file.webkitRelativePath)) {
+        levelFile = file;
+        continue;
+      }
+
+      // Game Rules
+      if (this.gameRulesRegex.exec(file.webkitRelativePath)) {
+        gameRulesFile = file;
+        continue;
+      }
+
+      // Weather
+      if (this.weatherRegex.exec(file.webkitRelativePath)) {
+        weatherFile = file;
+        continue;
+      }
+
+      // Wandering Trader
+      if (this.wanderingTraderRegex.exec(file.webkitRelativePath)) {
+        wanderingTraderFile = file;
+        continue;
+      }
     }
 
     this.store.dispatch(
       setWorldFiles({
         files: {
-          level: levelFile,
+          worldInfo: {
+            level: levelFile,
+            gameRules: gameRulesFile,
+            weather: weatherFile,
+            wanderingTrader: wanderingTraderFile
+          },
           region: {
             overworld: overworldFiles.size > 0 ? overworldFiles : undefined,
             nether: netherFiles.size > 0 ? netherFiles : undefined,

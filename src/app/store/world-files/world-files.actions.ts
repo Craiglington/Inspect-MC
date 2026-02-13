@@ -6,9 +6,9 @@ export const setWorldFiles = createAction(
   "[World Files] Clear World Files",
   props<{ files: WorldFilesState }>()
 );
-export const setLevelFile = createAction(
-  "[World Files] Set Level File",
-  props<{ file: File | undefined }>()
+export const setWorldInfoFiles = createAction(
+  "[World Files] Set World Info Files",
+  props<{ files: WorldFilesState["worldInfo"] }>()
 );
 export const setRegionFiles = createAction(
   "[World Files] Set Region Files",

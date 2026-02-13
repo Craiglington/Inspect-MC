@@ -8,6 +8,23 @@ import { worldFilesFeature } from "../../store/world-files/world-files.feature";
 import { SnbtObjectViewerComponent } from "../snbt-object-viewer/snbt-object-viewer";
 import { SNBT } from "../../models/snbt";
 import { NoDataComponent } from "../no-data/no-data";
+import { WorldFilesState } from "../../store/world-files/world-files.state";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import {
+  LocalStorageKey,
+  LocalStorageService
+} from "../../services/local-storage/local-storage";
+import {
+  WorldInfoDialogData,
+  WorldInfoCategory,
+  WorldInfoDialogComponent
+} from "./world-info-dialog/world-info-dialog";
+import { MatDialog } from "@angular/material/dialog";
+
+export type WorldInfoStoredSettings = Pick<
+  WorldInfoDialogData,
+  "worldInfoCategory"
+>;
 
 @Component({
   selector: "app-world-info",
@@ -15,7 +32,8 @@ import { NoDataComponent } from "../no-data/no-data";
     MatIconModule,
     MatButtonModule,
     SnbtObjectViewerComponent,
-    NoDataComponent
+    NoDataComponent,
+    MatTooltipModule
   ],
   templateUrl: "./world-info.html",
   styleUrl: "./world-info.scss"
@@ -23,35 +41,103 @@ import { NoDataComponent } from "../no-data/no-data";
 export class WorldInfoComponent implements OnInit, OnDestroy {
   private readonly datService = inject(DatService);
   private readonly store = inject(Store);
+  private readonly localStorageService = inject(LocalStorageService);
+  private readonly dialog = inject(MatDialog);
 
   protected title = "General World Information";
   protected description =
     "World version, spawn location, game rules, time of day, difficulty, etc.";
 
-  private readonly levelFile$ = this.store.select(
-    worldFilesFeature.selectLevel
+  private readonly worldInfoFiles$ = this.store.select(
+    worldFilesFeature.selectWorldInfo
   );
-  private levelSubscription!: Subscription;
-  protected levelData?: SNBT;
+  private worldInfoFiles: WorldFilesState["worldInfo"];
+  protected worldInfoData?: SNBT;
 
-  constructor() {}
+  private readonly subscriptions: Subscription[] = [];
+  private worldInfoCategory: WorldInfoCategory;
+
+  constructor() {
+    const worldInfoSettings =
+      this.localStorageService.get<WorldInfoStoredSettings>(
+        LocalStorageKey.WORLD_INFO_SETTINGS
+      );
+    this.worldInfoCategory = worldInfoSettings?.worldInfoCategory ?? "level";
+
+    this.worldInfoFiles = {
+      level: undefined,
+      gameRules: undefined,
+      weather: undefined,
+      wanderingTrader: undefined
+    };
+  }
 
   ngOnInit(): void {
-    this.levelSubscription = this.levelFile$.subscribe(async (levelFile) => {
-      if (levelFile) {
-        const snbtData = (await this.datService.getSNBT(levelFile))?.["Data"];
-        this.levelData = snbtData
-          ? {
-              [levelFile.name]: snbtData
-            }
-          : undefined;
-      } else {
-        this.levelData = undefined;
-      }
-    });
+    this.subscriptions.push(
+      this.worldInfoFiles$.subscribe((worldInfoFiles) => {
+        this.worldInfoFiles = worldInfoFiles;
+        this.updateWorldInfoData();
+      })
+    );
   }
 
   ngOnDestroy(): void {
-    this.levelSubscription.unsubscribe();
+    for (const subscription of this.subscriptions) {
+      subscription.unsubscribe();
+    }
+  }
+
+  openWorldInfoDialog() {
+    const dialogRef = this.dialog.open<
+      WorldInfoDialogComponent,
+      WorldInfoDialogData,
+      WorldInfoDialogData
+    >(WorldInfoDialogComponent, {
+      data: {
+        worldInfoCategory: this.worldInfoCategory
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((data) => {
+      if (!data) return;
+      this.worldInfoCategory = data.worldInfoCategory;
+      this.localStorageService.set<WorldInfoStoredSettings>(
+        LocalStorageKey.WORLD_INFO_SETTINGS,
+        { worldInfoCategory: this.worldInfoCategory }
+      );
+      this.updateWorldInfoData();
+    });
+  }
+
+  async updateWorldInfoData() {
+    let worldInfoFile: File;
+    if (this.worldInfoCategory === "level" && this.worldInfoFiles.level) {
+      worldInfoFile = this.worldInfoFiles.level;
+    } else if (
+      this.worldInfoCategory === "game_rules" &&
+      this.worldInfoFiles.gameRules
+    ) {
+      worldInfoFile = this.worldInfoFiles.gameRules;
+    } else if (
+      this.worldInfoCategory === "weather" &&
+      this.worldInfoFiles.weather
+    ) {
+      worldInfoFile = this.worldInfoFiles.weather;
+    } else if (
+      this.worldInfoCategory === "wandering_trader" &&
+      this.worldInfoFiles.wanderingTrader
+    ) {
+      worldInfoFile = this.worldInfoFiles.wanderingTrader;
+    } else {
+      this.worldInfoData = undefined;
+      return;
+    }
+
+    const snbtData = await this.datService.getSNBT(worldInfoFile);
+    this.worldInfoData = snbtData
+      ? {
+          [worldInfoFile.name]: snbtData
+        }
+      : undefined;
   }
 }

@@ -1,5 +1,10 @@
 export interface WorldFilesState {
-  level: File | undefined;
+  worldInfo: {
+    level: File | undefined;
+    gameRules: File | undefined;
+    weather: File | undefined;
+    wanderingTrader: File | undefined;
+  };
   region: {
     overworld: Map<string, File> | undefined;
     nether: Map<string, File> | undefined;
@@ -11,7 +16,12 @@ export interface WorldFilesState {
 }
 
 export const initialWorldFilesState: WorldFilesState = {
-  level: undefined,
+  worldInfo: {
+    level: undefined,
+    gameRules: undefined,
+    weather: undefined,
+    wanderingTrader: undefined
+  },
   region: {
     overworld: undefined,
     nether: undefined,

@@ -2,7 +2,7 @@ import { createFeature, createReducer, on } from "@ngrx/store";
 import {
   clearWorldFiles,
   setAdvancementsFiles,
-  setLevelFile,
+  setWorldInfoFiles,
   setPlayerDataFiles,
   setRegionFiles,
   setStatsFiles,
@@ -14,9 +14,9 @@ const worldFilesReducer = createReducer<WorldFilesState>(
   { ...initialWorldFilesState },
   on(clearWorldFiles, () => ({ ...initialWorldFilesState })),
   on(setWorldFiles, (_, action) => action.files),
-  on(setLevelFile, (state, action) => ({
+  on(setWorldInfoFiles, (state, action) => ({
     ...state,
-    level: action.file
+    worldInfo: action.files
   })),
   on(setRegionFiles, (state, action) => ({
     ...state,

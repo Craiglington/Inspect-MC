@@ -4,6 +4,15 @@
   justify-content: flex-start;
   align-items: flex-start;
   box-sizing: border-box;
+  position: relative;
+}
+
+#editButton {
+  position: absolute;
+  top: 0.25rem;
+  right: 1rem;
+  background-color: var(--mat-sys-surface);
+  z-index: 2;
 }
 
 app-snbt-object-viewer {
