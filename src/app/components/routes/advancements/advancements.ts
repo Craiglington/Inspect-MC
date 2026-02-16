@@ -5,20 +5,20 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
 import { catchError, EMPTY, finalize, Subscription } from "rxjs";
-import { Advancements } from "../../models/advancements";
-import { GridColumn, GridRow } from "../../models/gird-data";
-import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
-import { FileReaderService } from "../../services/file-reader/file-reader-service";
+import { Advancements } from "../../../models/advancements";
+import { GridColumn, GridRow } from "../../../models/gird-data";
+import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
+import { FileReaderService } from "../../../services/file-reader/file-reader-service";
 import {
   LocalStorageKey,
   LocalStorageService
-} from "../../services/local-storage/local-storage";
-import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
-import { NotificationService } from "../../services/notification/notification-service";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { GridComponent } from "../grid/grid";
-import { NoDataComponent } from "../no-data/no-data";
-import { SpinnerComponent } from "../spinner/spinner";
+} from "../../../services/local-storage/local-storage";
+import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
+import { NotificationService } from "../../../services/notification/notification-service";
+import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
+import { GridComponent } from "../../grid/grid";
+import { NoDataComponent } from "../../no-data/no-data";
+import { SpinnerComponent } from "../../spinner/spinner";
 import {
   AdvancementsCategory,
   AdvancementsDialogComponent,

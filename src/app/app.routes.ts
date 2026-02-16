@@ -1,9 +1,9 @@
 import { Routes } from "@angular/router";
-import { MapComponent } from "./components/map/map";
-import { StatsComponent } from "./components/stats/stats";
-import { WorldInfoComponent } from "./components/world-info/world-info";
-import { PlayerDataComponent } from "./components/player-data/player-data";
-import { AdvancementsComponent } from "./components/advancements/advancements";
+import { AdvancementsComponent } from "./components/routes/advancements/advancements";
+import { MapComponent } from "./components/routes/map/map";
+import { PlayerDataComponent } from "./components/routes/player-data/player-data";
+import { StatsComponent } from "./components/routes/stats/stats";
+import { WorldInfoComponent } from "./components/routes/world-info/world-info";
 
 export const routes: Routes = [
   { path: "world-info", component: WorldInfoComponent },

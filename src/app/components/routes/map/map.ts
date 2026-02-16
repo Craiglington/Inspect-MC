@@ -23,27 +23,27 @@ import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
 import { debounceTime, filter, scan, Subscription } from "rxjs";
-import { MapColors } from "../../constants/map-colors";
-import { blocksOnlyMapPalette } from "../../constants/map-palettes/blocks-only-palette";
-import { noWaterMapPalette } from "../../constants/map-palettes/no-water-palette";
-import { originalMapPalette } from "../../constants/map-palettes/original-palette";
-import { Chunk } from "../../models/chunk";
-import { ChunkMapData } from "../../models/chunk-map-data";
-import { Coords } from "../../models/coords";
-import { Dimensions } from "../../models/dimensions";
-import { RGBAColor } from "../../models/map-color";
-import { MapPalette } from "../../models/map-palette";
-import { AnvilService } from "../../services/anvil/anvil-service";
-import { FileReaderService } from "../../services/file-reader/file-reader-service";
+import { MapColors } from "../../../constants/map-colors";
+import { blocksOnlyMapPalette } from "../../../constants/map-palettes/blocks-only-palette";
+import { noWaterMapPalette } from "../../../constants/map-palettes/no-water-palette";
+import { originalMapPalette } from "../../../constants/map-palettes/original-palette";
+import { Chunk } from "../../../models/chunk";
+import { ChunkMapData } from "../../../models/chunk-map-data";
+import { Coords } from "../../../models/coords";
+import { Dimensions } from "../../../models/dimensions";
+import { RGBAColor } from "../../../models/map-color";
+import { MapPalette } from "../../../models/map-palette";
+import { AnvilService } from "../../../services/anvil/anvil-service";
+import { FileReaderService } from "../../../services/file-reader/file-reader-service";
 import {
   LocalStorageKey,
   LocalStorageService
-} from "../../services/local-storage/local-storage";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { WorldFilesState } from "../../store/world-files/world-files.state";
-import { AsyncQueue } from "../../utils/async-queue";
-import { LruEvictionMap } from "../../utils/lru-eviction-map";
-import { NoDataComponent } from "../no-data/no-data";
+} from "../../../services/local-storage/local-storage";
+import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
+import { WorldFilesState } from "../../../store/world-files/world-files.state";
+import { AsyncQueue } from "../../../utils/async-queue";
+import { LruEvictionMap } from "../../../utils/lru-eviction-map";
+import { NoDataComponent } from "../../no-data/no-data";
 import { CoordInput } from "./coord-input/coord-input";
 import {
   MapDialogComponent,

@@ -5,26 +5,26 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
 import { catchError, EMPTY, finalize, Subscription } from "rxjs";
-import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
-import { GridColumn, GridRow } from "../../models/gird-data";
-import { Stats } from "../../models/stats";
-import { FileReaderService } from "../../services/file-reader/file-reader-service";
-import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
-import { NotificationService } from "../../services/notification/notification-service";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { GridComponent } from "../grid/grid";
-import { SpinnerComponent } from "../spinner/spinner";
+import { GridColumn, GridRow } from "../../../models/gird-data";
+import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
+import { Stats } from "../../../models/stats";
+import { FileReaderService } from "../../../services/file-reader/file-reader-service";
+import {
+  LocalStorageKey,
+  LocalStorageService
+} from "../../../services/local-storage/local-storage";
+import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
+import { NotificationService } from "../../../services/notification/notification-service";
+import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
+import { GridComponent } from "../../grid/grid";
+import { NoDataComponent } from "../../no-data/no-data";
+import { SpinnerComponent } from "../../spinner/spinner";
 import {
   StatsCategory,
   StatsDialogComponent,
   StatsDialogInputData,
   StatsDialogOutputData
 } from "./stats-dialog/stats-dialog";
-import {
-  LocalStorageKey,
-  LocalStorageService
-} from "../../services/local-storage/local-storage";
-import { NoDataComponent } from "../no-data/no-data";
 
 export type StatsStoredSettings = Pick<StatsDialogInputData, "statsCategory">;
 
