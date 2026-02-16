@@ -167,7 +167,11 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
 
   private async updateTable() {
     const newGridColumns: GridColumn[] = [
-      { field: this.advancementsCategory, filter: true }
+      {
+        field: this.advancementsCategory,
+        headerName: this.advancementsCategory,
+        filter: true
+      }
     ];
     const newGridRows: GridRow[] = [];
 
@@ -178,7 +182,10 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
       const file = this.advancementsFiles?.get(activeProfile);
       const profile = this.profiles.get(activeProfile);
       if (!file || !profile) continue;
-      newGridColumns.push({ field: profile.username });
+      newGridColumns.push({
+        field: profile.username,
+        headerName: profile.username
+      });
 
       let advancementsData = this.advancementsFileData.get(activeProfile);
       if (!advancementsData) {

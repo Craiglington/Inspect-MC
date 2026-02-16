@@ -168,7 +168,11 @@ export class StatsComponent implements OnInit, OnDestroy {
 
   private async updateTable() {
     const newGridColumns: GridColumn[] = [
-      { field: this.statsCategory, filter: true }
+      {
+        field: this.statsCategory,
+        headerName: this.statsCategory,
+        filter: true
+      }
     ];
     const newGridRows: GridRow[] = [];
 
@@ -196,7 +200,10 @@ export class StatsComponent implements OnInit, OnDestroy {
       const file = this.statsFiles?.get(activeProfile);
       const profile = this.profiles.get(activeProfile);
       if (!file || !profile) continue;
-      newGridColumns.push({ field: profile.username });
+      newGridColumns.push({
+        field: profile.username,
+        headerName: profile.username
+      });
 
       /**
        * Get the profile's stats. If it is not already loaded,
