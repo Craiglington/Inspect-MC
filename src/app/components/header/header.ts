@@ -16,6 +16,7 @@ import { HelpDialogComponent } from "./help-dialog/help-dialog";
 import { ToggleTheme } from "./toggle-theme/toggle-theme";
 import { UploadDialogComponent } from "./upload-dialog/upload-dialog";
 import { NgClass } from "@angular/common";
+import { ROUTE_PATHS } from "../../app.routes";
 
 @Component({
   selector: "app-header",
@@ -39,6 +40,7 @@ export class Header implements OnInit, OnDestroy {
 
   protected readonly title = AppConstants.appTitle;
   protected route?: string;
+  protected routePaths = ROUTE_PATHS;
 
   private readonly subscriptions: Subscription[] = [];
   private readonly worldFiles$ = this.store.select(
@@ -75,9 +77,13 @@ export class Header implements OnInit, OnDestroy {
         .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe((event: NavigationEnd) => {
           this.route = event.urlAfterRedirects;
+
+          // Only open the upload dialog on the first route navigation
+          if (event.id === 1 && this.route !== ROUTE_PATHS.CHANGELOG) {
+            this.openUploadDialog();
+          }
         })
     );
-    this.openUploadDialog();
   }
 
   ngOnDestroy(): void {

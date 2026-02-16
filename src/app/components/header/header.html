@@ -7,40 +7,40 @@
     <a
       mat-icon-button
       matTooltip="World Info"
-      routerLink="/world-info"
-      [ngClass]="{ 'current-route': route === '/world-info' }">
+      [routerLink]="routePaths.WORLD_INFO"
+      [ngClass]="{ 'current-route': route === routePaths.WORLD_INFO }">
       <mat-icon>info</mat-icon>
     </a>
 
     <a
       mat-icon-button
       matTooltip="Map"
-      routerLink="/map"
-      [ngClass]="{ 'current-route': route === '/map' }">
+      [routerLink]="routePaths.MAP"
+      [ngClass]="{ 'current-route': route === routePaths.MAP }">
       <mat-icon>map</mat-icon>
     </a>
 
     <a
       mat-icon-button
       matTooltip="Player Data"
-      routerLink="/player-data"
-      [ngClass]="{ 'current-route': route === '/player-data' }">
+      [routerLink]="routePaths.PLAYER_DATA"
+      [ngClass]="{ 'current-route': route === routePaths.PLAYER_DATA }">
       <mat-icon>people</mat-icon>
     </a>
 
     <a
       mat-icon-button
       matTooltip="Stats"
-      routerLink="/stats"
-      [ngClass]="{ 'current-route': route === '/stats' }">
+      [routerLink]="routePaths.STATS"
+      [ngClass]="{ 'current-route': route === routePaths.STATS }">
       <mat-icon>bar_chart</mat-icon>
     </a>
 
     <a
       mat-icon-button
       matTooltip="Advancements"
-      routerLink="/advancements"
-      [ngClass]="{ 'current-route': route === '/advancements' }">
+      [routerLink]="routePaths.ADVANCEMENTS"
+      [ngClass]="{ 'current-route': route === routePaths.ADVANCEMENTS }">
       <mat-icon>workspace_premium</mat-icon>
     </a>
 
