@@ -1,25 +1,25 @@
 import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
+import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
 import { Subscription } from "rxjs";
-import { DatService } from "../../services/dat/dat-service";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { SnbtObjectViewerComponent } from "../snbt-object-viewer/snbt-object-viewer";
-import { SNBT } from "../../models/snbt";
-import { NoDataComponent } from "../no-data/no-data";
-import { WorldFilesState } from "../../store/world-files/world-files.state";
-import { MatTooltipModule } from "@angular/material/tooltip";
+import { SNBT } from "../../../models/snbt";
+import { DatService } from "../../../services/dat/dat-service";
 import {
   LocalStorageKey,
   LocalStorageService
-} from "../../services/local-storage/local-storage";
+} from "../../../services/local-storage/local-storage";
+import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
+import { WorldFilesState } from "../../../store/world-files/world-files.state";
+import { NoDataComponent } from "../../no-data/no-data";
+import { SnbtObjectViewerComponent } from "../../snbt-object-viewer/snbt-object-viewer";
 import {
-  WorldInfoDialogData,
   WorldInfoCategory,
-  WorldInfoDialogComponent
+  WorldInfoDialogComponent,
+  WorldInfoDialogData
 } from "./world-info-dialog/world-info-dialog";
-import { MatDialog } from "@angular/material/dialog";
 
 export type WorldInfoStoredSettings = Pick<
   WorldInfoDialogData,
