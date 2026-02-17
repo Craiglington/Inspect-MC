@@ -17,7 +17,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
+import { MinecraftPlayerProfile } from "../../../../models/minecraft-profile";
 
 export interface PlayerDataDialogInputData {
   profiles: Map<string, MinecraftPlayerProfile>;

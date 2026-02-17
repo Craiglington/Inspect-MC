@@ -21,26 +21,34 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
-import { Stats } from "../../../models/stats";
+import { MinecraftPlayerProfile } from "../../../../models/minecraft-profile";
 
-export type StatsCategory = keyof Stats["stats"];
+export type AdvancementsCategory =
+  | "minecraft:story"
+  | "minecraft:nether"
+  | "minecraft:end"
+  | "minecraft:adventure"
+  | "minecraft:husbandry"
+  | "minecraft:recipes";
 
-export interface StatsDialogInputData {
+export interface AdvancementsDialogInputData {
   profiles: Map<string, MinecraftPlayerProfile>;
   activeProfiles: string[];
-  statsCategory: StatsCategory;
+  advancementsCategory: AdvancementsCategory;
 }
 
-export type StatsDialogOutputData = Omit<StatsDialogInputData, "profiles">;
+export type AdvancementsDialogOutputData = Omit<
+  AdvancementsDialogInputData,
+  "profiles"
+>;
 
-export interface StatsDialogForm {
+export interface AdvancementsDialogForm {
   activeProfiles: FormControl<string[]>;
-  statsCategory: FormControl<StatsCategory>;
+  advancementsCategory: FormControl<AdvancementsCategory>;
 }
 
 @Component({
-  selector: "app-stats-dialog",
+  selector: "app-advancements-dialog",
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -53,58 +61,46 @@ export interface StatsDialogForm {
     ReactiveFormsModule,
     MatSelectModule
   ],
-  templateUrl: "./stats-dialog.html",
-  styleUrl: "./stats-dialog.scss"
+  templateUrl: "./advancements-dialog.html",
+  styleUrl: "./advancements-dialog.scss"
 })
-export class StatsDialogComponent implements OnInit {
+export class AdvancementsDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogData = inject<StatsDialogInputData>(MAT_DIALOG_DATA);
+  private readonly dialogData =
+    inject<AdvancementsDialogInputData>(MAT_DIALOG_DATA);
 
-  protected readonly statsCategoryOptions: {
+  protected readonly advancementsCategoryOptions: {
     text: string;
-    value: StatsCategory;
+    value: AdvancementsCategory;
   }[] = [
     {
-      text: "Broken",
-      value: "minecraft:broken"
+      text: "Minecraft",
+      value: "minecraft:story"
     },
     {
-      text: "Crafted",
-      value: "minecraft:crafted"
+      text: "The Nether",
+      value: "minecraft:nether"
     },
     {
-      text: "Dropped",
-      value: "minecraft:dropped"
+      text: "The End",
+      value: "minecraft:end"
     },
     {
-      text: "General",
-      value: "minecraft:custom"
+      text: "Adventure",
+      value: "minecraft:adventure"
     },
     {
-      text: "Killed",
-      value: "minecraft:killed"
+      text: "Husbandry",
+      value: "minecraft:husbandry"
     },
     {
-      text: "Killed By",
-      value: "minecraft:killed_by"
-    },
-    {
-      text: "Mined",
-      value: "minecraft:mined"
-    },
-
-    {
-      text: "Picked Up",
-      value: "minecraft:picked_up"
-    },
-    {
-      text: "Used",
-      value: "minecraft:used"
+      text: "Recipes",
+      value: "minecraft:recipes"
     }
   ];
 
   protected profiles!: Map<string, MinecraftPlayerProfile>;
-  protected formGroup!: FormGroup<StatsDialogForm>;
+  protected formGroup!: FormGroup<AdvancementsDialogForm>;
 
   ngOnInit(): void {
     this.profiles = this.dialogData.profiles;
@@ -119,10 +115,13 @@ export class StatsDialogComponent implements OnInit {
           validators: this.maxLength()
         }
       ),
-      statsCategory: new FormControl(this.dialogData.statsCategory, {
-        nonNullable: true,
-        validators: Validators.required
-      })
+      advancementsCategory: new FormControl(
+        this.dialogData.advancementsCategory,
+        {
+          nonNullable: true,
+          validators: Validators.required
+        }
+      )
     });
   }
 

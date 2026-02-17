@@ -1,13 +1,16 @@
 import { Component } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import {
-  MatDialogContent,
   MatDialogActions,
-  MatDialogTitle,
-  MatDialogClose
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle
 } from "@angular/material/dialog";
-import { AppConstants } from "../../../constants/app-constants";
+import { RouterLink } from "@angular/router";
 import { environment } from "../../../../environments/environment";
+import { ROUTE_PATHS } from "../../../app.routes";
+import { AppConstants } from "../../../constants/app-constants";
+import { MatTooltipModule } from "@angular/material/tooltip";
 
 @Component({
   selector: "app-help-dialog",
@@ -17,7 +20,9 @@ import { environment } from "../../../../environments/environment";
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
-    MatButtonModule
+    MatButtonModule,
+    RouterLink,
+    MatTooltipModule
   ],
   templateUrl: "./help-dialog.html",
   styleUrl: "./help-dialog.scss"
@@ -27,4 +32,5 @@ export class HelpDialogComponent {
   protected readonly appVersion = environment.version;
   protected readonly supportedMinecraftVersions =
     AppConstants.supportedMinecraftVersions;
+  protected readonly routePaths = ROUTE_PATHS;
 }

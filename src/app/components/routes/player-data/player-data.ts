@@ -5,20 +5,20 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
 import { catchError, EMPTY, finalize, Subscription } from "rxjs";
-import { MinecraftPlayerProfile } from "../../models/minecraft-profile";
-import { DatService } from "../../services/dat/dat-service";
-import { MinecraftProfileService } from "../../services/minecraft-profile/minecraft-profile-service";
-import { NotificationService } from "../../services/notification/notification-service";
-import { worldFilesFeature } from "../../store/world-files/world-files.feature";
-import { SnbtObjectViewerComponent } from "../snbt-object-viewer/snbt-object-viewer";
-import { SpinnerComponent } from "../spinner/spinner";
+import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
+import { SNBT } from "../../../models/snbt";
+import { DatService } from "../../../services/dat/dat-service";
+import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
+import { NotificationService } from "../../../services/notification/notification-service";
+import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
+import { NoDataComponent } from "../../no-data/no-data";
+import { SnbtObjectViewerComponent } from "../../snbt-object-viewer/snbt-object-viewer";
+import { SpinnerComponent } from "../../spinner/spinner";
 import {
   PlayerDataDialogComponent,
   PlayerDataDialogInputData,
   PlayerDataDialogOutputData
 } from "./player-data-dialog/player-data-dialog";
-import { SNBT } from "../../models/snbt";
-import { NoDataComponent } from "../no-data/no-data";
 
 @Component({
   selector: "app-player-data",

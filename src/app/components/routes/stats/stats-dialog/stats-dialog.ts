@@ -21,34 +21,26 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
+import { MinecraftPlayerProfile } from "../../../../models/minecraft-profile";
+import { Stats } from "../../../../models/stats";
 
-export type AdvancementsCategory =
-  | "minecraft:story"
-  | "minecraft:nether"
-  | "minecraft:end"
-  | "minecraft:adventure"
-  | "minecraft:husbandry"
-  | "minecraft:recipes";
+export type StatsCategory = keyof Stats["stats"];
 
-export interface AdvancementsDialogInputData {
+export interface StatsDialogInputData {
   profiles: Map<string, MinecraftPlayerProfile>;
   activeProfiles: string[];
-  advancementsCategory: AdvancementsCategory;
+  statsCategory: StatsCategory;
 }
 
-export type AdvancementsDialogOutputData = Omit<
-  AdvancementsDialogInputData,
-  "profiles"
->;
+export type StatsDialogOutputData = Omit<StatsDialogInputData, "profiles">;
 
-export interface AdvancementsDialogForm {
+export interface StatsDialogForm {
   activeProfiles: FormControl<string[]>;
-  advancementsCategory: FormControl<AdvancementsCategory>;
+  statsCategory: FormControl<StatsCategory>;
 }
 
 @Component({
-  selector: "app-advancements-dialog",
+  selector: "app-stats-dialog",
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -61,46 +53,58 @@ export interface AdvancementsDialogForm {
     ReactiveFormsModule,
     MatSelectModule
   ],
-  templateUrl: "./advancements-dialog.html",
-  styleUrl: "./advancements-dialog.scss"
+  templateUrl: "./stats-dialog.html",
+  styleUrl: "./stats-dialog.scss"
 })
-export class AdvancementsDialogComponent implements OnInit {
+export class StatsDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogData =
-    inject<AdvancementsDialogInputData>(MAT_DIALOG_DATA);
+  private readonly dialogData = inject<StatsDialogInputData>(MAT_DIALOG_DATA);
 
-  protected readonly advancementsCategoryOptions: {
+  protected readonly statsCategoryOptions: {
     text: string;
-    value: AdvancementsCategory;
+    value: StatsCategory;
   }[] = [
     {
-      text: "Minecraft",
-      value: "minecraft:story"
+      text: "Broken",
+      value: "minecraft:broken"
     },
     {
-      text: "The Nether",
-      value: "minecraft:nether"
+      text: "Crafted",
+      value: "minecraft:crafted"
     },
     {
-      text: "The End",
-      value: "minecraft:end"
+      text: "Dropped",
+      value: "minecraft:dropped"
     },
     {
-      text: "Adventure",
-      value: "minecraft:adventure"
+      text: "General",
+      value: "minecraft:custom"
     },
     {
-      text: "Husbandry",
-      value: "minecraft:husbandry"
+      text: "Killed",
+      value: "minecraft:killed"
     },
     {
-      text: "Recipes",
-      value: "minecraft:recipes"
+      text: "Killed By",
+      value: "minecraft:killed_by"
+    },
+    {
+      text: "Mined",
+      value: "minecraft:mined"
+    },
+
+    {
+      text: "Picked Up",
+      value: "minecraft:picked_up"
+    },
+    {
+      text: "Used",
+      value: "minecraft:used"
     }
   ];
 
   protected profiles!: Map<string, MinecraftPlayerProfile>;
-  protected formGroup!: FormGroup<AdvancementsDialogForm>;
+  protected formGroup!: FormGroup<StatsDialogForm>;
 
   ngOnInit(): void {
     this.profiles = this.dialogData.profiles;
@@ -115,13 +119,10 @@ export class AdvancementsDialogComponent implements OnInit {
           validators: this.maxLength()
         }
       ),
-      advancementsCategory: new FormControl(
-        this.dialogData.advancementsCategory,
-        {
-          nonNullable: true,
-          validators: Validators.required
-        }
-      )
+      statsCategory: new FormControl(this.dialogData.statsCategory, {
+        nonNullable: true,
+        validators: Validators.required
+      })
     });
   }
 

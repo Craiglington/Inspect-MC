@@ -1,7 +1,13 @@
 <h2 id="dialogTitle" mat-dialog-title>About {{ appTitle }}</h2>
 <mat-dialog-content id="dialogContent">
   <div class="app-logo-large"></div>
-  <em>v{{ appVersion }}</em>
+  <a
+    mat-dialog-close
+    [routerLink]="routePaths.CHANGELOG"
+    matTooltip="View the Changelog"
+    >v{{ appVersion }}</a
+  >
+
   <p>
     <strong
       >Supports Vanilla* Minecraft Java Edition (<em
