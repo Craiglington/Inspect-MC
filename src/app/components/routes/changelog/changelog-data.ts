@@ -15,6 +15,10 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.4.0": {
+      releaseDate: "",
+      features: ["Added support for Minecraft version 26.1."]
+    },
     "1.3.0": {
       releaseDate: "Feb 16, 2026",
       features: [
