@@ -15,11 +15,15 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.3.1": {
+      releaseDate: "Feb 19, 2026",
+      bugFixes: [
+        "Adjusted the changelog language and data to be simpler and more readable."
+      ]
+    },
     "1.3.0": {
       releaseDate: "Feb 16, 2026",
-      features: [
-        "Added a changelog accessible through the help dialog or via url(/Inspect-MC/changelog)."
-      ]
+      features: ["Added a changelog accessible through the help popup."]
     },
     "1.2.1": {
       releaseDate: "Feb 14, 2026",
@@ -30,7 +34,7 @@ export const ChangeLogData: Changelog = {
     "1.2.0": {
       releaseDate: "Feb 12, 2026",
       features: [
-        "Added a zoom feature to the map that is controlled by scrolling on the map.",
+        "Added a zoom feature to the map that is controlled by scrolling over the map.",
         "Increased the maximum map length in chunks from 25 to 64.",
         'Replaced the "Nothing to See Here" disclaimer with a title and a description for each page.',
         "Upgraded map performance by using a least-recently-used cache to store chunk images and an asynchronous queue to fetch chunk images."
@@ -51,143 +55,14 @@ export const ChangeLogData: Changelog = {
     "1.0.0": {
       releaseDate: "Jan 25, 2026",
       features: [
-        "Inspect MC launched with the following capabilities:",
-        [
-          {
-            feature: "World Info Component",
-            description:
-              "Displays general world information. Available via tab or url(/Inspect-MC/world-info)."
-          },
-          {
-            feature: "Map Component",
-            description:
-              "Displays world maps of all three Minecraft dimensions. Available via tab or url(/Inspect-MC/map).",
-            details: [
-              "The map can be configured with the following settings:",
-              [
-                {
-                  setting: "Show Crosshairs",
-                  description:
-                    "When enabled, crosshairs display on the map and show the exact location of the map's current coordinates."
-                },
-                {
-                  setting: "Map Dimension",
-                  description:
-                    "Select from The Overworld, The Nether, or The End dimensions."
-                },
-                {
-                  setting: "Starting X Coordinate",
-                  description: "Select the starting x coordinate of the map."
-                },
-                {
-                  setting: "Starting Y Level",
-                  description: "Select the starting y level of the map."
-                },
-                {
-                  setting: "Starting Z Coordinate",
-                  description: "Select the starting z coordinate of the map."
-                },
-                {
-                  setting: "Map Type",
-                  description:
-                    "Select between various map types including Original, Blocks Only, and No Water."
-                }
-              ],
-              "The map displays the current coordinates at the top left of the screen. These can be adjusted to view any location of a Minecraft world at any height.",
-              "The map is draggable with a mouse or track pad."
-            ]
-          },
-          {
-            feature: "Player Data Component",
-            description:
-              "Displays general player information. Available via tab or url(/Inspect-MC/player-data).",
-            details: [
-              "The player data component can be configured with the following settings:",
-              [
-                {
-                  setting: "Player",
-                  description:
-                    "Choose a player from a list of Minecraft usernames."
-                }
-              ]
-            ]
-          },
-          {
-            feature: "Stats Component",
-            description:
-              "Display players' statistics. Available via tab or url(/Inspect-MC/stats).",
-            details: [
-              "The stats component can be configured with the following settings:",
-              [
-                {
-                  setting: "Players",
-                  description:
-                    "Choose up to 10 players from a list of Minecraft usernames."
-                },
-                {
-                  setting: "Category",
-                  description: [
-                    "Choose from the following list of Minecraft statistic categories:",
-                    [
-                      "Broken",
-                      "Crafted",
-                      "Dropped",
-                      "General",
-                      "Killed",
-                      "Killed By",
-                      "Mined",
-                      "Picked Up",
-                      "Used"
-                    ]
-                  ]
-                }
-              ],
-              "Statistics can be sorted and filtered by player or statistic thanks to AG Grid."
-            ]
-          },
-          {
-            feature: "Advancements Component",
-            description:
-              "Displays players' advancements. Available via tab or url(/Inspect-MC/advancements).",
-            details: [
-              "The advancements component can be configured with the following settings:",
-              [
-                {
-                  setting: "Players",
-                  description:
-                    "Choose up to 10 players from a list of Minecraft usernames."
-                },
-                {
-                  setting: "Category",
-                  description: [
-                    "Choose from the following list of Minecraft advancement categories:",
-                    [
-                      "Minecraft",
-                      "The Nether",
-                      "The End",
-                      "Adventure",
-                      "Husbandry",
-                      "Recipes"
-                    ]
-                  ]
-                }
-              ],
-              "Advancements can be sorted and filtered by player or advancment thanks to AG Grid."
-            ]
-          },
-          "All component settings are cached in the browser and used to repopulate components on refresh.",
-          {
-            feature: "Upload Dialog",
-            description:
-              "A popup used to upload Minecraft world folders. Available via tab."
-          },
-          "Light and dark modes available via tab.",
-          {
-            feature: "Help Dialog",
-            description:
-              "A popup used to display general app information and disclaimers. Available via tab."
-          }
-        ]
+        "Upload Minecraft save folders and inspect various files and their data.",
+        "View general world information on the World Info page.",
+        "Interact with draggable world maps of all three Minecraft dimensions on the Map page.",
+        "View general player information on the Player Data page.",
+        "Compare players' statistics on the Stats page.",
+        "Compare players' advancements on the Advancements page.",
+        "All page settings are cached in the browser and used to repopulate settings on refresh.",
+        "A light and dark mode."
       ]
     }
   }
