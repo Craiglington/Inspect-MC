@@ -15,6 +15,12 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.3.2": {
+      releaseDate: "Feb 22, 2026",
+      bugFixes: [
+        "Fixed maps not displaying correctly for Minecraft version 1.19."
+      ]
+    },
     "1.3.1": {
       releaseDate: "Feb 19, 2026",
       bugFixes: [
