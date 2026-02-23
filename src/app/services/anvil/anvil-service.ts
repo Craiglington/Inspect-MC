@@ -178,7 +178,7 @@ export class AnvilService {
       },
       InhabitedTime: levelChunk.Level.InhabitedTime,
       LastUpdate: levelChunk.Level.LastUpdate,
-      Status: `minecraft:${levelChunk.Level.Status}`,
+      Status: levelChunk.Level.Status,
       xPos: levelChunk.Level.xPos,
       yPos: 0,
       zPos: levelChunk.Level.zPos,
