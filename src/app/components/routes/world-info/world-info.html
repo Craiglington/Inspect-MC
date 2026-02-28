@@ -9,6 +9,7 @@
 
 @if (worldInfoData) {
   <app-snbt-object-viewer
+    class="scrollable"
     [data]="worldInfoData"
     [openIndices]="[0]"></app-snbt-object-viewer>
 } @else {

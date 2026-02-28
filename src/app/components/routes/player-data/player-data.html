@@ -13,7 +13,7 @@
 
 @if (activePlayerData) {
   <app-snbt-object-viewer
-    id="snbt-viewer"
+    class="scrollable"
     [data]="activePlayerData"
     [openIndices]="[0]"></app-snbt-object-viewer>
 } @else {

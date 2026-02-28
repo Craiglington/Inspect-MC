@@ -602,8 +602,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       regionChunkCoords.z,
       this.chunkYMin()
     );
-    return chunk?.Status === "minecraft:full" ||
-      chunk?.Status === "minecraft:postprocessed"
+    return chunk?.Status.endsWith("full") ||
+      chunk?.Status.endsWith("postprocessed")
       ? chunk
       : null;
   }
