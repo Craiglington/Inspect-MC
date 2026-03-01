@@ -1,0 +1,24 @@
+<h2 id="dialogTitle" mat-dialog-title>World Data Settings</h2>
+<mat-dialog-content id="dialogContent" [formGroup]="formGroup">
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>World Data File</mat-label>
+    <mat-select formControlName="worldDataFilePath" [panelWidth]="null">
+      @for (worldDataFile of data.worldDataFiles; track $index) {
+        <mat-option
+          [title]="worldDataFile.webkitRelativePath"
+          [value]="worldDataFile.webkitRelativePath"
+          >{{ worldDataFile.webkitRelativePath }}</mat-option
+        >
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="outlined" mat-dialog-close>Cancel</button>
+  <button
+    matButton="filled"
+    [mat-dialog-close]="getOutputData()"
+    [disabled]="formGroup.invalid || !formGroup.dirty">
+    Save
+  </button>
+</mat-dialog-actions>
