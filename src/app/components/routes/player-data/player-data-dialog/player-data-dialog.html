@@ -4,7 +4,9 @@
     <mat-label>Player</mat-label>
     <mat-select formControlName="activeProfile">
       @for (profile of profiles.values(); track profile.id) {
-        <mat-option [value]="profile.id">{{ profile.username }}</mat-option>
+        <mat-option [value]="profile.id" [title]="profile.username">{{
+          profile.username
+        }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
