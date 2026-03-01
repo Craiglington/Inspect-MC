@@ -15,6 +15,14 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.4.0": {
+      releaseDate: "Feb 28, 2026",
+      features: [
+        "Added support for upcoming Minecraft version 26.1.",
+        'Changed "World Info" page to "World Data"',
+        'The "World Data" page settings allow the selection of any "dat" file other than maps.'
+      ]
+    },
     "1.3.2": {
       releaseDate: "Feb 22, 2026",
       bugFixes: [
