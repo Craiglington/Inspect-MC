@@ -48,16 +48,8 @@ export class Header implements OnInit, OnDestroy {
   );
   protected worldFiles?: WorldFilesState;
 
-  private readonly levelRegex = new RegExp(/^[^/]+\/level\.dat$/);
-  private readonly gameRulesRegex = new RegExp(
-    /^[^/]+\/data\/minecraft\/game_rules\.dat$/
-  );
-  private readonly weatherRegex = new RegExp(
-    /^[^/]+\/data\/minecraft\/weather\.dat$/
-  );
-  private readonly wanderingTraderRegex = new RegExp(
-    /^[^/]+\/data\/minecraft\/wandering_trader\.dat$/
-  );
+  private readonly datRegex = new RegExp(/^(?!.*map_[0-9]+\.dat$).+\.dat$/);
+
   private readonly overworldRegionRegex = new RegExp(
     /^[^/]+(?:\/dimensions\/minecraft\/overworld)?\/region\/r\.(?<x>-?[0-9]+)\.(?<z>-?[0-9]+)\.mca$/
   );
@@ -115,10 +107,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   private async processFiles(files: FileList) {
-    let levelFile: File | undefined = undefined;
-    let gameRulesFile: File | undefined = undefined;
-    let weatherFile: File | undefined = undefined;
-    let wanderingTraderFile: File | undefined = undefined;
+    const worldDataFiles: File[] = [];
     const overworldFiles: Map<string, File> = new Map();
     const netherFiles: Map<string, File> = new Map();
     const endFiles: Map<string, File> = new Map();
@@ -148,7 +137,7 @@ export class Header implements OnInit, OnDestroy {
         continue;
       }
 
-      // PlayerData
+      // Player Data
       if (this.processUuidFile(file, this.playerDataRegex, playerDataFiles)) {
         continue;
       }
@@ -156,27 +145,9 @@ export class Header implements OnInit, OnDestroy {
       // Advancements
       this.processUuidFile(file, this.advancementsRegex, advancementsFiles);
 
-      // Level
-      if (this.levelRegex.exec(file.webkitRelativePath)) {
-        levelFile = file;
-        continue;
-      }
-
-      // Game Rules
-      if (this.gameRulesRegex.exec(file.webkitRelativePath)) {
-        gameRulesFile = file;
-        continue;
-      }
-
-      // Weather
-      if (this.weatherRegex.exec(file.webkitRelativePath)) {
-        weatherFile = file;
-        continue;
-      }
-
-      // Wandering Trader
-      if (this.wanderingTraderRegex.exec(file.webkitRelativePath)) {
-        wanderingTraderFile = file;
+      // World Data
+      if (this.datRegex.exec(file.webkitRelativePath)) {
+        worldDataFiles.push(file);
         continue;
       }
     }
@@ -184,12 +155,7 @@ export class Header implements OnInit, OnDestroy {
     this.store.dispatch(
       setWorldFiles({
         files: {
-          worldInfo: {
-            level: levelFile,
-            gameRules: gameRulesFile,
-            weather: weatherFile,
-            wanderingTrader: wanderingTraderFile
-          },
+          worldData: worldDataFiles,
           region: {
             overworld: overworldFiles.size > 0 ? overworldFiles : undefined,
             nether: netherFiles.size > 0 ? netherFiles : undefined,
