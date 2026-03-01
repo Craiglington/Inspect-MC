@@ -3,11 +3,11 @@ import { AdvancementsComponent } from "./components/routes/advancements/advancem
 import { MapComponent } from "./components/routes/map/map";
 import { PlayerDataComponent } from "./components/routes/player-data/player-data";
 import { StatsComponent } from "./components/routes/stats/stats";
-import { WorldInfoComponent } from "./components/routes/world-info/world-info";
+import { WorldDataComponent } from "./components/routes/world-data/world-data";
 import { ChangeLogComponent } from "./components/routes/changelog/changelog";
 
 export enum ROUTE_PATHS {
-  WORLD_INFO = "/world-info",
+  WORLD_DATA = "/world-data",
   MAP = "/map",
   PLAYER_DATA = "/player-data",
   STATS = "/stats",
@@ -16,11 +16,11 @@ export enum ROUTE_PATHS {
 }
 
 export const routes: Routes = [
-  { path: ROUTE_PATHS.WORLD_INFO.slice(1), component: WorldInfoComponent },
+  { path: ROUTE_PATHS.WORLD_DATA.slice(1), component: WorldDataComponent },
   { path: ROUTE_PATHS.MAP.slice(1), component: MapComponent },
   { path: ROUTE_PATHS.PLAYER_DATA.slice(1), component: PlayerDataComponent },
   { path: ROUTE_PATHS.STATS.slice(1), component: StatsComponent },
   { path: ROUTE_PATHS.ADVANCEMENTS.slice(1), component: AdvancementsComponent },
   { path: ROUTE_PATHS.CHANGELOG.slice(1), component: ChangeLogComponent },
-  { path: "**", redirectTo: ROUTE_PATHS.WORLD_INFO.slice(1) }
+  { path: "**", redirectTo: ROUTE_PATHS.WORLD_DATA.slice(1) }
 ];
