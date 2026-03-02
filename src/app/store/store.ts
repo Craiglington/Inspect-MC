@@ -1,6 +1,7 @@
 import { EnvironmentProviders } from "@angular/core";
 import { provideEffects as provideStoreEffects } from "@ngrx/effects";
 import { provideState } from "@ngrx/store";
+import { settingsFeature } from "./settings/settings.feature";
 import { ThemeEffects } from "./theme/theme.effects";
 import { themeFeature } from "./theme/theme.feature";
 import { worldFilesFeature } from "./world-files/world-files.feature";
@@ -10,7 +11,11 @@ import { worldFilesFeature } from "./world-files/world-files.feature";
  * @returns A list of EnvironmentProviders objects that contain states made from features.
  */
 export function provideFeatures(): EnvironmentProviders[] {
-  return [provideState(themeFeature), provideState(worldFilesFeature)];
+  return [
+    provideState(themeFeature),
+    provideState(worldFilesFeature),
+    provideState(settingsFeature)
+  ];
 }
 
 /**

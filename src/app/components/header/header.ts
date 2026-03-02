@@ -17,6 +17,7 @@ import { ToggleTheme } from "./toggle-theme/toggle-theme";
 import { UploadDialogComponent } from "./upload-dialog/upload-dialog";
 import { NgClass } from "@angular/common";
 import { ROUTE_PATHS } from "../../app.routes";
+import { clearSettings } from "../../store/settings/settings.actions";
 
 @Component({
   selector: "app-header",
@@ -152,6 +153,7 @@ export class Header implements OnInit, OnDestroy {
       }
     }
 
+    this.store.dispatch(clearSettings());
     this.store.dispatch(
       setWorldFiles({
         files: {
