@@ -8,7 +8,7 @@ import { ChangeLogComponent } from "./components/routes/changelog/changelog";
 
 export enum ROUTE_PATHS {
   WORLD_DATA = "/world-data",
-  MAP = "/map",
+  MAPS = "/maps",
   PLAYER_DATA = "/player-data",
   STATS = "/stats",
   ADVANCEMENTS = "/advancements",
@@ -17,7 +17,7 @@ export enum ROUTE_PATHS {
 
 export const routes: Routes = [
   { path: ROUTE_PATHS.WORLD_DATA.slice(1), component: WorldDataComponent },
-  { path: ROUTE_PATHS.MAP.slice(1), component: MapComponent },
+  { path: ROUTE_PATHS.MAPS.slice(1), component: MapComponent },
   { path: ROUTE_PATHS.PLAYER_DATA.slice(1), component: PlayerDataComponent },
   { path: ROUTE_PATHS.STATS.slice(1), component: StatsComponent },
   { path: ROUTE_PATHS.ADVANCEMENTS.slice(1), component: AdvancementsComponent },
