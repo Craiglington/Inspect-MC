@@ -4,7 +4,13 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { catchError, EMPTY, finalize, Subscription } from "rxjs";
+import {
+  catchError,
+  EMPTY,
+  finalize,
+  Subscription,
+  withLatestFrom
+} from "rxjs";
 import { GridColumn, GridRow } from "../../../models/gird-data";
 import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
 import { Stats } from "../../../models/stats";
@@ -15,6 +21,8 @@ import {
 } from "../../../services/local-storage/local-storage";
 import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
 import { NotificationService } from "../../../services/notification/notification-service";
+import { setStatsSettings } from "../../../store/settings/settings.actions";
+import { settingsFeature } from "../../../store/settings/settings.feature";
 import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
 import { GridComponent } from "../../grid/grid";
 import { NoDataComponent } from "../../no-data/no-data";
@@ -64,6 +72,9 @@ export class StatsComponent implements OnInit, OnDestroy {
   private readonly statsFiles$ = this.store.select(
     worldFilesFeature.selectStats
   );
+  private readonly statsSettings$ = this.store.select(
+    settingsFeature.selectStats
+  );
   private statsFiles?: Map<string, File>;
   private readonly statsFileData: Map<string, Stats> = new Map();
   private profiles: Map<string, MinecraftPlayerProfile> = new Map();
@@ -85,10 +96,13 @@ export class StatsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.statsFiles$.subscribe((files) => {
-        this.statsFiles = files;
-        this.processStatsFiles();
-      })
+      this.statsFiles$
+        .pipe(withLatestFrom(this.statsSettings$))
+        .subscribe(([files, statsSettings]) => {
+          this.statsFiles = files;
+          this.activeProfiles = statsSettings.activeProfiles;
+          this.processStatsFiles();
+        })
     );
   }
 
@@ -103,7 +117,6 @@ export class StatsComponent implements OnInit, OnDestroy {
     this.rows = [];
     this.statsFileData.clear();
     this.profiles.clear();
-    this.activeProfiles = [];
 
     if (!this.statsFiles) return;
 
@@ -131,7 +144,11 @@ export class StatsComponent implements OnInit, OnDestroy {
           this.profiles.set(profile.data.player.id, profile.data.player);
         }
         if (this.profiles.size > 0) {
-          this.openStatsDialog();
+          if (this.activeProfiles.length > 0) {
+            this.updateTable();
+          } else {
+            this.openStatsDialog();
+          }
         } else {
           this.notificationService.notify({
             message: "No Minecraft profiles found."
@@ -161,6 +178,13 @@ export class StatsComponent implements OnInit, OnDestroy {
       this.localStorageService.set<StatsStoredSettings>(
         LocalStorageKey.STATS_SETTINGS,
         { statsCategory: this.statsCategory }
+      );
+      this.store.dispatch(
+        setStatsSettings({
+          settings: {
+            activeProfiles: this.activeProfiles
+          }
+        })
       );
       this.updateTable();
     });

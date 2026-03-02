@@ -22,7 +22,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { debounceTime, filter, scan, Subscription } from "rxjs";
+import { debounceTime, filter, scan, Subscription, withLatestFrom } from "rxjs";
 import { MapColors } from "../../../constants/map-colors";
 import { blocksOnlyMapPalette } from "../../../constants/map-palettes/blocks-only-palette";
 import { noWaterMapPalette } from "../../../constants/map-palettes/no-water-palette";
@@ -39,6 +39,8 @@ import {
   LocalStorageKey,
   LocalStorageService
 } from "../../../services/local-storage/local-storage";
+import { setMapsSettings } from "../../../store/settings/settings.actions";
+import { settingsFeature } from "../../../store/settings/settings.feature";
 import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
 import { WorldFilesState } from "../../../store/world-files/world-files.state";
 import { AsyncQueue } from "../../../utils/async-queue";
@@ -91,6 +93,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly MAX_MAP_LENGTH_CHUNKS = 64; // Minecraft chunks
   private readonly CROSSHAIRS_WIDTH = 0.5; // Minecraft blocks/map pixels
   private readonly CROSSHAIRS_LENGTH = 6; // Minecraft blocks/map pixels
+  private readonly MAX_Y_LEVEL = 319;
   private readonly MIN_ZOOM = 0;
   private readonly MAX_ZOOM = 15;
 
@@ -122,6 +125,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly resizeCanvasEmitter: EventEmitter<void> = new EventEmitter();
   private readonly wheelCanvasEmitter: EventEmitter<number> =
     new EventEmitter();
+
+  // Map session settings
+  private readonly mapsSettings$ = this.store.select(
+    settingsFeature.selectMaps
+  );
 
   // Region files from the store.
   private readonly regionFiles$ = this.store.select(
@@ -160,7 +168,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly mapCenterCoords = new Coords();
   // The current coords of the map.
   protected mapCoords = new Coords();
-  protected mapYLevel: number;
+  protected mapYLevel = this.MAX_Y_LEVEL;
 
   /**
    * These coords are used to track the previous and current mouse positions
@@ -186,9 +194,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly crosshairsCoords = new Coords();
 
   // Map Settings
-  private startingXCoord: number;
-  private startingYLevel: number;
-  private startingZCoord: number;
   private mapDimension: WritableSignal<MapDimensionType>;
   private mapPaletteType: WritableSignal<MapPaletteType>;
   private mapPalette: Signal<MapPalette>;
@@ -245,12 +250,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       return originalMapPalette;
     });
 
-    // Set map coords and other settings.
-    this.startingXCoord = mapSettings?.startingXCoord ?? 0;
-    this.startingZCoord = mapSettings?.startingZCoord ?? 0;
-    this.mapCoords.set(this.startingXCoord, this.startingZCoord);
-    this.startingYLevel = mapSettings?.startingYLevel ?? 319;
-    this.mapYLevel = this.startingYLevel;
+    // Other settings.
     this.showCrosshairs = mapSettings?.showCrosshairs ?? true;
   }
 
@@ -282,18 +282,31 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           } else if (acc.delta < 0) {
             this.zoom = Math.min(this.MAX_ZOOM, this.zoom + 1);
           }
+          this.dispatchMapsSettings();
           this.resizeCanvas();
         }),
-      this.regionFiles$.subscribe((regionFiles) => {
-        this.regionFiles.set(regionFiles);
-        this.mapCoords.set(this.startingXCoord, this.startingZCoord);
-        this.mapYLevel = this.startingYLevel;
-        this.regionFileData.clear();
-        this.superChunkImages.clear();
-        this.chunkMapData.clear();
-        this.getImageQueue.clear();
-        this.drawMap();
-      })
+      this.regionFiles$
+        .pipe(withLatestFrom(this.mapsSettings$))
+        .subscribe(([files, mapsSettings]) => {
+          this.regionFiles.set(files);
+          if (mapsSettings.coords) {
+            this.mapCoords.set(mapsSettings.coords.x, mapsSettings.coords.z);
+            this.mapYLevel = mapsSettings.coords.y;
+          } else {
+            this.mapCoords.set(0, 0);
+            this.mapYLevel = this.MAX_Y_LEVEL;
+          }
+          if (mapsSettings.zoom !== null) {
+            this.zoom = mapsSettings.zoom;
+          } else {
+            this.zoom = this.MIN_ZOOM;
+          }
+          this.regionFileData.clear();
+          this.superChunkImages.clear();
+          this.chunkMapData.clear();
+          this.getImageQueue.clear();
+          this.resizeCanvas();
+        })
     );
   }
 
@@ -309,6 +322,21 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     for (const subscription of this.subscriptions) {
       subscription.unsubscribe();
     }
+  }
+
+  private dispatchMapsSettings() {
+    this.store.dispatch(
+      setMapsSettings({
+        settings: {
+          coords: {
+            x: this.mapCoords.x,
+            y: this.mapYLevel,
+            z: this.mapCoords.z
+          },
+          zoom: this.zoom
+        }
+      })
+    );
   }
 
   /**
@@ -330,6 +358,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected mapCoordInputChange() {
+    this.dispatchMapsSettings();
     if (!this.isMapDragging) {
       this.drawMap();
     }
@@ -448,9 +477,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     >(MapDialogComponent, {
       data: {
         mapDimension: this.mapDimension(),
-        startingXCoord: this.startingXCoord,
-        startingZCoord: this.startingZCoord,
-        startingYLevel: this.startingYLevel,
         mapPaletteType: this.mapPaletteType(),
         showCrosshairs: this.showCrosshairs
       }
@@ -461,9 +487,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const clearChunkData =
         this.mapPaletteType() !== data.mapPaletteType ||
         this.mapDimension() !== data.mapDimension;
-      this.startingXCoord = data.startingXCoord;
-      this.startingZCoord = data.startingZCoord;
-      this.startingYLevel = data.startingYLevel;
       this.mapPaletteType.set(data.mapPaletteType);
       this.mapDimension.set(data.mapDimension);
       this.showCrosshairs = data.showCrosshairs;
@@ -813,6 +836,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.drawMap(this.dragMapCoords);
       requestAnimationFrame(this.animationFrame);
     } else {
+      this.dispatchMapsSettings();
       this.drawMap();
     }
   };

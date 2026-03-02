@@ -4,12 +4,20 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { catchError, EMPTY, finalize, Subscription } from "rxjs";
+import {
+  catchError,
+  EMPTY,
+  finalize,
+  Subscription,
+  withLatestFrom
+} from "rxjs";
 import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
 import { SNBT } from "../../../models/snbt";
 import { DatService } from "../../../services/dat/dat-service";
 import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
 import { NotificationService } from "../../../services/notification/notification-service";
+import { setPlayerDataSettings } from "../../../store/settings/settings.actions";
+import { settingsFeature } from "../../../store/settings/settings.feature";
 import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
 import { NoDataComponent } from "../../no-data/no-data";
 import { SnbtObjectViewerComponent } from "../../snbt-object-viewer/snbt-object-viewer";
@@ -55,6 +63,9 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
   private readonly playerDataFiles$ = this.store.select(
     worldFilesFeature.selectPlayerData
   );
+  private readonly playerDataSettings$ = this.store.select(
+    settingsFeature.selectPlayerData
+  );
   private playerDataFiles?: Map<string, File>;
   private readonly playerData: Map<string, SNBT | null> = new Map();
   protected activePlayerData: SNBT | null = null;
@@ -63,10 +74,13 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.playerDataFiles$.subscribe((files) => {
-        this.playerDataFiles = files;
-        this.processPlayerDataFiles();
-      })
+      this.playerDataFiles$
+        .pipe(withLatestFrom(this.playerDataSettings$))
+        .subscribe(([files, playerDataSettings]) => {
+          this.playerDataFiles = files;
+          this.activeProfile = playerDataSettings.activeProfile;
+          this.processPlayerDataFiles();
+        })
     );
   }
 
@@ -80,7 +94,6 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
     this.playerData.clear();
     this.profiles.clear();
     this.activePlayerData = null;
-    this.activeProfile = null;
 
     if (!this.playerDataFiles) return;
 
@@ -108,7 +121,11 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
           this.profiles.set(profile.data.player.id, profile.data.player);
         }
         if (this.profiles.size > 0) {
-          this.openPlayerDataDialog();
+          if (this.activeProfile) {
+            this.updatePlayerData();
+          } else {
+            this.openPlayerDataDialog();
+          }
         } else {
           this.notificationService.notify({
             message: "No Minecraft profiles found."
@@ -132,6 +149,13 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
       this.activeProfile = data.activeProfile;
+      this.store.dispatch(
+        setPlayerDataSettings({
+          settings: {
+            activeProfile: this.activeProfile
+          }
+        })
+      );
       this.updatePlayerData();
     });
   }

@@ -4,7 +4,13 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { catchError, EMPTY, finalize, Subscription } from "rxjs";
+import {
+  catchError,
+  EMPTY,
+  finalize,
+  Subscription,
+  withLatestFrom
+} from "rxjs";
 import { Advancements } from "../../../models/advancements";
 import { GridColumn, GridRow } from "../../../models/gird-data";
 import { MinecraftPlayerProfile } from "../../../models/minecraft-profile";
@@ -15,6 +21,8 @@ import {
 } from "../../../services/local-storage/local-storage";
 import { MinecraftProfileService } from "../../../services/minecraft-profile/minecraft-profile-service";
 import { NotificationService } from "../../../services/notification/notification-service";
+import { setAdvancementsSettings } from "../../../store/settings/settings.actions";
+import { settingsFeature } from "../../../store/settings/settings.feature";
 import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
 import { GridComponent } from "../../grid/grid";
 import { NoDataComponent } from "../../no-data/no-data";
@@ -61,6 +69,9 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
   private readonly advancementsFiles$ = this.store.select(
     worldFilesFeature.selectAdvancements
   );
+  private readonly advancementsSettings$ = this.store.select(
+    settingsFeature.selectAdvancements
+  );
   private advancementsFiles?: Map<string, File>;
   private readonly advancementsFileData: Map<string, Advancements> = new Map();
   private profiles: Map<string, MinecraftPlayerProfile> = new Map();
@@ -84,10 +95,13 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.advancementsFiles$.subscribe((files) => {
-        this.advancementsFiles = files;
-        this.processAdvancementsFiles();
-      })
+      this.advancementsFiles$
+        .pipe(withLatestFrom(this.advancementsSettings$))
+        .subscribe(([files, advancementsSettings]) => {
+          this.advancementsFiles = files;
+          this.activeProfiles = advancementsSettings.activeProfiles;
+          this.processAdvancementsFiles();
+        })
     );
   }
 
@@ -102,7 +116,6 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
     this.rows = [];
     this.advancementsFileData.clear();
     this.profiles.clear();
-    this.activeProfiles = [];
 
     if (!this.advancementsFiles) return;
 
@@ -130,7 +143,11 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
           this.profiles.set(profile.data.player.id, profile.data.player);
         }
         if (this.profiles.size > 0) {
-          this.openAdvancementsDialog();
+          if (this.activeProfiles.length > 0) {
+            this.updateTable();
+          } else {
+            this.openAdvancementsDialog();
+          }
         } else {
           this.notificationService.notify({
             message: "No Minecraft profiles found."
@@ -158,8 +175,15 @@ export class AdvancementsComponent implements OnInit, OnDestroy {
       this.advancementsCategory = data.advancementsCategory;
 
       this.localStorageService.set<AdvancementsStoredSettings>(
-        LocalStorageKey.STATS_SETTINGS,
+        LocalStorageKey.ADVANCEMENTS_SETTINGS,
         { advancementsCategory: this.advancementsCategory }
+      );
+      this.store.dispatch(
+        setAdvancementsSettings({
+          settings: {
+            activeProfiles: this.activeProfiles
+          }
+        })
       );
       this.updateTable();
     });

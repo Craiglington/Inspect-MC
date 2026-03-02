@@ -4,10 +4,11 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Store } from "@ngrx/store";
-import { Subscription } from "rxjs";
+import { Subscription, withLatestFrom } from "rxjs";
 import { SNBT } from "../../../models/snbt";
 import { DatService } from "../../../services/dat/dat-service";
-import { LocalStorageService } from "../../../services/local-storage/local-storage";
+import { setWorldDataSettings } from "../../../store/settings/settings.actions";
+import { settingsFeature } from "../../../store/settings/settings.feature";
 import { worldFilesFeature } from "../../../store/world-files/world-files.feature";
 import { WorldFilesState } from "../../../store/world-files/world-files.state";
 import { NoDataComponent } from "../../no-data/no-data";
@@ -38,7 +39,6 @@ export type WorldDataStoredSettings = Pick<
 export class WorldDataComponent implements OnInit, OnDestroy {
   private readonly datService = inject(DatService);
   private readonly store = inject(Store);
-  private readonly localStorageService = inject(LocalStorageService);
   private readonly dialog = inject(MatDialog);
 
   protected title = "General World Data";
@@ -48,6 +48,9 @@ export class WorldDataComponent implements OnInit, OnDestroy {
   private readonly worldDataFiles$ = this.store.select(
     worldFilesFeature.selectWorldData
   );
+  private readonly worldDataSettings$ = this.store.select(
+    settingsFeature.selectWorldData
+  );
   private worldDataFiles: WorldFilesState["worldData"] = [];
   protected worldData?: SNBT;
   private worldDataFilePath: string | null = null;
@@ -56,14 +59,20 @@ export class WorldDataComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.worldDataFiles$.subscribe((worldDataFiles) => {
-        this.worldDataFiles = worldDataFiles;
-        this.worldData = undefined;
-        this.worldDataFilePath = null;
-        if (this.worldDataFiles.length > 0) {
-          this.openWorldInfoDialog();
-        }
-      })
+      this.worldDataFiles$
+        .pipe(withLatestFrom(this.worldDataSettings$))
+        .subscribe(([files, worldDataSettings]) => {
+          this.worldDataFiles = files;
+          this.worldData = undefined;
+          this.worldDataFilePath = worldDataSettings.worldDataFilePath;
+          if (this.worldDataFiles.length > 0) {
+            if (this.worldDataFilePath) {
+              this.updateWorldInfoData();
+            } else {
+              this.openWorldInfoDialog();
+            }
+          }
+        })
     );
   }
 
@@ -88,6 +97,13 @@ export class WorldDataComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((data) => {
       if (!data) return;
       this.worldDataFilePath = data.worldDataFilePath;
+      this.store.dispatch(
+        setWorldDataSettings({
+          settings: {
+            worldDataFilePath: this.worldDataFilePath
+          }
+        })
+      );
       this.updateWorldInfoData();
     });
   }

@@ -25,18 +25,12 @@ export type MapPaletteType = "original" | "blocks-only" | "no-water";
 
 export interface MapDialogData {
   mapDimension: MapDimensionType;
-  startingXCoord: number;
-  startingZCoord: number;
-  startingYLevel: number;
   mapPaletteType: MapPaletteType;
   showCrosshairs: boolean;
 }
 
 export interface MapDialogForm {
   mapDimension: FormControl<MapDimensionType>;
-  startingXCoord: FormControl<number>;
-  startingZCoord: FormControl<number>;
-  startingYLevel: FormControl<number>;
   mapPaletteType: FormControl<MapPaletteType>;
   showCrosshairs: FormControl<boolean>;
 }
@@ -105,30 +99,6 @@ export class MapDialogComponent implements OnInit {
       mapDimension: new FormControl(this.data.mapDimension, {
         nonNullable: true,
         validators: [Validators.required]
-      }),
-      startingXCoord: new FormControl(this.data.startingXCoord, {
-        nonNullable: true,
-        validators: [
-          Validators.max(30_000_000),
-          Validators.min(-30_000_000),
-          Validators.required
-        ]
-      }),
-      startingZCoord: new FormControl(this.data.startingZCoord, {
-        nonNullable: true,
-        validators: [
-          Validators.max(30_000_000),
-          Validators.min(-30_000_000),
-          Validators.required
-        ]
-      }),
-      startingYLevel: new FormControl(this.data.startingYLevel, {
-        nonNullable: true,
-        validators: [
-          Validators.max(319),
-          Validators.min(-64),
-          Validators.required
-        ]
       }),
       mapPaletteType: new FormControl(this.data.mapPaletteType, {
         nonNullable: true,

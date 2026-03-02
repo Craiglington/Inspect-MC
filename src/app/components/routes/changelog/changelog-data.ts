@@ -15,42 +15,56 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.5.0": {
+      releaseDate: "March 1, 2026",
+      features: [
+        "The maps page url has been changed from '/map' to '/maps'.",
+        "Available settings values that differ by world (player selections, world data files) are now stored and restored when navigating " +
+          "back and forth between tabs. Previously, these settings were simply reset.",
+        "Map coordinates and zoom level are now stored and restored when navigating away from and back to the maps page.",
+        "The starting map coordinates settings from the maps page have been removed."
+      ],
+      bugFixes: [
+        "Fixed advancements category settings not storing correctly.",
+        "Replaced double quotes inside the changelog with single quotes."
+      ]
+    },
     "1.4.0": {
-      releaseDate: "Feb 28, 2026",
+      releaseDate: "February 28, 2026",
       features: [
         "Added support for upcoming Minecraft version 26.1.",
-        'Changed "World Info" page to "World Data"',
-        'The "World Data" page settings allow the selection of any "dat" file other than maps.'
+        "Changed the 'World Info' page to 'World Data'",
+        "The 'World Data' page settings allow the selection of any 'dat' file other than maps."
       ]
     },
     "1.3.2": {
-      releaseDate: "Feb 22, 2026",
+      releaseDate: "February 22, 2026",
       bugFixes: [
         "Fixed maps not displaying correctly for Minecraft version 1.19."
       ]
     },
     "1.3.1": {
-      releaseDate: "Feb 19, 2026",
+      releaseDate: "February 19, 2026",
       bugFixes: [
         "Adjusted the changelog language and data to be simpler and more readable."
       ]
     },
     "1.3.0": {
-      releaseDate: "Feb 16, 2026",
+      releaseDate: "February 16, 2026",
       features: ["Added a changelog accessible through the help popup."]
     },
     "1.2.1": {
-      releaseDate: "Feb 14, 2026",
+      releaseDate: "February 14, 2026",
       bugFixes: [
         "Fixed spaces appearing in grid column headers due to a default AG Grid setting."
       ]
     },
     "1.2.0": {
-      releaseDate: "Feb 12, 2026",
+      releaseDate: "February 12, 2026",
       features: [
         "Added a zoom feature to the map that is controlled by scrolling over the map.",
         "Increased the maximum map length in chunks from 25 to 64.",
-        'Replaced the "Nothing to See Here" disclaimer with a title and a description for each page.',
+        "Replaced the 'Nothing to See Here' disclaimer with a title and a description for each page.",
         "Upgraded map performance by using a least-recently-used cache to store chunk images and an asynchronous queue to fetch chunk images."
       ],
       bugFixes: [
@@ -58,7 +72,7 @@ export const ChangeLogData: Changelog = {
       ]
     },
     "1.1.0": {
-      releaseDate: "Jan 27, 2026",
+      releaseDate: "January 27, 2026",
       features: [
         "The map now loads chunks while dragging. It no longer waits for dragging to end to load the chunks of the viewable area."
       ],
@@ -67,7 +81,7 @@ export const ChangeLogData: Changelog = {
       ]
     },
     "1.0.0": {
-      releaseDate: "Jan 25, 2026",
+      releaseDate: "January 25, 2026",
       features: [
         "Upload Minecraft save folders and inspect various files and their data.",
         "View general world information on the World Info page.",
