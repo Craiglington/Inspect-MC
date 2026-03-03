@@ -15,6 +15,12 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.6.0": {
+      releaseDate: "March 2, 2026",
+      features: [
+        "The player's username now shows alongside the file name in the player data page."
+      ]
+    },
     "1.5.0": {
       releaseDate: "March 1, 2026",
       features: [
