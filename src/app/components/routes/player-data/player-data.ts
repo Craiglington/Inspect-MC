@@ -167,6 +167,7 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
     }
 
     let storedPlayerData = this.playerData.get(this.activeProfile);
+    const profile = this.profiles.get(this.activeProfile);
     if (storedPlayerData === undefined) {
       storedPlayerData =
         (await this.datService.getSNBT(
@@ -175,7 +176,9 @@ export class PlayerDataComponent implements OnInit, OnDestroy {
       this.playerData.set(this.activeProfile, storedPlayerData);
     }
     this.activePlayerData = storedPlayerData
-      ? { [`${this.activeProfile}.dat`]: storedPlayerData }
+      ? {
+          [`${this.activeProfile}.dat (${profile?.username})`]: storedPlayerData
+        }
       : null;
   }
 }
