@@ -7,10 +7,10 @@
   <mat-icon>settings</mat-icon>
 </button>
 
-@if (worldData) {
+@if (activeWorldData) {
   <app-snbt-object-viewer
     class="scrollable"
-    [data]="worldData"
+    [data]="activeWorldData"
     [openIndices]="[0]"></app-snbt-object-viewer>
 } @else {
   <app-no-data [title]="title" [description]="description"></app-no-data>

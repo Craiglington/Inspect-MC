@@ -52,7 +52,8 @@ export class WorldDataComponent implements OnInit, OnDestroy {
     settingsFeature.selectWorldData
   );
   private worldDataFiles: WorldFilesState["worldData"] = [];
-  protected worldData?: SNBT;
+  private readonly worldData: Map<string, SNBT | null> = new Map();
+  protected activeWorldData: SNBT | null = null;
   private worldDataFilePath: string | null = null;
 
   private readonly subscriptions: Subscription[] = [];
@@ -63,7 +64,8 @@ export class WorldDataComponent implements OnInit, OnDestroy {
         .pipe(withLatestFrom(this.worldDataSettings$))
         .subscribe(([files, worldDataSettings]) => {
           this.worldDataFiles = files;
-          this.worldData = undefined;
+          this.worldData.clear();
+          this.activeWorldData = null;
           this.worldDataFilePath = worldDataSettings.worldDataFilePath;
           if (this.worldDataFiles.length > 0) {
             if (this.worldDataFilePath) {
@@ -110,24 +112,24 @@ export class WorldDataComponent implements OnInit, OnDestroy {
 
   async updateWorldInfoData() {
     if (!this.worldDataFilePath) {
-      this.worldData = undefined;
+      this.activeWorldData = null;
       return;
     }
 
     const worldDataFile = this.worldDataFiles.find(
       (file) => file.webkitRelativePath === this.worldDataFilePath
-    );
+    )!;
 
-    if (!worldDataFile) {
-      this.worldData = undefined;
-      return;
+    let storedWorldData = this.worldData.get(this.worldDataFilePath);
+    if (storedWorldData === undefined) {
+      storedWorldData = (await this.datService.getSNBT(worldDataFile)) || null;
+      this.worldData.set(this.worldDataFilePath, storedWorldData);
     }
 
-    const snbtData = await this.datService.getSNBT(worldDataFile);
-    this.worldData = snbtData
+    this.activeWorldData = storedWorldData
       ? {
-          [worldDataFile.webkitRelativePath]: snbtData
+          [worldDataFile.webkitRelativePath]: storedWorldData
         }
-      : undefined;
+      : null;
   }
 }
