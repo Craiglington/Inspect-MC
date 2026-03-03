@@ -41,8 +41,8 @@ export class WorldDataComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialog);
 
-  protected title = "General World Data";
-  protected description =
+  protected readonly title = "General World Data";
+  protected readonly description =
     "World version, spawn location, game rules, time of day, difficulty, etc.";
 
   private readonly worldDataFiles$ = this.store.select(

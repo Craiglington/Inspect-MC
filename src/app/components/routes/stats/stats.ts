@@ -57,8 +57,8 @@ export class StatsComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(Store);
 
-  protected title = "Player Statistics";
-  protected description =
+  protected readonly title = "Player Statistics";
+  protected readonly description =
     "Compare times died, blocks mined, items crafted, monsters killed, etc.";
 
   protected loading: boolean = false;
