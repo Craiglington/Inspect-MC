@@ -15,6 +15,12 @@ interface ReleaseVersion extends SNBT {
  */
 export const ChangeLogData: Changelog = {
   Changelog: {
+    "1.7.0": {
+      releaseDate: "March 16, 2026",
+      features: [
+        "A note that all dates are in UTC time was added in the advancements page settings."
+      ]
+    },
     "1.6.0": {
       releaseDate: "March 2, 2026",
       features: [
