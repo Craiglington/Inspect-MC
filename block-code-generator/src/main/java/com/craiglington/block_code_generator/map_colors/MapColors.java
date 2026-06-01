@@ -7,9 +7,16 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// /net/minecraft/world/level/material/MapColor.class -> /src/app/constants/map-colors.ts
+/**
+ * Copy all the {@code public static final MapColor} variables from
+ * {@code /net/minecraft/world/level/material/MapColor.class}
+ * in a Minecraft version and paste them into {@code input.txt} in the resources
+ * directory.
+ * 
+ * Use the output to fill out the {@code /src/app/constants/map-colors.ts} file.
+ */
 public class MapColors {
-  private static final String inputFile = "/MapColors/input.txt";
+  private static final String inputFile = "input.txt";
   private static final float BELOW_MULTIPLIER = 0.71f;
   private static final float SAME_MULTIPLIER = 0.86f;
   private static final Pattern pattern = Pattern
