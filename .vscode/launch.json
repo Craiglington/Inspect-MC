@@ -8,6 +8,14 @@
       "request": "launch",
       "mainClass": "com.craiglington.block_code_generator.map_colors.MapColors",
       "projectName": "block_code_generator"
+    },
+    {
+      "name": "Blocks",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "com.craiglington.block_code_generator.blocks.Blocks",
+      "projectName": "block_code_generator",
+      "args": [""]
     }
   ]
 }
