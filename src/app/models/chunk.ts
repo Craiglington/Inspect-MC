@@ -1,15 +1,26 @@
 import { SNBT } from "./snbt";
 
 /**
- * A palette entry is a Minecraft block with certain properties.
- * The same Minecraft block with different properties can have different map colors.
+ * This interface is the object version of a palette entry.
  */
-export interface BlockPaletteEntry extends SNBT {
-  Name: string;
-  Properties?: {
+export interface BlockPaletteEntryObject extends SNBT {
+  "Name"?: string;
+  "id"?: string;
+  ""?: string;
+  "Properties"?: {
+    [key: string]: string;
+  };
+  "properties"?: {
     [key: string]: string;
   };
 }
+
+/**
+ * A palette entry as of 26.3 is no longer always an object but can also be a string.
+ * A palette entry is a Minecraft block with certain properties.
+ * The same Minecraft block with different properties can have different map colors.
+ */
+export type BlockPaletteEntry = string | BlockPaletteEntryObject;
 
 export interface ChunkSection extends SNBT {
   Y: number;

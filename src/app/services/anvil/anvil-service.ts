@@ -333,14 +333,21 @@ export class AnvilService {
     paletteEntry: BlockPaletteEntry,
     mapPalette: MapPalette
   ): MapIds {
-    const blockColor = mapPalette[paletteEntry.Name.slice(10)];
+    const blockPaletteEntryId: string =
+      typeof paletteEntry === "object"
+        ? (paletteEntry[""] ?? paletteEntry.id ?? paletteEntry.Name!)
+        : paletteEntry;
+    const blockColor = mapPalette[blockPaletteEntryId.slice(10)];
     if (!blockColor) return MapIds.NONE;
     if (typeof blockColor === "number") return blockColor;
+    if (typeof paletteEntry === "string")
+      return blockColor[0]?.id ?? MapIds.NONE;
     for (const color of blockColor) {
       let match = true;
       for (const property in color.properties) {
         if (
-          color.properties[property] !== paletteEntry.Properties?.[property]
+          color.properties[property] !==
+          (paletteEntry.properties ?? paletteEntry.Properties)?.[property]
         ) {
           match = false;
           break;
@@ -348,7 +355,7 @@ export class AnvilService {
       }
       if (match) return color.id;
     }
-    return 0;
+    return MapIds.NONE;
   }
 
   /**
