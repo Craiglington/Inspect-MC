@@ -182,6 +182,8 @@ export const originalMapPalette: MapPalette = {
   black_carpet: MapIds.COLOR_BLACK,
   black_concrete: MapIds.COLOR_BLACK,
   black_concrete_powder: MapIds.COLOR_BLACK,
+  black_concrete_slab: MapIds.COLOR_BLACK,
+  black_concrete_stairs: MapIds.COLOR_BLACK,
   black_glazed_terracotta: MapIds.COLOR_BLACK,
   black_shulker_box: MapIds.COLOR_BLACK,
   black_stained_glass: MapIds.COLOR_BLACK,
@@ -189,6 +191,8 @@ export const originalMapPalette: MapPalette = {
   black_terracotta: MapIds.TERRACOTTA_BLACK,
   black_wall_banner: MapIds.NONE,
   black_wool: MapIds.COLOR_BLACK,
+  black_wool_slab: MapIds.COLOR_BLACK,
+  black_wool_stairs: MapIds.COLOR_BLACK,
   blackstone: MapIds.COLOR_BLACK,
   blackstone_slab: MapIds.COLOR_BLACK,
   blackstone_stairs: MapIds.COLOR_BLACK,
@@ -214,6 +218,8 @@ export const originalMapPalette: MapPalette = {
   blue_carpet: MapIds.COLOR_BLUE,
   blue_concrete: MapIds.COLOR_BLUE,
   blue_concrete_powder: MapIds.COLOR_BLUE,
+  blue_concrete_slab: MapIds.COLOR_BLUE,
+  blue_concrete_stairs: MapIds.COLOR_BLUE,
   blue_glazed_terracotta: MapIds.COLOR_BLUE,
   blue_ice: MapIds.ICE,
   blue_orchid: MapIds.PLANT,
@@ -223,6 +229,8 @@ export const originalMapPalette: MapPalette = {
   blue_terracotta: MapIds.TERRACOTTA_BLUE,
   blue_wall_banner: MapIds.NONE,
   blue_wool: MapIds.COLOR_BLUE,
+  blue_wool_slab: MapIds.COLOR_BLUE,
+  blue_wool_stairs: MapIds.COLOR_BLUE,
   bone_block: MapIds.SAND,
   bookshelf: MapIds.WOOD,
   brain_coral: MapIds.COLOR_PINK,
@@ -254,6 +262,8 @@ export const originalMapPalette: MapPalette = {
   brown_carpet: MapIds.COLOR_BROWN,
   brown_concrete: MapIds.COLOR_BROWN,
   brown_concrete_powder: MapIds.COLOR_BROWN,
+  brown_concrete_slab: MapIds.COLOR_BROWN,
+  brown_concrete_stairs: MapIds.COLOR_BROWN,
   brown_glazed_terracotta: MapIds.COLOR_BROWN,
   brown_mushroom: MapIds.COLOR_BROWN,
   brown_mushroom_block: MapIds.DIRT,
@@ -263,6 +273,8 @@ export const originalMapPalette: MapPalette = {
   brown_terracotta: MapIds.TERRACOTTA_BROWN,
   brown_wall_banner: MapIds.NONE,
   brown_wool: MapIds.COLOR_BROWN,
+  brown_wool_slab: MapIds.COLOR_BROWN,
+  brown_wool_stairs: MapIds.COLOR_BROWN,
   bubble_column: MapIds.WATER,
   bubble_coral: MapIds.COLOR_PURPLE,
   bubble_coral_block: MapIds.COLOR_PURPLE,
@@ -471,6 +483,8 @@ export const originalMapPalette: MapPalette = {
   cyan_carpet: MapIds.COLOR_CYAN,
   cyan_concrete: MapIds.COLOR_CYAN,
   cyan_concrete_powder: MapIds.COLOR_CYAN,
+  cyan_concrete_slab: MapIds.COLOR_CYAN,
+  cyan_concrete_stairs: MapIds.COLOR_CYAN,
   cyan_glazed_terracotta: MapIds.COLOR_CYAN,
   cyan_shulker_box: MapIds.COLOR_CYAN,
   cyan_stained_glass: MapIds.COLOR_CYAN,
@@ -478,6 +492,8 @@ export const originalMapPalette: MapPalette = {
   cyan_terracotta: MapIds.TERRACOTTA_CYAN,
   cyan_wall_banner: MapIds.NONE,
   cyan_wool: MapIds.COLOR_CYAN,
+  cyan_wool_slab: MapIds.COLOR_CYAN,
+  cyan_wool_stairs: MapIds.COLOR_CYAN,
   damaged_anvil: MapIds.METAL,
   dandelion: MapIds.PLANT,
   dark_oak_button: MapIds.NONE,
@@ -661,6 +677,8 @@ export const originalMapPalette: MapPalette = {
   gray_carpet: MapIds.COLOR_GRAY,
   gray_concrete: MapIds.COLOR_GRAY,
   gray_concrete_powder: MapIds.COLOR_GRAY,
+  gray_concrete_slab: MapIds.COLOR_GRAY,
+  gray_concrete_stairs: MapIds.COLOR_GRAY,
   gray_glazed_terracotta: MapIds.COLOR_GRAY,
   gray_shulker_box: MapIds.COLOR_GRAY,
   gray_stained_glass: MapIds.COLOR_GRAY,
@@ -668,6 +686,8 @@ export const originalMapPalette: MapPalette = {
   gray_terracotta: MapIds.TERRACOTTA_GRAY,
   gray_wall_banner: MapIds.NONE,
   gray_wool: MapIds.COLOR_GRAY,
+  gray_wool_slab: MapIds.COLOR_GRAY,
+  gray_wool_stairs: MapIds.COLOR_GRAY,
   green_banner: MapIds.WOOD,
   green_bed: [
     {
@@ -688,6 +708,8 @@ export const originalMapPalette: MapPalette = {
   green_carpet: MapIds.COLOR_GREEN,
   green_concrete: MapIds.COLOR_GREEN,
   green_concrete_powder: MapIds.COLOR_GREEN,
+  green_concrete_slab: MapIds.COLOR_GREEN,
+  green_concrete_stairs: MapIds.COLOR_GREEN,
   green_glazed_terracotta: MapIds.COLOR_GREEN,
   green_shulker_box: MapIds.COLOR_GREEN,
   green_stained_glass: MapIds.COLOR_GREEN,
@@ -695,6 +717,8 @@ export const originalMapPalette: MapPalette = {
   green_terracotta: MapIds.TERRACOTTA_GREEN,
   green_wall_banner: MapIds.NONE,
   green_wool: MapIds.COLOR_GREEN,
+  green_wool_slab: MapIds.COLOR_GREEN,
+  green_wool_stairs: MapIds.COLOR_GREEN,
   grindstone: MapIds.METAL,
   hanging_roots: MapIds.DIRT,
   hay_block: MapIds.COLOR_YELLOW,
@@ -809,6 +833,8 @@ export const originalMapPalette: MapPalette = {
   light_blue_carpet: MapIds.COLOR_LIGHT_BLUE,
   light_blue_concrete: MapIds.COLOR_LIGHT_BLUE,
   light_blue_concrete_powder: MapIds.COLOR_LIGHT_BLUE,
+  light_blue_concrete_slab: MapIds.COLOR_LIGHT_BLUE,
+  light_blue_concrete_stairs: MapIds.COLOR_LIGHT_BLUE,
   light_blue_glazed_terracotta: MapIds.COLOR_LIGHT_BLUE,
   light_blue_shulker_box: MapIds.COLOR_LIGHT_BLUE,
   light_blue_stained_glass: MapIds.COLOR_LIGHT_BLUE,
@@ -816,6 +842,8 @@ export const originalMapPalette: MapPalette = {
   light_blue_terracotta: MapIds.TERRACOTTA_LIGHT_BLUE,
   light_blue_wall_banner: MapIds.NONE,
   light_blue_wool: MapIds.COLOR_LIGHT_BLUE,
+  light_blue_wool_slab: MapIds.COLOR_LIGHT_BLUE,
+  light_blue_wool_stairs: MapIds.COLOR_LIGHT_BLUE,
   light_gray_banner: MapIds.WOOD,
   light_gray_bed: [
     {
@@ -836,6 +864,8 @@ export const originalMapPalette: MapPalette = {
   light_gray_carpet: MapIds.COLOR_LIGHT_GRAY,
   light_gray_concrete: MapIds.COLOR_LIGHT_GRAY,
   light_gray_concrete_powder: MapIds.COLOR_LIGHT_GRAY,
+  light_gray_concrete_slab: MapIds.COLOR_LIGHT_GRAY,
+  light_gray_concrete_stairs: MapIds.COLOR_LIGHT_GRAY,
   light_gray_glazed_terracotta: MapIds.COLOR_LIGHT_GRAY,
   light_gray_shulker_box: MapIds.COLOR_LIGHT_GRAY,
   light_gray_stained_glass: MapIds.COLOR_LIGHT_GRAY,
@@ -843,6 +873,8 @@ export const originalMapPalette: MapPalette = {
   light_gray_terracotta: MapIds.TERRACOTTA_LIGHT_GRAY,
   light_gray_wall_banner: MapIds.NONE,
   light_gray_wool: MapIds.COLOR_LIGHT_GRAY,
+  light_gray_wool_slab: MapIds.COLOR_LIGHT_GRAY,
+  light_gray_wool_stairs: MapIds.COLOR_LIGHT_GRAY,
   light_weighted_pressure_plate: MapIds.GOLD,
   lightning_rod: MapIds.COLOR_ORANGE,
   lilac: MapIds.PLANT,
@@ -868,6 +900,8 @@ export const originalMapPalette: MapPalette = {
   lime_carpet: MapIds.COLOR_LIGHT_GREEN,
   lime_concrete: MapIds.COLOR_LIGHT_GREEN,
   lime_concrete_powder: MapIds.COLOR_LIGHT_GREEN,
+  lime_concrete_slab: MapIds.COLOR_LIGHT_GREEN,
+  lime_concrete_stairs: MapIds.COLOR_LIGHT_GREEN,
   lime_glazed_terracotta: MapIds.COLOR_LIGHT_GREEN,
   lime_shulker_box: MapIds.COLOR_LIGHT_GREEN,
   lime_stained_glass: MapIds.COLOR_LIGHT_GREEN,
@@ -875,6 +909,8 @@ export const originalMapPalette: MapPalette = {
   lime_terracotta: MapIds.TERRACOTTA_LIGHT_GREEN,
   lime_wall_banner: MapIds.NONE,
   lime_wool: MapIds.COLOR_LIGHT_GREEN,
+  lime_wool_slab: MapIds.COLOR_LIGHT_GREEN,
+  lime_wool_stairs: MapIds.COLOR_LIGHT_GREEN,
   lodestone: MapIds.METAL,
   loom: MapIds.WOOD,
   magenta_banner: MapIds.WOOD,
@@ -897,6 +933,8 @@ export const originalMapPalette: MapPalette = {
   magenta_carpet: MapIds.COLOR_MAGENTA,
   magenta_concrete: MapIds.COLOR_MAGENTA,
   magenta_concrete_powder: MapIds.COLOR_MAGENTA,
+  magenta_concrete_slab: MapIds.COLOR_MAGENTA,
+  magenta_concrete_stairs: MapIds.COLOR_MAGENTA,
   magenta_glazed_terracotta: MapIds.COLOR_MAGENTA,
   magenta_shulker_box: MapIds.COLOR_MAGENTA,
   magenta_stained_glass: MapIds.COLOR_MAGENTA,
@@ -904,6 +942,8 @@ export const originalMapPalette: MapPalette = {
   magenta_terracotta: MapIds.TERRACOTTA_MAGENTA,
   magenta_wall_banner: MapIds.NONE,
   magenta_wool: MapIds.COLOR_MAGENTA,
+  magenta_wool_slab: MapIds.COLOR_MAGENTA,
+  magenta_wool_stairs: MapIds.COLOR_MAGENTA,
   magma_block: MapIds.NETHER,
   mangrove_button: MapIds.NONE,
   mangrove_door: MapIds.COLOR_RED,
@@ -1066,7 +1106,23 @@ export const originalMapPalette: MapPalette = {
   orange_carpet: MapIds.COLOR_ORANGE,
   orange_concrete: MapIds.COLOR_ORANGE,
   orange_concrete_powder: MapIds.COLOR_ORANGE,
+  orange_concrete_slab: MapIds.COLOR_ORANGE,
+  orange_concrete_stairs: MapIds.COLOR_ORANGE,
   orange_glazed_terracotta: MapIds.COLOR_ORANGE,
+  orange_poplar_leaves: [
+    {
+      id: MapIds.COLOR_ORANGE,
+      properties: {
+        waterlogged: "false"
+      }
+    },
+    {
+      id: MapIds.WATER,
+      properties: {
+        waterlogged: "true"
+      }
+    }
+  ],
   orange_shulker_box: MapIds.COLOR_ORANGE,
   orange_stained_glass: MapIds.COLOR_ORANGE,
   orange_stained_glass_pane: MapIds.NONE,
@@ -1074,6 +1130,8 @@ export const originalMapPalette: MapPalette = {
   orange_tulip: MapIds.PLANT,
   orange_wall_banner: MapIds.NONE,
   orange_wool: MapIds.COLOR_ORANGE,
+  orange_wool_slab: MapIds.COLOR_ORANGE,
+  orange_wool_stairs: MapIds.COLOR_ORANGE,
   oxeye_daisy: MapIds.PLANT,
   oxidized_chiseled_copper: MapIds.WARPED_NYLIUM,
   oxidized_copper: MapIds.WARPED_NYLIUM,
@@ -1170,6 +1228,8 @@ export const originalMapPalette: MapPalette = {
   pink_carpet: MapIds.COLOR_PINK,
   pink_concrete: MapIds.COLOR_PINK,
   pink_concrete_powder: MapIds.COLOR_PINK,
+  pink_concrete_slab: MapIds.COLOR_PINK,
+  pink_concrete_stairs: MapIds.COLOR_PINK,
   pink_glazed_terracotta: MapIds.COLOR_PINK,
   pink_petals: MapIds.PLANT,
   pink_shulker_box: MapIds.COLOR_PINK,
@@ -1179,6 +1239,8 @@ export const originalMapPalette: MapPalette = {
   pink_tulip: MapIds.PLANT,
   pink_wall_banner: MapIds.NONE,
   pink_wool: MapIds.COLOR_PINK,
+  pink_wool_slab: MapIds.COLOR_PINK,
+  pink_wool_stairs: MapIds.COLOR_PINK,
   piston: MapIds.STONE,
   piston_head: MapIds.STONE,
   pitcher_crop: MapIds.PLANT,
@@ -1223,6 +1285,42 @@ export const originalMapPalette: MapPalette = {
   polished_tuff_slab: MapIds.TERRACOTTA_GRAY,
   polished_tuff_stairs: MapIds.TERRACOTTA_GRAY,
   polished_tuff_wall: MapIds.TERRACOTTA_GRAY,
+  poplar_button: MapIds.NONE,
+  poplar_door: MapIds.COLOR_LIGHT_GRAY,
+  poplar_fence: MapIds.COLOR_LIGHT_GRAY,
+  poplar_fence_gate: MapIds.COLOR_LIGHT_GRAY,
+  poplar_hanging_sign: MapIds.COLOR_LIGHT_GRAY,
+  poplar_log: [
+    {
+      id: MapIds.COLOR_LIGHT_GRAY,
+      properties: {
+        axis: "y"
+      }
+    },
+    {
+      id: MapIds.PODZOL,
+      properties: {
+        axis: "z"
+      }
+    },
+    {
+      id: MapIds.PODZOL,
+      properties: {
+        axis: "x"
+      }
+    }
+  ],
+  poplar_planks: MapIds.COLOR_LIGHT_GRAY,
+  poplar_pressure_plate: MapIds.COLOR_LIGHT_GRAY,
+  poplar_sapling: MapIds.METAL,
+  poplar_shelf: MapIds.COLOR_LIGHT_GRAY,
+  poplar_sign: MapIds.COLOR_LIGHT_GRAY,
+  poplar_slab: MapIds.COLOR_LIGHT_GRAY,
+  poplar_stairs: MapIds.COLOR_LIGHT_GRAY,
+  poplar_trapdoor: MapIds.COLOR_LIGHT_GRAY,
+  poplar_wall_hanging_sign: MapIds.NONE,
+  poplar_wall_sign: MapIds.NONE,
+  poplar_wood: MapIds.PODZOL,
   poppy: MapIds.PLANT,
   potatoes: MapIds.PLANT,
   potent_sulfur: MapIds.GOLD,
@@ -1254,6 +1352,7 @@ export const originalMapPalette: MapPalette = {
   potted_oxeye_daisy: MapIds.NONE,
   potted_pale_oak_sapling: MapIds.NONE,
   potted_pink_tulip: MapIds.NONE,
+  potted_poplar_sapling: MapIds.NONE,
   potted_poppy: MapIds.NONE,
   potted_red_mushroom: MapIds.NONE,
   potted_red_tulip: MapIds.NONE,
@@ -1295,6 +1394,8 @@ export const originalMapPalette: MapPalette = {
   purple_carpet: MapIds.COLOR_PURPLE,
   purple_concrete: MapIds.COLOR_PURPLE,
   purple_concrete_powder: MapIds.COLOR_PURPLE,
+  purple_concrete_slab: MapIds.COLOR_PURPLE,
+  purple_concrete_stairs: MapIds.COLOR_PURPLE,
   purple_glazed_terracotta: MapIds.COLOR_PURPLE,
   purple_shulker_box: MapIds.TERRACOTTA_PURPLE,
   purple_stained_glass: MapIds.COLOR_PURPLE,
@@ -1302,6 +1403,8 @@ export const originalMapPalette: MapPalette = {
   purple_terracotta: MapIds.TERRACOTTA_PURPLE,
   purple_wall_banner: MapIds.NONE,
   purple_wool: MapIds.COLOR_PURPLE,
+  purple_wool_slab: MapIds.COLOR_PURPLE,
+  purple_wool_stairs: MapIds.COLOR_PURPLE,
   purpur_block: MapIds.COLOR_MAGENTA,
   purpur_pillar: MapIds.COLOR_MAGENTA,
   purpur_slab: MapIds.COLOR_MAGENTA,
@@ -1335,6 +1438,8 @@ export const originalMapPalette: MapPalette = {
   red_carpet: MapIds.COLOR_RED,
   red_concrete: MapIds.COLOR_RED,
   red_concrete_powder: MapIds.COLOR_RED,
+  red_concrete_slab: MapIds.COLOR_RED,
+  red_concrete_stairs: MapIds.COLOR_RED,
   red_glazed_terracotta: MapIds.COLOR_RED,
   red_mushroom: MapIds.COLOR_RED,
   red_mushroom_block: MapIds.COLOR_RED,
@@ -1342,11 +1447,26 @@ export const originalMapPalette: MapPalette = {
   red_nether_brick_stairs: MapIds.NETHER,
   red_nether_brick_wall: MapIds.NETHER,
   red_nether_bricks: MapIds.NETHER,
+  red_poplar_leaves: [
+    {
+      id: MapIds.COLOR_RED,
+      properties: {
+        waterlogged: "false"
+      }
+    },
+    {
+      id: MapIds.WATER,
+      properties: {
+        waterlogged: "true"
+      }
+    }
+  ],
   red_sand: MapIds.COLOR_ORANGE,
   red_sandstone: MapIds.COLOR_ORANGE,
   red_sandstone_slab: MapIds.COLOR_ORANGE,
   red_sandstone_stairs: MapIds.COLOR_ORANGE,
   red_sandstone_wall: MapIds.COLOR_ORANGE,
+  red_shrub: MapIds.CRIMSON_NYLIUM,
   red_shulker_box: MapIds.COLOR_RED,
   red_stained_glass: MapIds.COLOR_RED,
   red_stained_glass_pane: MapIds.NONE,
@@ -1354,6 +1474,8 @@ export const originalMapPalette: MapPalette = {
   red_tulip: MapIds.PLANT,
   red_wall_banner: MapIds.NONE,
   red_wool: MapIds.COLOR_RED,
+  red_wool_slab: MapIds.COLOR_RED,
+  red_wool_stairs: MapIds.COLOR_RED,
   redstone_block: MapIds.FIRE,
   redstone_lamp: MapIds.TERRACOTTA_ORANGE,
   redstone_ore: MapIds.STONE,
@@ -1386,6 +1508,7 @@ export const originalMapPalette: MapPalette = {
   sea_lantern: MapIds.QUARTZ,
   sea_pickle: MapIds.COLOR_GREEN,
   seagrass: MapIds.WATER,
+  shelf_mushroom: MapIds.TERRACOTTA_YELLOW,
   short_dry_grass: MapIds.COLOR_YELLOW,
   short_grass: MapIds.PLANT,
   shroomlight: MapIds.COLOR_RED,
@@ -1483,6 +1606,7 @@ export const originalMapPalette: MapPalette = {
   stone_slab: MapIds.STONE,
   stone_stairs: MapIds.STONE,
   stonecutter: MapIds.STONE,
+  straw_bed: MapIds.COLOR_YELLOW,
   stripped_acacia_log: MapIds.COLOR_ORANGE,
   stripped_acacia_wood: MapIds.COLOR_ORANGE,
   stripped_bamboo_block: MapIds.COLOR_YELLOW,
@@ -1502,6 +1626,8 @@ export const originalMapPalette: MapPalette = {
   stripped_oak_wood: MapIds.WOOD,
   stripped_pale_oak_log: MapIds.QUARTZ,
   stripped_pale_oak_wood: MapIds.QUARTZ,
+  stripped_poplar_log: MapIds.COLOR_LIGHT_GRAY,
+  stripped_poplar_wood: MapIds.COLOR_LIGHT_GRAY,
   stripped_spruce_log: MapIds.PODZOL,
   stripped_spruce_wood: MapIds.PODZOL,
   stripped_warped_hyphae: MapIds.WARPED_STEM,
@@ -1747,6 +1873,8 @@ export const originalMapPalette: MapPalette = {
   white_carpet: MapIds.SNOW,
   white_concrete: MapIds.SNOW,
   white_concrete_powder: MapIds.SNOW,
+  white_concrete_slab: MapIds.SNOW,
+  white_concrete_stairs: MapIds.SNOW,
   white_glazed_terracotta: MapIds.SNOW,
   white_shulker_box: MapIds.SNOW,
   white_stained_glass: MapIds.SNOW,
@@ -1755,6 +1883,8 @@ export const originalMapPalette: MapPalette = {
   white_tulip: MapIds.PLANT,
   white_wall_banner: MapIds.NONE,
   white_wool: MapIds.SNOW,
+  white_wool_slab: MapIds.SNOW,
+  white_wool_stairs: MapIds.SNOW,
   wildflowers: MapIds.PLANT,
   wither_rose: MapIds.PLANT,
   wither_skeleton_skull: MapIds.NONE,
@@ -1779,13 +1909,31 @@ export const originalMapPalette: MapPalette = {
   yellow_carpet: MapIds.COLOR_YELLOW,
   yellow_concrete: MapIds.COLOR_YELLOW,
   yellow_concrete_powder: MapIds.COLOR_YELLOW,
+  yellow_concrete_slab: MapIds.COLOR_YELLOW,
+  yellow_concrete_stairs: MapIds.COLOR_YELLOW,
   yellow_glazed_terracotta: MapIds.COLOR_YELLOW,
+  yellow_poplar_leaves: [
+    {
+      id: MapIds.COLOR_YELLOW,
+      properties: {
+        waterlogged: "false"
+      }
+    },
+    {
+      id: MapIds.WATER,
+      properties: {
+        waterlogged: "true"
+      }
+    }
+  ],
   yellow_shulker_box: MapIds.COLOR_YELLOW,
   yellow_stained_glass: MapIds.COLOR_YELLOW,
   yellow_stained_glass_pane: MapIds.NONE,
   yellow_terracotta: MapIds.TERRACOTTA_YELLOW,
   yellow_wall_banner: MapIds.NONE,
   yellow_wool: MapIds.COLOR_YELLOW,
+  yellow_wool_slab: MapIds.COLOR_YELLOW,
+  yellow_wool_stairs: MapIds.COLOR_YELLOW,
   zombie_head: MapIds.NONE,
   zombie_wall_head: MapIds.NONE
 };

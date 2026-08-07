@@ -1,5 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { MapIds } from "../../constants/map-colors";
+import { originalMapPalette } from "../../constants/map-palettes/original-palette";
 import { BlockPaletteEntry, Chunk, ChunkSection } from "../../models/chunk";
 import { ChunkMapData } from "../../models/chunk-map-data";
 import { Coords } from "../../models/coords";
@@ -333,11 +334,15 @@ export class AnvilService {
     paletteEntry: BlockPaletteEntry,
     mapPalette: MapPalette
   ): MapIds {
-    const blockPaletteEntryId: string =
+    const blockPaletteEntryId = (
       typeof paletteEntry === "object"
-        ? (paletteEntry[""] ?? paletteEntry.id ?? paletteEntry.Name!)
-        : paletteEntry;
-    const blockColor = mapPalette[blockPaletteEntryId.slice(10)];
+        ? (paletteEntry[""] ?? paletteEntry.id ?? paletteEntry.Name)!
+        : paletteEntry
+    ).slice(10);
+    let blockColor = mapPalette[blockPaletteEntryId];
+    if (blockColor === undefined && mapPalette !== originalMapPalette) {
+      blockColor = originalMapPalette[blockPaletteEntryId];
+    }
     if (!blockColor) return MapIds.NONE;
     if (typeof blockColor === "number") return blockColor;
     if (typeof paletteEntry === "string")
